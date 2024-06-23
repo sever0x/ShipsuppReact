@@ -1,12 +1,3 @@
-Here's a README.md for your React.js project using TypeScript. It includes the instructions for cloning the repository,
-installing dependencies, and setting up the environment with Firebase credentials.
-
----
-
-# Admin Panel
-
-This project is a React.js-based admin panel built with TypeScript. It uses Firebase for backend services.
-
 ## Getting Started
 
 Follow these instructions to set up and run the project locally.
