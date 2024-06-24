@@ -3,11 +3,11 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { CssBaseline, Container, AppBar, Toolbar, Typography, Button } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 
-import AuthProvider from './context/auth';
-import SignIn from '../components/SignIn/SignIn';
-import Register from '../components/Register/Register';
-import Profile from '../components/Profile/Profile';
-import PrivateRoute from '../components/PrivateRoute/PrivateRoute';
+import AuthProvider from "../../misc/providers/AuthProvider";
+import SignIn from '../../components/SignIn/SignIn';
+import Register from '../../components/Register/Register';
+import Profile from '../../components/Profile/Profile';
+import PrivateRoute from '../../components/PrivateRoute/PrivateRoute';
 
 const theme = createTheme();
 
