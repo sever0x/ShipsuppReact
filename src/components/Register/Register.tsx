@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
-import {useAuth} from "../../misc/hooks/useAuth";
+import { useNavigate } from 'react-router-dom';
+import { TextField, Button, Container, Typography } from '@mui/material';
+import useAuth from '../../misc/hooks/useAuth';
 
-const Register: React.FC = () => {
+const Register = () => {
     const { register } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const navigate = useNavigate();
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
         try {
             await register(email, password);
-            alert('Registration successful');
+            navigate('/profile');
         } catch (error) {
             console.error(error);
             alert('Registration failed');
@@ -18,27 +21,30 @@ const Register: React.FC = () => {
     };
 
     return (
-        <form onSubmit={handleSubmit}>
-            <div>
-                <label htmlFor="email">Email:</label>
-                <input
+        <Container maxWidth="sm">
+            <Typography variant="h4" gutterBottom>Register</Typography>
+            <form onSubmit={handleSubmit}>
+                <TextField
+                    label="Email"
                     type="email"
-                    id="email"
+                    fullWidth
+                    margin="normal"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                 />
-            </div>
-            <div>
-                <label htmlFor="password">Password:</label>
-                <input
+                <TextField
+                    label="Password"
                     type="password"
-                    id="password"
+                    fullWidth
+                    margin="normal"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                 />
-            </div>
-            <button type="submit">Register</button>
-        </form>
+                <Button type="submit" variant="contained" color="primary" fullWidth>
+                    Register
+                </Button>
+            </form>
+        </Container>
     );
 };
 

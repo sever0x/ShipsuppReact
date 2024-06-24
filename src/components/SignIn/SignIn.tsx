@@ -1,44 +1,51 @@
 import React, { useState } from 'react';
-import {useAuth} from "../../misc/hooks/useAuth";
+import { useNavigate } from 'react-router-dom';
+import { TextField, Button, Container, Typography } from '@mui/material';
+import useAuth from '../../misc/hooks/useAuth';
 
-const SignIn: React.FC = () => {
+const SignIn = () => {
     const { login } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [error, setError] = useState<string | null>(null);
+    const navigate = useNavigate();
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
         try {
             await login(email, password);
-            alert('Login successful');
-        } catch (error) {
-            console.error(error);
-            alert('Login failed');
+            navigate('/profile');
+        } catch (error: any) {
+            setError(error.message);
         }
     };
 
     return (
-        <form onSubmit={handleSubmit}>
-            <div>
-                <label htmlFor="email">Email:</label>
-                <input
+        <Container maxWidth="sm">
+            <Typography variant="h4" gutterBottom>Sign In</Typography>
+            <form onSubmit={handleSubmit}>
+                <TextField
+                    label="Email"
                     type="email"
-                    id="email"
+                    fullWidth
+                    margin="normal"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                 />
-            </div>
-            <div>
-                <label htmlFor="password">Password:</label>
-                <input
+                <TextField
+                    label="Password"
                     type="password"
-                    id="password"
+                    fullWidth
+                    margin="normal"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                 />
-            </div>
-            <button type="submit">Sign In</button>
-        </form>
+                {error && <Typography color="error">{error}</Typography>}
+                <Button type="submit" variant="contained" color="primary" fullWidth>
+                    Sign In
+                </Button>
+            </form>
+        </Container>
     );
 };
 
