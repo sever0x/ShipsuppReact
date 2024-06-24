@@ -1,13 +1,12 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { CssBaseline, Container, AppBar, Toolbar, Typography, Button } from '@mui/material';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
+import {BrowserRouter as Router, Navigate, Route, Routes} from 'react-router-dom';
+import {AppBar, Button, Container, CssBaseline, Toolbar, Typography} from '@mui/material';
+import {createTheme, ThemeProvider} from '@mui/material/styles';
+import AuthProvider from "misc/providers/AuthProvider";
 
-import AuthProvider from "../../misc/providers/AuthProvider";
 import SignIn from '../../components/SignIn/SignIn';
 import Register from '../../components/Register/Register';
 import Profile from '../../components/Profile/Profile';
-import PrivateRoute from '../../components/PrivateRoute/PrivateRoute';
 
 const theme = createTheme();
 
@@ -38,9 +37,7 @@ function App() {
                             <Route path="/" element={<Navigate to="/signin" />} />
                             <Route path="/signin" element={<SignIn />} />
                             <Route path="/register" element={<Register />} />
-                            <Route path="/profile" element={<PrivateRoute />}>
-                                <Route path="" element={<Profile />} />
-                            </Route>
+                            <Route path="/profile" element={<Profile />} />
                         </Routes>
                     </Container>
                 </Router>

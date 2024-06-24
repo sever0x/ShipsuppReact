@@ -1,5 +1,11 @@
-import {createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, User, signOut} from 'firebase/auth';
-import React, {createContext, useContext, useEffect, useState} from "react";
+import {
+    createUserWithEmailAndPassword,
+    onAuthStateChanged,
+    signInWithEmailAndPassword,
+    signOut,
+    User
+} from 'firebase/auth';
+import React, {createContext, useEffect, useState} from "react";
 import {auth} from "../../../app/config/firebaseConfig";
 
 interface AuthContextProps {
