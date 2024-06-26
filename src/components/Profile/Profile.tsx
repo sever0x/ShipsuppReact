@@ -2,6 +2,8 @@ import React from 'react';
 import { Button, Container, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import useAuth from '../../misc/hooks/useAuth';
+import pageURLs from "../../constants/pagesURLs";
+import * as pages from "../../constants/pages";
 
 const Profile: React.FC = () => {
     const { user, logout } = useAuth();
@@ -9,7 +11,7 @@ const Profile: React.FC = () => {
 
     const handleLogout = async () => {
         await logout();
-        navigate('/signin');
+        navigate(`${pageURLs[pages.login]}`);
     };
 
     return (

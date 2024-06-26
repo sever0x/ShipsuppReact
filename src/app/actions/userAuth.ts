@@ -1,4 +1,5 @@
 import {
+    AUTH_STATE_CHANGED,
     ERROR_SIGN_IN,
     ERROR_SIGN_UP,
     REQUEST_SIGN_IN,
@@ -57,6 +58,11 @@ const successSignOut = () => ({
     type: SUCCESS_SIGN_OUT,
 });
 
+const authStateChange = (user: User | null) => ({
+    type: AUTH_STATE_CHANGED,
+    payload: user,
+});
+
 const googleProvider = new GoogleAuthProvider();
 
 const fetchGoogleSignIn = (): ThunkAction<Promise<void>, RootState, unknown, UnknownAction> => async (dispatch: any) => {
@@ -111,6 +117,7 @@ const exportFunctions = {
     fetchGoogleSignIn,
     successSignIn,
     requestSignOut,
+    authStateChange,
 };
 
 export default exportFunctions;
