@@ -1,23 +1,18 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { TextField, Button, Container, Typography } from '@mui/material';
+import React, {useState} from 'react';
+import {useNavigate} from 'react-router-dom';
+import {TextField, Button, Container, Typography} from '@mui/material';
 import useAuth from '../../misc/hooks/useAuth';
 
 const Register = () => {
-    const { register } = useAuth();
+    const {register, error} = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
-        try {
-            await register(email, password);
-            navigate('/profile');
-        } catch (error) {
-            console.error(error);
-            alert('Registration failed');
-        }
+        await register(email, password);
+        navigate('/profile');
     };
 
     return (
@@ -40,6 +35,7 @@ const Register = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                 />
+                {error && <Typography color="error">{error.message}</Typography>}
                 <Button type="submit" variant="contained" color="primary" fullWidth>
                     Register
                 </Button>
