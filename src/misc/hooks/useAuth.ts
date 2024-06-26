@@ -15,6 +15,7 @@ const useAuth = () => {
         login: (email: string, password: string) => dispatch(actions.fetchLogin(email, password)),
         register: (email: string, password: string) => dispatch(actions.fetchRegister(email, password)),
         logout: () => dispatch(actions.fetchLogout()),
+        googleSignIn: () => dispatch(actions.fetchGoogleSignIn()),
     };
 };
 

@@ -1,16 +1,26 @@
 import {
     ERROR_SIGN_IN,
-    REQUEST_SIGN_IN,
-    SUCCESS_SIGN_IN,
-    REQUEST_SIGN_OUT,
-    SUCCESS_SIGN_OUT,
     ERROR_SIGN_UP,
+    REQUEST_SIGN_IN,
+    REQUEST_SIGN_OUT,
     REQUEST_SIGN_UP,
+    SUCCESS_SIGN_IN,
+    SUCCESS_SIGN_OUT,
     SUCCESS_SIGN_UP,
 } from '../constants/actionTypes';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, User } from 'firebase/auth';
+import {
+    createUserWithEmailAndPassword,
+    GoogleAuthProvider,
+    signInWithEmailAndPassword,
+    signInWithPopup,
+    signOut,
+    User
+} from 'firebase/auth';
 import storage from 'misc/storage';
-import { auth } from 'app/config/firebaseConfig';
+import {auth} from 'app/config/firebaseConfig';
+import {ThunkAction} from "redux-thunk";
+import {RootState} from "../reducers";
+import {UnknownAction} from "redux";
 
 const requestSignIn = () => ({
     type: REQUEST_SIGN_IN,
@@ -46,6 +56,20 @@ const requestSignOut = () => ({
 const successSignOut = () => ({
     type: SUCCESS_SIGN_OUT,
 });
+
+const googleProvider = new GoogleAuthProvider();
+
+const fetchGoogleSignIn = (): ThunkAction<Promise<void>, RootState, unknown, UnknownAction> => async (dispatch: any) => {
+    dispatch(requestSignIn());
+    try {
+        const result = await signInWithPopup(auth, googleProvider);
+        const user = result.user;
+        storage.setItem('user', JSON.stringify(user));
+        dispatch(successSignIn(user));
+    } catch (error) {
+        dispatch(errorSignIn(error));
+    }
+};
 
 const fetchLogin = (email: string, password: string) => async (dispatch: any) => {
     dispatch(requestSignIn());
@@ -84,6 +108,7 @@ const exportFunctions = {
     fetchLogin,
     fetchRegister,
     fetchLogout,
+    fetchGoogleSignIn,
     successSignIn,
     requestSignOut,
 };

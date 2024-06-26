@@ -1,18 +1,24 @@
 import React, {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
-import {TextField, Button, Container, Typography} from '@mui/material';
-import useAuth from '../../misc/hooks/useAuth';
+import {Button, Container, Divider, TextField, Typography} from '@mui/material';
+import useAuth from 'misc/hooks/useAuth';
+import {Google} from "@mui/icons-material";
 
 const SignIn = () => {
-    const {login, error} = useAuth();
+    const { login, googleSignIn, error } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
-        await login(email, password);
-        navigate('/profile');
+            await login(email, password);
+            navigate('/profile');
+    };
+
+    const handleGoogleSignIn = async () => {
+            await googleSignIn();
+            navigate('/profile');
     };
 
     return (
@@ -40,6 +46,16 @@ const SignIn = () => {
                     Sign In
                 </Button>
             </form>
+            <Divider style={{ margin: '20px 0' }}>OR</Divider>
+            <Button
+                onClick={handleGoogleSignIn}
+                variant="outlined"
+                color="primary"
+                fullWidth
+                startIcon={<Google />}
+            >
+                Sign In with Google
+            </Button>
         </Container>
     );
 };
