@@ -1,4 +1,4 @@
 export const home: string = "";
 export const login: string = "login";
-export const registration: string = "registration";
+export const register: string = "register";
 export const profile: string = "profile";

@@ -1,11 +1,12 @@
 import React from 'react';
-import Button from 'components/Button';
+import Button from "components/Button";
 
 interface GoogleSignInButtonProps {
     onClick: () => void;
+    text: string;
 }
 
-const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({ onClick }) => (
+const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({ onClick, text }) => (
     <Button
         type="button"
         fullWidth
@@ -24,7 +25,7 @@ const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({ onClick }) => (
             },
         }}
     >
-        Sign In with Google
+        {text}
     </Button>
 );
 

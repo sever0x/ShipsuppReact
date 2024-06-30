@@ -22,7 +22,7 @@ const MainLayout: React.FC = () => {
                             <Button color="inherit" href={`${pageURLs[pages.login]}`}>
                                 Sign In
                             </Button>
-                            <Button color="inherit" href={`${pageURLs[pages.registration]}`}>
+                            <Button color="inherit" href={`${pageURLs[pages.register]}`}>
                                 Register
                             </Button>
                         </div>

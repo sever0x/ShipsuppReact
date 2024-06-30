@@ -1,7 +1,7 @@
 import React from 'react';
 import { InputAdornment } from '@mui/material';
 import { Email } from '@mui/icons-material';
-import TextField from "components/TextField";
+import TextField from "../TextField";
 
 interface EmailFieldProps {
     email: string;

@@ -1,7 +1,11 @@
-import Button from 'components/Button';
 import React from 'react';
+import Button from "components/Button";
 
-const SubmitButton: React.FC = () => (
+interface SubmitButtonProps {
+    text: string;
+}
+
+const SubmitButton: React.FC<SubmitButtonProps> = ({ text }) => (
     <Button
         type="submit"
         fullWidth
@@ -17,7 +21,7 @@ const SubmitButton: React.FC = () => (
             },
         }}
     >
-        Sign In
+        {text}
     </Button>
 );
 
