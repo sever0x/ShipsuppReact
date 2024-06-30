@@ -1,7 +1,6 @@
 import React, {useState} from 'react';
 import {BrowserRouter as Router, Navigate, Route, Routes} from 'react-router-dom';
 import {AppBar, Button, Container, CssBaseline, Toolbar, Typography} from '@mui/material';
-import {createTheme, ThemeProvider} from '@mui/material/styles';
 import AuthProvider from "misc/providers/AuthProvider";
 import pageURLs from 'constants/pagesURLs';
 import * as pages from 'constants/pages';
@@ -12,8 +11,7 @@ import Profile from 'components/Profile/Profile';
 import {useDispatch, useSelector} from "react-redux";
 import {RootState} from "../reducers";
 import ProtectedRoute from "../../pageProviders/components/ProtectedRoute";
-
-const theme = createTheme();
+import ThemeProvider from 'misc/providers/ThemeProvider';
 
 function App() {
     const dispatch = useDispatch();
@@ -32,7 +30,7 @@ function App() {
 
     return (
         <AuthProvider>
-            <ThemeProvider theme={theme}>
+            <ThemeProvider>
                 <CssBaseline/>
                 {isLoading && (
                     <div>Loading...</div>
