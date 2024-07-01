@@ -36,6 +36,12 @@ const TextField: React.FC<CustomTextFieldProps> = ({
         },
         '& input[type="password"]::-ms-reveal': { display: 'none' },
         '& input[type="password"]::-ms-clear': { display: 'none' },
+        '& input:-webkit-autofill': {
+            transition: 'background-color 600000s 0s, color 600000s 0s',
+        },
+        '& input[data-autocompleted]': {
+            backgroundColor: 'transparent !important',
+        },
         ...sx,
     };
 

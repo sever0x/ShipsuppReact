@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { InputAdornment } from '@mui/material';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
+import {Password, Visibility, VisibilityOff} from '@mui/icons-material';
 import TextField from "components/TextField";
 import IconButton from "components/IconButton";
 
@@ -27,6 +27,11 @@ const PasswordField: React.FC<PasswordFieldProps> = ({ password, setPassword, pl
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             InputProps={{
+                startAdornment: (
+                    <InputAdornment position="start">
+                        <Password/>
+                    </InputAdornment>
+                ),
                 endAdornment: (
                     <InputAdornment position="end">
                         <IconButton
