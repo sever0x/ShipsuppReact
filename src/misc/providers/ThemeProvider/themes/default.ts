@@ -36,10 +36,38 @@ const muiTheme = createTheme({
     },
     palette: {
         primary: {
-            main: '#1976d2',
+            main: '#5BFEC5', // Bright mint green
         },
         secondary: {
-            main: '#dc004e',
+            main: '#382F6D', // Deep purple
+        },
+        background: {
+            default: '#FFFFFF', // White
+            paper: '#DDF2EE', // Light cyan
+        },
+        text: {
+            primary: '#102625', // Very dark teal (almost black)
+            secondary: '#132F2F', // Dark teal
+        },
+        error: {
+            main: '#463380', // Medium purple
+        },
+        warning: {
+            main: '#5F4A9F', // Light purple
+        },
+        info: {
+            main: '#EFFBF9', // Very light cyan
+        },
+        success: {
+            main: '#194241', // Dark teal
+        },
+        grey: {
+            100: '#FFFFFF', // White
+            200: '#EFFBF9', // Very light cyan
+            300: '#DDF2EE', // Light cyan
+            400: '#C6D0D1', // Light grayish cyan
+            500: '#ACB6B7', // Medium grayish cyan
+            600: '#97A4A5', // Dark grayish cyan
         },
     },
     shape: {

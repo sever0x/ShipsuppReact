@@ -8,7 +8,11 @@ import RegisterForm from '../components/RegisterForm';
 const getClasses = createUseStyles((muiTheme) => ({
     container: {
         height: '100vh',
-        backgroundImage: `url(static/images/login/background.png)`,
+        // backgroundImage: `url(static/images/login/background.png)`,
+        // backgroundSize: 'cover',
+        // backgroundPosition: 'center',
+        // backgroundRepeat: 'no-repeat',
+        // backgroundAttachment: 'fixed',
     },
 }));
 
@@ -29,7 +33,7 @@ const RegisterPage: React.FC = () => {
                 }}
             >
                 <Logo />
-                <Stack sx={{ paddingTop: '220px' }}>
+                <Stack sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                     <RegisterForm />
                 </Stack>
             </Stack>

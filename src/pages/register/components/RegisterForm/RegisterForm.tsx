@@ -61,7 +61,10 @@ const RegisterForm: React.FC = () => {
                     Sign Up.
                 </Typography>
                 <Typography sx={{ paddingTop: '16px' }}>
-                    Already have an account? <Link href={`${pageURLs[pages.login]}`}>Sign In</Link>
+                    Already have an account? <Link href={`${pageURLs[pages.login]}`} sx={{
+                    color: 'inherit',
+                    textDecorationColor: 'inherit'
+                }}>Sign In</Link>
                 </Typography>
             </div>
             <div className={classes.fieldsContainer}>

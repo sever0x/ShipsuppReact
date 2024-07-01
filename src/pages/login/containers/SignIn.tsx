@@ -5,10 +5,14 @@ import Stack from "components/Stack";
 import Logo from '../../../components/Logo';
 import SignInForm from '../components/SignInForm';
 
-const getClasses = createUseStyles((muiTheme) => ({
+const getClasses = createUseStyles(() => ({
     container: {
         height: '100vh',
-        backgroundImage: `url(static/images/login/background.png)`,
+        // backgroundImage: `url(static/images/login/background.png)`,
+        // backgroundSize: 'cover',
+        // backgroundPosition: 'center',
+        // backgroundRepeat: 'no-repeat',
+        // backgroundAttachment: 'fixed',
     },
 }));
 
@@ -29,7 +33,7 @@ const SignInPage: React.FC = () => {
                 }}
             >
                 <Logo />
-                <Stack sx={{ paddingTop: '220px' }}>
+                <Stack sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                     <SignInForm />
                 </Stack>
             </Stack>
