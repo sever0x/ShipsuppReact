@@ -4,7 +4,7 @@ import AuthProvider from "misc/providers/AuthProvider";
 import ThemeProvider from 'misc/providers/ThemeProvider';
 import CssBaseline from '@mui/material/CssBaseline';
 import ProtectedRoute from "../../pageProviders/components/ProtectedRoute";
-import Profile from 'components/Profile/Profile';
+import Profile from 'pages/profile';
 import pageURLs from 'constants/pagesURLs';
 import * as pages from 'constants/pages';
 import AuthLayout from "app/layouts/AuthLayout";
