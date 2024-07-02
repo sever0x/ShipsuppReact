@@ -1,13 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Button, Container, Typography, CircularProgress, Avatar, Box, IconButton } from '@mui/material';
-import { Edit } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
+import React, {useEffect, useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
+import {Avatar, Box, Button, CircularProgress, Container, Typography} from '@mui/material';
+import {useNavigate} from 'react-router-dom';
 import useAuth from 'misc/hooks/useAuth';
 import pageURLs from 'constants/pagesURLs';
 import * as pages from 'constants/pages';
-import { fetchUserProfile } from '../actions/profileActions';
-import { RootState } from 'app/reducers';
+import {fetchUserProfile} from '../actions/profileActions';
+import {RootState} from 'app/reducers';
 import EditProfile from '../components/EditProfile';
 
 const Profile: React.FC = () => {

@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Button, TextField, Box, Avatar, IconButton, CircularProgress } from '@mui/material';
-import { Edit, CloudUpload } from '@mui/icons-material';
-import { RootState } from '../../../../app/reducers';
-import { updateProfile, updateProfilePhoto } from '../../actions/profileActions';
+import React, {useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
+import {Avatar, Box, Button, CircularProgress, IconButton, TextField} from '@mui/material';
+import {CloudUpload} from '@mui/icons-material';
+import {RootState} from '../../../../app/reducers';
+import {updateProfile, updateProfilePhoto} from '../../actions/profileActions';
 
 interface EditProfileProps {
     onCancel: () => void;
