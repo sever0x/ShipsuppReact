@@ -8,7 +8,10 @@ import {
     FETCH_PROFILE_FAILURE,
     UPDATE_PROFILE_PHOTO_REQUEST,
     UPDATE_PROFILE_PHOTO_SUCCESS,
-    UPDATE_PROFILE_PHOTO_FAILURE
+    UPDATE_PROFILE_PHOTO_FAILURE,
+    UPDATE_PROFILE_REQUEST,
+    UPDATE_PROFILE_SUCCESS,
+    UPDATE_PROFILE_FAILURE
 } from '../constants/actionTypes';
 
 export const fetchUserProfile = (uid: string) => async (dispatch: Dispatch) => {
@@ -49,9 +52,31 @@ export const updateProfilePhoto = (uid: string, file: File) => async (dispatch: 
             type: UPDATE_PROFILE_PHOTO_SUCCESS,
             payload: { profilePhoto: photoURL }
         });
+
+        return photoURL;
     } catch (error) {
         dispatch({
             type: UPDATE_PROFILE_PHOTO_FAILURE,
+            payload: error instanceof Error ? error.message : 'An unknown error occurred'
+        });
+        throw error;
+    }
+};
+
+export const updateProfile = (uid: string, profileData: any) => async (dispatch: Dispatch) => {
+    dispatch({ type: UPDATE_PROFILE_REQUEST });
+
+    try {
+        const userRef = ref(database, `users/${uid}`);
+        await update(userRef, profileData);
+
+        dispatch({
+            type: UPDATE_PROFILE_SUCCESS,
+            payload: profileData
+        });
+    } catch (error) {
+        dispatch({
+            type: UPDATE_PROFILE_FAILURE,
             payload: error instanceof Error ? error.message : 'An unknown error occurred'
         });
     }

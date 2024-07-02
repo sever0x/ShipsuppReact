@@ -1,3 +1,10 @@
-import Profile from './container/Profile';
+import React from 'react';
+import Profile from 'pages/profile/containers/Profile';
 
-export default Profile;
+function Index(props: any) {
+    return (
+        <Profile />
+    );
+}
+
+export default Index;
