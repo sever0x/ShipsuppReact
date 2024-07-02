@@ -53,12 +53,6 @@ const Profile: React.FC = () => {
                                 alt={`${profile.data?.firstName} ${profile.data?.lastName}`}
                                 sx={{ width: 100, height: 100, mb: 2 }}
                             />
-                            <IconButton
-                                sx={{ position: 'absolute', bottom: 0, right: 0 }}
-                                onClick={() => setIsEditing(true)}
-                            >
-                                <Edit />
-                            </IconButton>
                         </Box>
                         <Typography variant="h4" gutterBottom>User Profile</Typography>
                     </Box>
