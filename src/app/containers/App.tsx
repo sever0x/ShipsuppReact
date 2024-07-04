@@ -5,6 +5,7 @@ import ThemeProvider from 'misc/providers/ThemeProvider';
 import CssBaseline from '@mui/material/CssBaseline';
 import ProtectedRoute from "../../pageProviders/components/ProtectedRoute";
 import Profile from 'pages/profile';
+import Catalog from 'pages/catalog/containers/Catalog';
 import pageURLs from 'constants/pagesURLs';
 import * as pages from 'constants/pages';
 import AuthLayout from "app/layouts/AuthLayout";
@@ -22,6 +23,7 @@ function App() {
                         <Route element={<MainLayout />}>
                             <Route path={`${pageURLs[pages.home]}`} element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                             <Route path={`${pageURLs[pages.profile]}`} element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+                            <Route path={`${pageURLs[pages.catalog]}`} element={<ProtectedRoute><Catalog /></ProtectedRoute>} />
                         </Route>
                         <Route element={<AuthLayout />}>
                             <Route path={`${pageURLs[pages.login]}`} element={<SignIn />} />
