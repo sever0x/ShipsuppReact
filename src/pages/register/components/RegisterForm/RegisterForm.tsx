@@ -15,6 +15,7 @@ const getClasses = createUseStyles(() => ({
     textContainer: {
         display: 'flex',
         flexDirection: 'column',
+        alignItems: 'center',
     },
     fieldsContainer: {
         display: 'flex',

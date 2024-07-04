@@ -5,7 +5,7 @@ import Stack from "components/Stack";
 import Logo from 'components/Logo';
 import RegisterForm from '../components/RegisterForm';
 
-const getClasses = createUseStyles((muiTheme) => ({
+const getClasses = createUseStyles(() => ({
     container: {
         height: '100vh',
         // backgroundImage: `url(static/images/login/background.png)`,
@@ -14,6 +14,10 @@ const getClasses = createUseStyles((muiTheme) => ({
         // backgroundRepeat: 'no-repeat',
         // backgroundAttachment: 'fixed',
     },
+    center: {
+        display: 'flex',
+        justifyContent: 'center',
+    }
 }));
 
 const RegisterPage: React.FC = () => {
@@ -21,7 +25,7 @@ const RegisterPage: React.FC = () => {
     const classes = getClasses({ theme });
 
     return (
-        <div className={classes.container}>
+        <div className={classes.container + ' ' + classes.center}>
             <Stack
                 sx={{
                     display: 'flex',
@@ -32,9 +36,11 @@ const RegisterPage: React.FC = () => {
                     padding: '48px 48px',
                 }}
             >
-                <Logo />
-                <Stack sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                    <RegisterForm />
+                <div className={classes.center}>
+                    <Logo/>
+                </div>
+                <Stack sx={{flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
+                    <RegisterForm/>
                 </Stack>
             </Stack>
         </div>

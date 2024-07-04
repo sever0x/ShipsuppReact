@@ -14,6 +14,10 @@ const getClasses = createUseStyles(() => ({
         // backgroundRepeat: 'no-repeat',
         // backgroundAttachment: 'fixed',
     },
+    center: {
+        display: 'flex',
+        justifyContent: 'center',
+    }
 }));
 
 const SignInPage: React.FC = () => {
@@ -21,7 +25,7 @@ const SignInPage: React.FC = () => {
     const classes = getClasses({ theme });
 
     return (
-        <div className={classes.container}>
+        <div className={classes.container + ' ' + classes.center}>
             <Stack
                 sx={{
                     display: 'flex',
@@ -32,7 +36,9 @@ const SignInPage: React.FC = () => {
                     padding: '48px 48px',
                 }}
             >
-                <Logo />
+                <div className={classes.center}>
+                    <Logo />
+                </div>
                 <Stack sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                     <SignInForm />
                 </Stack>
