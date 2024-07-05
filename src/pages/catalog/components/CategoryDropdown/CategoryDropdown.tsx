@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Button, Menu, MenuItem, ListItemText, ListItemIcon, Collapse } from '@mui/material';
 import { ExpandMore, ChevronRight } from '@mui/icons-material';
+import {useDispatch} from "react-redux";
+import {fetchGoods} from "pages/catalog/actions/catalogActions";
 
 interface Category {
     id: string;
@@ -14,6 +16,8 @@ interface CategoryDropdownProps {
 }
 
 const CategoryDropdown: React.FC<CategoryDropdownProps> = ({ categories }) => {
+    const dispatch = useDispatch();
+
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [openCategories, setOpenCategories] = useState<{ [key: string]: boolean }>({});
 
@@ -35,6 +39,11 @@ const CategoryDropdown: React.FC<CategoryDropdownProps> = ({ categories }) => {
             !(category.categories.length === 1 && category.categories[0].title === category.title);
     };
 
+    const handleCategorySelect = (categoryId: string) => {
+        dispatch(fetchGoods(categoryId) as any);
+        handleClose();
+    };
+
     const renderCategories = (categories: Category[], depth = 0) => {
         const sortedCategories = [...categories].sort((a, b) => (a.index ?? 0) - (b.index ?? 0));
 
@@ -44,7 +53,7 @@ const CategoryDropdown: React.FC<CategoryDropdownProps> = ({ categories }) => {
             return (
                 <React.Fragment key={category.id}>
                     <MenuItem
-                        onClick={() => hasSubcategories && handleCategoryClick(category.id)}
+                        onClick={() => hasSubcategories ? handleCategoryClick(category.id) : handleCategorySelect(category.id)}
                         style={{ paddingLeft: `${depth * 16}px` }}
                     >
                         <ListItemText primary={category.title} />
