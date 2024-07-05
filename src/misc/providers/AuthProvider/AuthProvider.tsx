@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from "../../../app/config/firebaseConfig";
+import React, {useEffect} from 'react';
+import {useDispatch} from 'react-redux';
+import {onAuthStateChanged} from 'firebase/auth';
+import {auth} from "../../../app/config/firebaseConfig";
 import actions from "../../../app/actions/userAuth";
-import {AUTH_STATE_CHANGED} from "../../../app/constants/actionTypes";
+import storage from 'misc/storage';
 
 export const AuthContext = React.createContext<any>(undefined);
 
@@ -17,6 +17,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                 dispatch(actions.successSignIn(user));
             } else {
                 dispatch(actions.requestSignOut());
+                storage.removeItem(storage.keys.USER_DATA);
             }
         });
 

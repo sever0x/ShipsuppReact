@@ -62,6 +62,11 @@ const Profile: React.FC = () => {
                             <Typography variant="body1">First Name: {profile.data.firstName}</Typography>
                             <Typography variant="body1">Last Name: {profile.data.lastName}</Typography>
                             <Typography variant="body1">Phone: {profile.data.phone}</Typography>
+                            {profile.data.port && (
+                                <Typography variant="body1">
+                                    Port: {profile.data.port.title} ({profile.data.port.city.title}, {profile.data.port.city.country.title})
+                                </Typography>
+                            )}
                         </>
                     )}
                     <Box mt={3}>

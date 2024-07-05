@@ -88,6 +88,16 @@ const EditProfile: React.FC<EditProfileProps> = ({ onCancel }) => {
                 value={formData.phone}
                 onChange={handleChange}
             />
+            <TextField
+                fullWidth
+                margin="normal"
+                name="port"
+                label="Port"
+                value={formData.port?.title || ''}
+                InputProps={{
+                    readOnly: true,
+                }}
+            />
             <Box mt={3}>
                 <Button type="submit" variant="contained" color="primary" sx={{ mr: 2 }}>
                     Save

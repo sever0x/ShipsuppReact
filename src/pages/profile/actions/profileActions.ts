@@ -1,7 +1,7 @@
 import { Dispatch } from 'redux';
 import { ref, get, update } from 'firebase/database';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { database, storage } from 'app/config/firebaseConfig';
+import { database, storage as firebaseStorage } from 'app/config/firebaseConfig';
 import {
     FETCH_PROFILE_REQUEST,
     FETCH_PROFILE_SUCCESS,
@@ -13,6 +13,7 @@ import {
     UPDATE_PROFILE_SUCCESS,
     UPDATE_PROFILE_FAILURE
 } from '../constants/actionTypes';
+import storage from 'misc/storage';
 
 export const fetchUserProfile = (uid: string) => async (dispatch: Dispatch) => {
     dispatch({ type: FETCH_PROFILE_REQUEST });
@@ -22,9 +23,11 @@ export const fetchUserProfile = (uid: string) => async (dispatch: Dispatch) => {
         const snapshot = await get(userRef);
 
         if (snapshot.exists()) {
+            const userData = snapshot.val();
+            storage.setItem(storage.keys.USER_DATA, userData);
             dispatch({
                 type: FETCH_PROFILE_SUCCESS,
-                payload: snapshot.val()
+                payload: userData
             });
         } else {
             throw new Error('User profile not found');
@@ -41,7 +44,7 @@ export const updateProfilePhoto = (uid: string, file: File) => async (dispatch: 
     dispatch({ type: UPDATE_PROFILE_PHOTO_REQUEST });
 
     try {
-        const photoRef = storageRef(storage, `users/${uid}/profilePhoto/${file.name}`);
+        const photoRef = storageRef(firebaseStorage, `users/${uid}/profilePhoto/${file.name}`);
         await uploadBytes(photoRef, file);
         const photoURL = await getDownloadURL(photoRef);
 

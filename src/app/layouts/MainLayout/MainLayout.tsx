@@ -28,9 +28,14 @@ const MainLayout: React.FC = () => {
                         </div>
                     )}
                     {isAuthenticated && (
-                        <Button color="inherit" href={`${pageURLs[pages.profile]}`}>
-                            Profile
-                        </Button>
+                        <div>
+                            <Button color="inherit" href={`${pageURLs[pages.catalog]}`}>
+                                Catalog
+                            </Button>
+                            <Button color="inherit" href={`${pageURLs[pages.profile]}`}>
+                                Profile
+                            </Button>
+                        </div>
                     )}
                 </Toolbar>
             </AppBar>

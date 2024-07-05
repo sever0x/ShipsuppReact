@@ -1,3 +1,9 @@
+export const keys = {
+    TOKEN: 'TOKEN',
+    TOKEN_EXPIRATION: 'TOKEN_EXP',
+    USER_DATA: 'USER_DATA',
+};
+
 const getItem = (key: string) => {
     return localStorage.getItem(key);
 };
@@ -7,18 +13,14 @@ const removeItem = (key: string) => {
 };
 
 const setItem = (key: string, value: any) => {
-    localStorage.setItem(key, value);
+    localStorage.setItem(key, JSON.stringify(value));
 };
-
-export const keys = {
-    TOKEN: 'TOKEN',
-    TOKEN_EXPIRATION: 'TOKEN_EXP',
-}
 
 const forExport = {
     getItem,
     removeItem,
-    setItem
+    setItem,
+    keys,
 };
 
 export default forExport;
