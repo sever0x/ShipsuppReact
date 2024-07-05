@@ -42,12 +42,12 @@ const SignInForm: React.FC = () => {
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
         await login(email, password);
-        navigate('/profile');
+        navigate('/catalog');
     };
 
     const handleGoogleSignIn = async () => {
         await googleSignIn();
-        navigate('/profile');
+        navigate('/catalog');
     };
 
     return (
