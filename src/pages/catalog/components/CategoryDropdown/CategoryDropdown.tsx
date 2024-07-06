@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Button, Menu, MenuItem, ListItemText, ListItemIcon, Collapse } from '@mui/material';
 import { ExpandMore, ChevronRight } from '@mui/icons-material';
-import {useDispatch} from "react-redux";
-import {fetchGoods} from "pages/catalog/actions/catalogActions";
+import { useDispatch } from "react-redux";
+import { fetchGoods } from "pages/catalog/actions/catalogActions";
 
 interface Category {
     id: string;
@@ -39,8 +39,14 @@ const CategoryDropdown: React.FC<CategoryDropdownProps> = ({ categories }) => {
             !(category.categories.length === 1 && category.categories[0].title === category.title);
     };
 
-    const handleCategorySelect = (categoryId: string) => {
-        dispatch(fetchGoods(categoryId) as any);
+    const handleCategorySelect = (category: Category) => {
+        let selectedId: string;
+        if (category.categories && category.categories.length === 1) {
+            selectedId = category.categories[0].id;
+        } else {
+            selectedId = category.id;
+        }
+        dispatch(fetchGoods(selectedId) as any);
         handleClose();
     };
 
@@ -53,7 +59,7 @@ const CategoryDropdown: React.FC<CategoryDropdownProps> = ({ categories }) => {
             return (
                 <React.Fragment key={category.id}>
                     <MenuItem
-                        onClick={() => hasSubcategories ? handleCategoryClick(category.id) : handleCategorySelect(category.id)}
+                        onClick={() => hasSubcategories ? handleCategoryClick(category.id) : handleCategorySelect(category)}
                         style={{ paddingLeft: `${depth * 16}px` }}
                     >
                         <ListItemText primary={category.title} />
@@ -64,7 +70,7 @@ const CategoryDropdown: React.FC<CategoryDropdownProps> = ({ categories }) => {
                         )}
                     </MenuItem>
                     {hasSubcategories && category.categories && (
-                        <Collapse in={openCategories[category.id]} timeout="auto" unmountOnExit>
+                        <Collapse in={!!openCategories[category.id]} timeout="auto" unmountOnExit>
                             {renderCategories(category.categories, depth + 1)}
                         </Collapse>
                     )}
