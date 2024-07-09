@@ -6,6 +6,7 @@ import storage from "misc/storage";
 import {database, storage as firebaseStorage} from 'app/config/firebaseConfig';
 import {Good} from "pages/catalog/types/Good";
 import {v4 as uuidv4} from 'uuid';
+import { remove } from 'firebase/database';
 
 export const fetchCategories = () => async (dispatch: Dispatch) => {
     dispatch({ type: actionTypes.FETCH_CATEGORIES_REQUEST });
@@ -126,6 +127,42 @@ export const updateGood = (updatedGood: Good, newImages: File[], deletedImageKey
     } catch (error) {
         dispatch({
             type: actionTypes.UPDATE_GOOD_FAILURE,
+            payload: error instanceof Error ? error.message : 'An unknown error occurred'
+        });
+    }
+};
+
+export const deleteGood = (good: Good) => async (dispatch: Dispatch) => {
+    dispatch({ type: actionTypes.DELETE_GOOD_REQUEST });
+
+    try {
+        const userData = JSON.parse(storage.getItem(storage.keys.USER_DATA) ?? '{}');
+        const portId = userData.port?.id;
+        const userId = userData.id;
+
+        if (!portId || !userId) {
+            throw new Error('User port or ID not found');
+        }
+
+        // Delete images from Firebase Storage
+        if (good.images) {
+            await Promise.all(Object.keys(good.images).map(async (key) => {
+                const imageRef = storageRef(firebaseStorage, `goods/${portId}/${userId}/${good.id}/${key}`);
+                await deleteObject(imageRef);
+            }));
+        }
+
+        // Delete good from Firebase Realtime Database
+        const goodRef = ref(database, `goods/${portId}/${userId}/${good.id}`);
+        await remove(goodRef);
+
+        dispatch({
+            type: actionTypes.DELETE_GOOD_SUCCESS,
+            payload: good.id
+        });
+    } catch (error) {
+        dispatch({
+            type: actionTypes.DELETE_GOOD_FAILURE,
             payload: error instanceof Error ? error.message : 'An unknown error occurred'
         });
     }
