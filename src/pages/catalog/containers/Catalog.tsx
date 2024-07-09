@@ -43,8 +43,8 @@ const Catalog: React.FC = () => {
         setEditingGood(null);
     };
 
-    const handleSaveGood = (updatedGood: Good) => {
-        dispatch(updateGood(updatedGood) as any);
+    const handleSaveGood = (updatedGood: Good, newImages: File[], deletedImageKeys: string[]) => {
+        dispatch(updateGood(updatedGood, newImages, deletedImageKeys) as any);
     };
 
     return (

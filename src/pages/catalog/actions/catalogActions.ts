@@ -1,9 +1,11 @@
 import { Dispatch } from 'redux';
 import {ref, get, update} from 'firebase/database';
-import { database } from 'app/config/firebaseConfig';
 import * as actionTypes from '../constants/actionTypes';
 import storage from "misc/storage";
+import { storage as firebaseStorage, database } from 'app/config/firebaseConfig';
 import {Good} from "pages/catalog/types/Good";
+import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { v4 as uuidv4 } from 'uuid';
 
 export const fetchCategories = () => async (dispatch: Dispatch) => {
     dispatch({ type: actionTypes.FETCH_CATEGORIES_REQUEST });
@@ -71,7 +73,7 @@ export const fetchGoods = (categoryId: string) => async (dispatch: Dispatch) => 
     }
 };
 
-export const updateGood = (updatedGood: Good) => async (dispatch: Dispatch) => {
+export const updateGood = (updatedGood: Good, newImages: File[], deletedImageKeys: string[]) => async (dispatch: Dispatch) => {
     dispatch({ type: actionTypes.UPDATE_GOOD_REQUEST });
 
     try {
@@ -83,12 +85,37 @@ export const updateGood = (updatedGood: Good) => async (dispatch: Dispatch) => {
             throw new Error('User port or ID not found');
         }
 
+        // Upload new images
+        const uploadedImages = await Promise.all(newImages.map(async (file) => {
+            const uniqueFileName = `${uuidv4()}_${file.name.replace(/[.#$\/\[\]]/g, '_')}`;
+            const imageRef = storageRef(firebaseStorage, `goods/${portId}/${userId}/${updatedGood.id}/${uniqueFileName}`);
+            await uploadBytes(imageRef, file);
+            const downloadURL = await getDownloadURL(imageRef);
+            return { [uniqueFileName]: downloadURL };
+        }));
+
+        // Remove deleted images
+        const filteredImages = Object.entries(updatedGood.images || {})
+            .filter(([key]) => !deletedImageKeys.includes(key))
+            .reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {});
+
+        // Merge new images with existing ones
+        const mergedImages = {
+            ...filteredImages,
+            ...Object.assign({}, ...uploadedImages)
+        };
+
+        const updatedGoodWithImages = {
+            ...updatedGood,
+            images: mergedImages
+        };
+
         const goodRef = ref(database, `goods/${portId}/${userId}/${updatedGood.id}`);
-        await update(goodRef, updatedGood);
+        await update(goodRef, updatedGoodWithImages);
 
         dispatch({
             type: actionTypes.UPDATE_GOOD_SUCCESS,
-            payload: updatedGood
+            payload: updatedGoodWithImages
         });
     } catch (error) {
         dispatch({
