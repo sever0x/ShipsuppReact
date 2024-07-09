@@ -1,11 +1,11 @@
-import { Dispatch } from 'redux';
-import {ref, get, update} from 'firebase/database';
+import {Dispatch} from 'redux';
+import {deleteObject, getDownloadURL, ref as storageRef, uploadBytes} from 'firebase/storage';
+import {get, ref, update} from 'firebase/database';
 import * as actionTypes from '../constants/actionTypes';
 import storage from "misc/storage";
-import { storage as firebaseStorage, database } from 'app/config/firebaseConfig';
+import {database, storage as firebaseStorage} from 'app/config/firebaseConfig';
 import {Good} from "pages/catalog/types/Good";
-import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { v4 as uuidv4 } from 'uuid';
+import {v4 as uuidv4} from 'uuid';
 
 export const fetchCategories = () => async (dispatch: Dispatch) => {
     dispatch({ type: actionTypes.FETCH_CATEGORIES_REQUEST });
@@ -94,7 +94,13 @@ export const updateGood = (updatedGood: Good, newImages: File[], deletedImageKey
             return { [uniqueFileName]: downloadURL };
         }));
 
-        // Remove deleted images
+        // Delete removed images from Firebase Storage
+        await Promise.all(deletedImageKeys.map(async (key) => {
+            const imageRef = storageRef(firebaseStorage, `goods/${portId}/${userId}/${updatedGood.id}/${key}`);
+            await deleteObject(imageRef);
+        }));
+
+        // Remove deleted images from the good object
         const filteredImages = Object.entries(updatedGood.images || {})
             .filter(([key]) => !deletedImageKeys.includes(key))
             .reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {});
