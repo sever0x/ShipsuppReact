@@ -7,4 +7,5 @@ export interface Good {
     price: number;
     currency: string;
     description: string;
+    images?: { [key: string]: string };
 }

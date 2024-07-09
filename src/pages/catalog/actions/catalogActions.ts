@@ -1,5 +1,5 @@
 import { Dispatch } from 'redux';
-import { ref, get } from 'firebase/database';
+import {ref, get, update} from 'firebase/database';
 import { database } from 'app/config/firebaseConfig';
 import * as actionTypes from '../constants/actionTypes';
 import storage from "misc/storage";
@@ -66,6 +66,33 @@ export const fetchGoods = (categoryId: string) => async (dispatch: Dispatch) => 
     } catch (error) {
         dispatch({
             type: actionTypes.FETCH_GOODS_FAILURE,
+            payload: error instanceof Error ? error.message : 'An unknown error occurred'
+        });
+    }
+};
+
+export const updateGood = (updatedGood: Good) => async (dispatch: Dispatch) => {
+    dispatch({ type: actionTypes.UPDATE_GOOD_REQUEST });
+
+    try {
+        const userData = JSON.parse(storage.getItem(storage.keys.USER_DATA) ?? '{}');
+        const portId = userData.port?.id;
+        const userId = userData.id;
+
+        if (!portId || !userId) {
+            throw new Error('User port or ID not found');
+        }
+
+        const goodRef = ref(database, `goods/${portId}/${userId}/${updatedGood.id}`);
+        await update(goodRef, updatedGood);
+
+        dispatch({
+            type: actionTypes.UPDATE_GOOD_SUCCESS,
+            payload: updatedGood
+        });
+    } catch (error) {
+        dispatch({
+            type: actionTypes.UPDATE_GOOD_FAILURE,
             payload: error instanceof Error ? error.message : 'An unknown error occurred'
         });
     }

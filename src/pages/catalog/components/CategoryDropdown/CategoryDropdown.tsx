@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { Button, Menu, MenuItem, ListItemText, ListItemIcon, Collapse } from '@mui/material';
 import { ExpandMore, ChevronRight } from '@mui/icons-material';
-import { useDispatch } from "react-redux";
-import { fetchGoods } from "pages/catalog/actions/catalogActions";
 
 interface Category {
     id: string;
@@ -13,11 +11,10 @@ interface Category {
 
 interface CategoryDropdownProps {
     categories: Category[];
+    onCategorySelect: (categoryId: string) => void;
 }
 
-const CategoryDropdown: React.FC<CategoryDropdownProps> = ({ categories }) => {
-    const dispatch = useDispatch();
-
+const CategoryDropdown: React.FC<CategoryDropdownProps> = ({ categories, onCategorySelect }) => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [openCategories, setOpenCategories] = useState<{ [key: string]: boolean }>({});
 
@@ -46,7 +43,7 @@ const CategoryDropdown: React.FC<CategoryDropdownProps> = ({ categories }) => {
         } else {
             selectedId = category.id;
         }
-        dispatch(fetchGoods(selectedId) as any);
+        onCategorySelect(selectedId);
         handleClose();
     };
 
@@ -70,7 +67,7 @@ const CategoryDropdown: React.FC<CategoryDropdownProps> = ({ categories }) => {
                         )}
                     </MenuItem>
                     {hasSubcategories && category.categories && (
-                        <Collapse in={!!openCategories[category.id]} timeout="auto" unmountOnExit>
+                        <Collapse in={openCategories[category.id]} timeout="auto" unmountOnExit>
                             {renderCategories(category.categories, depth + 1)}
                         </Collapse>
                     )}
