@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchCategories, fetchGoods, updateGood, deleteGood } from '../actions/catalogActions';
+import { fetchCategories, fetchGoods, updateGood, deleteGood, addGood } from '../actions/catalogActions';
 import CategoryDropdown from '../components/CategoryDropdown';
 import EditGoodModal from '../components/EditGoodModal';
+import AddGoodModal from '../components/AddGoodModal';
 import { RootState } from "app/reducers";
 import { Container, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
 import { Good } from '../types/Good';
 
 const Catalog: React.FC = () => {
@@ -14,6 +16,7 @@ const Catalog: React.FC = () => {
     const { categories, goods, loading, error } = useSelector((state: RootState) => state.catalog);
     const [editingGood, setEditingGood] = useState<Good | null>(null);
     const [deletingGood, setDeletingGood] = useState<Good | null>(null);
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
     useEffect(() => {
         dispatch(fetchCategories() as any);
@@ -50,6 +53,10 @@ const Catalog: React.FC = () => {
         dispatch(updateGood(updatedGood, newImages, deletedImageKeys) as any);
     };
 
+    const handleAddGood = (newGood: Omit<Good, 'id'>, newImages: File[]) => {
+        dispatch(addGood(newGood, newImages) as any);
+    };
+
     if (loading) {
         return <Typography>Loading...</Typography>;
     }
@@ -62,6 +69,15 @@ const Catalog: React.FC = () => {
         <Container>
             <Typography variant="h4" gutterBottom>Catalog</Typography>
             <CategoryDropdown categories={categories} onCategorySelect={handleCategorySelect} />
+            <Button
+                variant="contained"
+                color="primary"
+                startIcon={<AddIcon />}
+                onClick={() => setIsAddModalOpen(true)}
+                style={{ marginTop: '20px' }}
+            >
+                Add New Good
+            </Button>
             {goods.length > 0 && (
                 <TableContainer component={Paper} style={{ marginTop: '20px' }}>
                     <Table>
@@ -113,6 +129,12 @@ const Catalog: React.FC = () => {
                     onSave={handleSaveGood}
                 />
             )}
+            <AddGoodModal
+                open={isAddModalOpen}
+                onClose={() => setIsAddModalOpen(false)}
+                onAdd={handleAddGood}
+                categories={categories}
+            />
             <Dialog
                 open={!!deletingGood}
                 onClose={handleCloseDeleteDialog}

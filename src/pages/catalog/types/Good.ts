@@ -1,13 +1,16 @@
 export interface Good {
     id: string;
-    categoryId: string;
-    ownerId: string;
-    article?: string;
+    article: string;
     title: string;
-    brand: string;
     price: number;
-    currency: string;
-    color?: string;
+    brand: string;
+    color: string;
     description: string;
+    categoryId: string;
+    currency: string;
+    ownerId: string;
+    portId: string;
+    createTimestampGMT: string;
+    available: boolean;
     images?: { [key: string]: string };
 }

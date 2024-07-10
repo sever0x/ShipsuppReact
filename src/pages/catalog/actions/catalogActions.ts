@@ -1,12 +1,11 @@
 import {Dispatch} from 'redux';
 import {deleteObject, getDownloadURL, ref as storageRef, uploadBytes} from 'firebase/storage';
-import {get, ref, update} from 'firebase/database';
+import {get, ref, remove, set, update} from 'firebase/database';
 import * as actionTypes from '../constants/actionTypes';
 import storage from "misc/storage";
 import {database, storage as firebaseStorage} from 'app/config/firebaseConfig';
 import {Good} from "pages/catalog/types/Good";
 import {v4 as uuidv4} from 'uuid';
-import { remove } from 'firebase/database';
 
 export const fetchCategories = () => async (dispatch: Dispatch) => {
     dispatch({ type: actionTypes.FETCH_CATEGORIES_REQUEST });
@@ -163,6 +162,54 @@ export const deleteGood = (good: Good) => async (dispatch: Dispatch) => {
     } catch (error) {
         dispatch({
             type: actionTypes.DELETE_GOOD_FAILURE,
+            payload: error instanceof Error ? error.message : 'An unknown error occurred'
+        });
+    }
+};
+
+export const addGood = (newGood: Omit<Good, 'id'>, newImages: File[]) => async (dispatch: Dispatch) => {
+    dispatch({ type: actionTypes.ADD_GOOD_REQUEST });
+
+    try {
+        const userData = JSON.parse(storage.getItem(storage.keys.USER_DATA) ?? '{}');
+        const portId = userData.port?.id;
+        const userId = userData.id;
+
+        if (!portId || !userId) {
+            throw new Error('User port or ID not found');
+        }
+
+        const goodId = uuidv4();
+
+        // Upload new images
+        const uploadedImages = await Promise.all(newImages.map(async (file) => {
+            const uniqueFileName = `${uuidv4()}_${file.name.replace(/[.#$\/\[\]]/g, '_')}`;
+            const imageRef = storageRef(firebaseStorage, `goods/${portId}/${userId}/${goodId}/${uniqueFileName}`);
+            await uploadBytes(imageRef, file);
+            const downloadURL = await getDownloadURL(imageRef);
+            return { [uniqueFileName]: downloadURL };
+        }));
+
+        const goodWithImages = {
+            ...newGood,
+            id: goodId,
+            images: Object.assign({}, ...uploadedImages),
+            ownerId: userId,
+            portId: portId,
+            createTimestampGMT: new Date().toISOString(),
+            available: true,
+        };
+
+        const goodRef = ref(database, `goods/${portId}/${userId}/${goodId}`);
+        await set(goodRef, goodWithImages);
+
+        dispatch({
+            type: actionTypes.ADD_GOOD_SUCCESS,
+            payload: goodWithImages
+        });
+    } catch (error) {
+        dispatch({
+            type: actionTypes.ADD_GOOD_FAILURE,
             payload: error instanceof Error ? error.message : 'An unknown error occurred'
         });
     }

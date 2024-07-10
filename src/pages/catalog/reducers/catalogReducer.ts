@@ -54,6 +54,17 @@ const catalogReducer = (state = initialState, action: any): CatalogState => {
             };
         case actionTypes.DELETE_GOOD_FAILURE:
             return { ...state, loading: false, error: action.payload };
+        case actionTypes.ADD_GOOD_REQUEST:
+            return { ...state, loading: true, error: null };
+        case actionTypes.ADD_GOOD_SUCCESS:
+            return {
+                ...state,
+                loading: false,
+                goods: [...state.goods, action.payload],
+                error: null
+            };
+        case actionTypes.ADD_GOOD_FAILURE:
+            return { ...state, loading: false, error: action.payload };
         default:
             return state;
     }
