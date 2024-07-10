@@ -1,9 +1,9 @@
 import React, {useRef, useState} from 'react';
-import { Modal, Box, TextField, Button, Typography, Grid, IconButton, Menu, MenuItem, ListItemText, ListItemIcon, Collapse } from '@mui/material';
+import {Box, Button, Grid, IconButton, Modal, TextField, Typography} from '@mui/material';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import DeleteIcon from '@mui/icons-material/Delete';
 import {Good} from '../../types/Good';
-import {ChevronRight, ExpandMore} from "@mui/icons-material";
+import CategorySelector from "pages/catalog/components/CategorySelector";
 
 interface Category {
     id: string;
@@ -37,7 +37,6 @@ const AddGoodModal: React.FC<AddGoodModalProps> = ({ open, onClose, onAdd, categ
     const [newImages, setNewImages] = useState<File[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-    const [openCategories, setOpenCategories] = useState<{ [key: string]: boolean }>({});
     const [selectedCategory, setSelectedCategory] = useState<string>('');
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -69,55 +68,9 @@ const AddGoodModal: React.FC<AddGoodModalProps> = ({ open, onClose, onAdd, categ
         setAnchorEl(null);
     };
 
-    const handleSubcategoryClick = (categoryId: string) => {
-        setOpenCategories(prev => ({ ...prev, [categoryId]: !prev[categoryId] }));
-    };
-
-    const shouldRenderSubcategories = (category: Category): boolean => {
-        return !!category.categories &&
-            category.categories.length > 0 &&
-            !(category.categories.length === 1 && category.categories[0].title === category.title);
-    };
-
-    const handleCategorySelect = (category: Category) => {
-        let selectedId: string;
-        if (category.categories && category.categories.length === 1) {
-            selectedId = category.categories[0].id;
-        } else {
-            selectedId = category.id;
-        }
-        setNewGood(prev => ({ ...prev, categoryId: selectedId }));
-        setSelectedCategory(category.title);
-        handleCategoryClose();
-    };
-
-    const renderCategories = (categories: Category[], depth = 0) => {
-        const sortedCategories = [...categories].sort((a, b) => (a.index ?? 0) - (b.index ?? 0));
-
-        return sortedCategories.map((category) => {
-            const hasSubcategories = shouldRenderSubcategories(category);
-
-            return (
-                <React.Fragment key={category.id}>
-                    <MenuItem
-                        onClick={() => hasSubcategories ? handleSubcategoryClick(category.id) : handleCategorySelect(category)}
-                        style={{ paddingLeft: `${depth * 16}px` }}
-                    >
-                        <ListItemText primary={category.title} />
-                        {hasSubcategories && (
-                            <ListItemIcon>
-                                {openCategories[category.id] ? <ExpandMore /> : <ChevronRight />}
-                            </ListItemIcon>
-                        )}
-                    </MenuItem>
-                    {hasSubcategories && category.categories && (
-                        <Collapse in={openCategories[category.id]} timeout="auto" unmountOnExit>
-                            {renderCategories(category.categories, depth + 1)}
-                        </Collapse>
-                    )}
-                </React.Fragment>
-            );
-        });
+    const handleCategorySelect = (categoryId: string, categoryTitle: string) => {
+        setNewGood(prev => ({ ...prev, categoryId: categoryId }));
+        setSelectedCategory(categoryTitle);
     };
 
     return (
@@ -203,13 +156,12 @@ const AddGoodModal: React.FC<AddGoodModalProps> = ({ open, onClose, onAdd, categ
                 >
                     {selectedCategory || "Select Category"}
                 </Button>
-                <Menu
+                <CategorySelector
+                    categories={categories}
+                    onCategorySelect={handleCategorySelect}
                     anchorEl={anchorEl}
-                    open={Boolean(anchorEl)}
                     onClose={handleCategoryClose}
-                >
-                    {renderCategories(categories)}
-                </Menu>
+                />
                 <Box sx={{ mt: 2 }}>
                     <Typography variant="subtitle1" gutterBottom>
                         Images
