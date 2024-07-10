@@ -15,7 +15,7 @@ const MainLayout: React.FC = () => {
             <AppBar position="static">
                 <Toolbar>
                     <Typography variant="h6" style={{ flexGrow: 1 }}>
-                        Firebase Authentication
+                        ShipSupp Dev
                     </Typography>
                     {!isAuthenticated && (
                         <div>

@@ -5,13 +5,13 @@ import ThemeProvider from 'misc/providers/ThemeProvider';
 import CssBaseline from '@mui/material/CssBaseline';
 import ProtectedRoute from "../../pageProviders/components/ProtectedRoute";
 import Profile from 'pages/profile';
-import Catalog from 'pages/catalog/containers/Catalog';
+import Catalog from 'pages/catalog';
 import pageURLs from 'constants/pagesURLs';
 import * as pages from 'constants/pages';
 import AuthLayout from "app/layouts/AuthLayout";
 import MainLayout from "app/layouts/MainLayout";
-import SignIn from "pages/login/containers/SignIn";
-import Register from "pages/register/containers/Register";
+import SignIn from "pages/login";
+import Register from "pages/register";
 
 function App() {
     return (
