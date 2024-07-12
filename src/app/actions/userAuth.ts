@@ -23,13 +23,23 @@ import {ThunkAction} from "redux-thunk";
 import {RootState} from "../reducers";
 import {UnknownAction} from "redux";
 
+const serializeUser = (user: User | null) => {
+    if (!user) return null;
+    return {
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName,
+        photoURL: user.photoURL,
+    };
+};
+
 const requestSignIn = () => ({
     type: REQUEST_SIGN_IN,
 });
 
 const successSignIn = (user: User) => ({
     type: SUCCESS_SIGN_IN,
-    payload: user,
+    payload: serializeUser(user),
 });
 
 const errorSignIn = (error: any) => ({
@@ -60,7 +70,7 @@ const successSignOut = () => ({
 
 const authStateChange = (user: User | null) => ({
     type: AUTH_STATE_CHANGED,
-    payload: user,
+    payload: serializeUser(user),
 });
 
 const googleProvider = new GoogleAuthProvider();

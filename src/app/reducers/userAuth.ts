@@ -1,17 +1,22 @@
 import {
+    AUTH_STATE_CHANGED,
     ERROR_SIGN_IN,
-    REQUEST_SIGN_IN,
-    SUCCESS_SIGN_IN,
-    REQUEST_SIGN_OUT,
-    SUCCESS_SIGN_OUT,
     ERROR_SIGN_UP,
+    REQUEST_SIGN_IN,
+    REQUEST_SIGN_OUT,
     REQUEST_SIGN_UP,
-    SUCCESS_SIGN_UP, AUTH_STATE_CHANGED,
+    SUCCESS_SIGN_IN,
+    SUCCESS_SIGN_OUT,
+    SUCCESS_SIGN_UP,
 } from '../constants/actionTypes';
-import {User} from "firebase/auth";
 
 export interface AuthState {
-    user: User | null;
+    user: {
+        uid: string;
+        email: string | null;
+        displayName: string | null;
+        photoURL: string | null;
+    } | null;
     loading: boolean;
     error: any;
     isAuthenticated: boolean;

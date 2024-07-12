@@ -1,11 +1,22 @@
-import { createStore, applyMiddleware, Action, Reducer, Store } from 'redux';
-import { thunk } from 'redux-thunk';
+import {configureStore, ThunkAction, Action, Reducer} from '@reduxjs/toolkit';
+import {thunk} from "redux-thunk";
 
-const createStoreWithMiddleware = applyMiddleware(thunk)(createStore);
-
-export default function configureStore<S = any, A extends Action = Action>(
-    rootReducer: Reducer<S, A>,
+export function setupStore<S = any>(
+    rootReducer: Reducer<S>,
     initialState?: S
-): Store<S, A> {
-    return createStoreWithMiddleware(rootReducer, initialState);
+) {
+    return configureStore({
+        reducer: rootReducer,
+        preloadedState: initialState,
+        middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(thunk),
+    });
 }
+
+export type AppStore = ReturnType<typeof setupStore>;
+export type AppState = ReturnType<AppStore['getState']>;
+export type AppThunk<ReturnType = void> = ThunkAction<
+    ReturnType,
+    AppState,
+    unknown,
+    Action<string>
+>;
