@@ -6,6 +6,7 @@ const result = {
     [pages.register]: `/${pages.register}`,
     [pages.profile]: `/${pages.profile}`,
     [pages.catalog]: `/${pages.catalog}`,
+    [pages.orders]: `/${pages.orders}`,
 };
 
 export default result;

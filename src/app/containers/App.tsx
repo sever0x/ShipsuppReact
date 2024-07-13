@@ -12,6 +12,7 @@ import AuthLayout from "app/layouts/AuthLayout";
 import MainLayout from "app/layouts/MainLayout";
 import SignIn from "pages/login";
 import Register from "pages/register";
+import Orders from "pages/orders";
 
 function App() {
     return (
@@ -21,13 +22,34 @@ function App() {
                 <Router>
                     <Routes>
                         <Route element={<MainLayout />}>
-                            <Route path={`${pageURLs[pages.home]}`} element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-                            <Route path={`${pageURLs[pages.profile]}`} element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-                            <Route path={`${pageURLs[pages.catalog]}`} element={<ProtectedRoute><Catalog /></ProtectedRoute>} />
+                            <Route path={`${pageURLs[pages.home]}`} element={
+                                <ProtectedRoute>
+                                    <Profile />
+                                </ProtectedRoute>
+                            } />
+                            <Route path={`${pageURLs[pages.profile]}`} element={
+                                <ProtectedRoute>
+                                    <Profile />
+                                </ProtectedRoute>
+                            } />
+                            <Route path={`${pageURLs[pages.catalog]}`} element={
+                                <ProtectedRoute>
+                                    <Catalog />
+                                </ProtectedRoute>
+                            } />
+                            <Route path={`${pageURLs[pages.orders]}`} element={
+                                <ProtectedRoute>
+                                    <Orders />
+                                </ProtectedRoute>
+                            } />
                         </Route>
                         <Route element={<AuthLayout />}>
-                            <Route path={`${pageURLs[pages.login]}`} element={<SignIn />} />
-                            <Route path={`${pageURLs[pages.register]}`} element={<Register />} />
+                            <Route path={`${pageURLs[pages.login]}`} element={
+                                <SignIn />
+                            } />
+                            <Route path={`${pageURLs[pages.register]}`} element={
+                                <Register />
+                            } />
                         </Route>
                     </Routes>
                 </Router>
