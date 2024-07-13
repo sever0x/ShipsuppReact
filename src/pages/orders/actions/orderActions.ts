@@ -1,10 +1,13 @@
 import { Dispatch } from 'redux';
-import { ref, query, orderByChild, equalTo, get } from 'firebase/database';
+import { ref, query, orderByChild, equalTo, get, update } from 'firebase/database';
 import { database } from 'app/config/firebaseConfig';
 import {
     FETCH_SELLER_ORDERS_REQUEST,
     FETCH_SELLER_ORDERS_SUCCESS,
-    FETCH_SELLER_ORDERS_FAILURE
+    FETCH_SELLER_ORDERS_FAILURE,
+    UPDATE_ORDER_STATUS_REQUEST,
+    UPDATE_ORDER_STATUS_SUCCESS,
+    UPDATE_ORDER_STATUS_FAILURE
 } from '../constants/actionTypes';
 
 export const fetchSellerOrders = (sellerUID: string) => async (dispatch: Dispatch) => {
@@ -30,6 +33,38 @@ export const fetchSellerOrders = (sellerUID: string) => async (dispatch: Dispatc
     } catch (error) {
         dispatch({
             type: FETCH_SELLER_ORDERS_FAILURE,
+            payload: error instanceof Error ? error.message : 'An unknown error occurred'
+        });
+    }
+};
+
+export const updateOrderStatus = (orderId: string, newStatus: string) => async (dispatch: Dispatch) => {
+    dispatch({ type: UPDATE_ORDER_STATUS_REQUEST });
+
+    try {
+        const orderRef = ref(database, `orders/${orderId}`);
+        const snapshot = await get(orderRef);
+        if (snapshot.exists()) {
+            const order = snapshot.val();
+            const updatedOrder = {
+                ...order,
+                status: newStatus,
+                datesOfStatusChange: {
+                    ...order.datesOfStatusChange,
+                    [newStatus]: new Date().toISOString()
+                }
+            };
+            await update(orderRef, updatedOrder);
+            dispatch({
+                type: UPDATE_ORDER_STATUS_SUCCESS,
+                payload: updatedOrder
+            });
+        } else {
+            throw new Error('Order not found');
+        }
+    } catch (error) {
+        dispatch({
+            type: UPDATE_ORDER_STATUS_FAILURE,
             payload: error instanceof Error ? error.message : 'An unknown error occurred'
         });
     }

@@ -1,22 +1,32 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-    Paper, CircularProgress, Typography, Container
+    Paper, CircularProgress, Typography, Container, Button
 } from '@mui/material';
 import { fetchSellerOrders } from '../actions/orderActions';
 import { RootState } from 'app/reducers';
+import EditOrderModal from '../components/EditOrderModal';
 
 const Orders: React.FC = () => {
     const dispatch = useDispatch();
     const { loading, data: orders, error } = useSelector((state: RootState) => state.orders);
     const user = useSelector((state: RootState) => state.userAuth.user);
+    const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
 
     useEffect(() => {
         if (user?.uid) {
             dispatch(fetchSellerOrders(user.uid) as any);
         }
     }, [dispatch, user]);
+
+    const handleEditOrder = (order: any) => {
+        setSelectedOrder(order);
+    };
+
+    const handleCloseModal = () => {
+        setSelectedOrder(null);
+    };
 
     if (loading) {
         return <CircularProgress />;
@@ -40,6 +50,7 @@ const Orders: React.FC = () => {
                             <TableCell>Price per one</TableCell>
                             <TableCell>Total price</TableCell>
                             <TableCell>Currency</TableCell>
+                            <TableCell>Actions</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -52,11 +63,21 @@ const Orders: React.FC = () => {
                                 <TableCell>{order.priceInOrder}</TableCell>
                                 <TableCell>{order.quantity * order.priceInOrder}</TableCell>
                                 <TableCell>{order.currencyInOrder}</TableCell>
+                                <TableCell>
+                                    <Button onClick={() => handleEditOrder(order)}>Edit</Button>
+                                </TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
                 </Table>
             </TableContainer>
+            {selectedOrder && (
+                <EditOrderModal
+                    open={!!selectedOrder}
+                    onClose={handleCloseModal}
+                    order={selectedOrder}
+                />
+            )}
         </Container>
     );
 };
