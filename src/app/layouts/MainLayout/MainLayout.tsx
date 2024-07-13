@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
     Box,
     CssBaseline,
     Drawer,
+    IconButton,
     List,
     ListItem,
     ListItemButton,
@@ -14,16 +15,12 @@ import CatalogIcon from '@mui/icons-material/Category';
 import OrdersIcon from '@mui/icons-material/ShoppingCart';
 import ChatsIcon from '@mui/icons-material/Chat';
 import ProfileIcon from '@mui/icons-material/Person';
-import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../reducers';
+import MenuIcon from '@mui/icons-material/Menu';
+import {Outlet, useLocation, useNavigate} from 'react-router-dom';
 
 const drawerWidth = 240;
-const closedDrawerWidth = 60;
 
 const MainLayout: React.FC = () => {
-    const [open, setOpen] = useState(false);
-    const { isAuthenticated } = useSelector((state: RootState) => state.userAuth);
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -36,8 +33,6 @@ const MainLayout: React.FC = () => {
 
     const drawer = (
         <Box
-            onMouseEnter={() => setOpen(true)}
-            onMouseLeave={() => setOpen(false)}
             sx={{
                 height: '100%',
                 display: 'flex',
@@ -58,24 +53,13 @@ const MainLayout: React.FC = () => {
                     alignItems: 'center',
                     justifyContent: 'center',
                     transition: 'opacity 0.2s, transform 0.2s',
-                    opacity: open ? 1 : 0,
-                    transform: open ? 'translateX(0)' : 'translateX(-20px)',
+                    opacity: 1,
+                    transform: 'translateX(0)',
                 }}>
                     <img src={'static/images/logo/minilogo.svg'} alt="Logo" style={{ width: '48px', height: '48px', marginRight: '8px' }} />
                     <Typography variant="h6" noWrap component="div" sx={{ color: 'primary.main' }}>
                         ShipSupp
                     </Typography>
-                </Box>
-                <Box sx={{
-                    position: 'absolute',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    transition: 'opacity 0.2s, transform 0.2s',
-                    opacity: open ? 0 : 1,
-                    transform: open ? 'translateX(20px)' : 'translateX(0)',
-                }}>
-                    <img src={'static/images/logo/minilogo.svg'} alt="Logo" style={{ width: '48px', height: '48px' }} />
                 </Box>
             </Box>
             <List>
@@ -131,7 +115,7 @@ const MainLayout: React.FC = () => {
                                     <ListItemText
                                         primary={item.text}
                                         sx={{
-                                            opacity: open ? 1 : 0,
+                                            opacity: 1,
                                             transition: 'opacity 0.2s',
                                             '& .MuiListItemText-primary': {
                                                 color: isActive ? '#00E6AF' : 'inherit',
@@ -154,10 +138,10 @@ const MainLayout: React.FC = () => {
             <Drawer
                 variant="permanent"
                 sx={{
-                    width: closedDrawerWidth,
+                    width: drawerWidth,
                     flexShrink: 0,
                     [`& .MuiDrawer-paper`]: {
-                        width: open ? drawerWidth : closedDrawerWidth,
+                        width: drawerWidth,
                         transition: 'width 0.2s',
                         overflowX: 'hidden',
                         zIndex: 1200,
@@ -173,8 +157,8 @@ const MainLayout: React.FC = () => {
             <Box component="main" sx={{
                 flexGrow: 1,
                 p: 3,
-                marginLeft: `${closedDrawerWidth}px`,
-                width: `calc(100% - ${closedDrawerWidth}px)`,
+                marginLeft: `60px`,
+                width: `calc(100% - 60px)`,
             }}>
                 <Outlet />
             </Box>

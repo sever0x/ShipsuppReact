@@ -43,7 +43,7 @@ const Profile: React.FC = () => {
     }
 
     return (
-        <Container maxWidth="md" sx={{mt: 4}}>
+        <Container maxWidth="lg" sx={{mt: 4}}>
             {isEditing ? (
                 <EditProfile onCancel={() => setIsEditing(false)}/>
             ) : (
