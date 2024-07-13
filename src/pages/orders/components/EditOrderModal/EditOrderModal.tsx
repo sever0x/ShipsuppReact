@@ -7,7 +7,8 @@ import {
     DialogActions,
     Button,
     Typography,
-    Box
+    Box,
+    Chip
 } from '@mui/material';
 import { updateOrderStatus } from '../../actions/orderActions';
 
@@ -25,6 +26,33 @@ const statusOrder = [
     'COMPLETED'
 ];
 
+const statusLabels: { [key: string]: string } = {
+    'APPROVE_BY_BUYER': 'Approve',
+    'APPROVE_BY_SELLER': 'Approve',
+    'SENT': 'Sent',
+    'ARRIVED': 'Delivered',
+    'COMPLETED': 'Complete',
+    'CANCEL_BY_SELLER': 'Cancel order'
+};
+
+const statusColors: { [key: string]: "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" } = {
+    'APPROVE_BY_BUYER': 'info',
+    'APPROVE_BY_SELLER': 'primary',
+    'SENT': 'secondary',
+    'ARRIVED': 'warning',
+    'COMPLETED': 'success',
+    'CANCEL_BY_SELLER': 'error'
+};
+
+const statusMessages: { [key: string]: string } = {
+    'APPROVE_BY_BUYER': 'Order created',
+    'APPROVE_BY_SELLER': 'Order approved',
+    'SENT': 'Sent',
+    'ARRIVED': 'Delivered',
+    'COMPLETED': 'Completed',
+    'CANCEL_BY_SELLER': 'Cancelled by seller'
+};
+
 const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order }) => {
     const dispatch = useDispatch();
 
@@ -33,28 +61,36 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order })
         onClose();
     };
 
-    const handleCancel = () => {
-        dispatch(updateOrderStatus(order.id, 'CANCEL_BY_SELLER') as any);
-        onClose();
-    };
-
     const currentStatusIndex = statusOrder.indexOf(order.status);
-    const nextStatus = statusOrder[currentStatusIndex + 1];
+    const availableStatuses = statusOrder.slice(currentStatusIndex + 1);
+
+    const isOrderCancelled = order.status === 'CANCEL_BY_SELLER';
+    const isOrderCompleted = order.status === 'COMPLETED';
+
+    const sortedStatusChanges = Object.entries(order.datesOfStatusChange as Record<string, string>)
+        .sort(([, dateA], [, dateB]) => new Date(dateA).getTime() - new Date(dateB).getTime());
 
     return (
         <Dialog open={open} onClose={onClose}>
-            <DialogTitle>Edit Order #{order.orderNumber}</DialogTitle>
+            <DialogTitle>Order #{order.orderNumber}</DialogTitle>
             <DialogContent>
-                <Typography>Current status: {order.status}</Typography>
+                <Typography>Current status:
+                    <Chip
+                        label={statusMessages[order.status]}
+                        color={statusColors[order.status]}
+                        size="small"
+                        style={{ marginLeft: '10px' }}
+                    />
+                </Typography>
                 <Typography>Quantity: {order.quantity}</Typography>
                 <Typography>Price per one: {order.priceInOrder}</Typography>
                 <Typography>Total price: {order.quantity * order.priceInOrder}</Typography>
                 <Typography>Currency: {order.currencyInOrder}</Typography>
                 <Box mt={2}>
                     <Typography variant="subtitle1">Status timeline:</Typography>
-                    {Object.entries(order.datesOfStatusChange).map(([status, date]) => (
+                    {sortedStatusChanges.map(([status, date]) => (
                         <Typography key={status}>
-                            {status}: {typeof date === 'string' ? new Date(date).toLocaleString() : 'Invalid date'}
+                            {statusMessages[status]} → {new Date(date).toLocaleString()}
                         </Typography>
                     ))}
                 </Box>
@@ -63,23 +99,26 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order })
                 <Button onClick={onClose} color="primary">
                     Close
                 </Button>
-                {order.status !== 'COMPLETED' && (
-                    <>
-                        <Button
-                            onClick={() => handleStatusChange(nextStatus)}
-                            color="primary"
-                            disabled={!nextStatus}
-                        >
-                            {nextStatus ? nextStatus.replace(/_/g, ' ') : 'No next status'}
-                        </Button>
-                        <Button
-                            onClick={handleCancel}
-                            color="secondary"
-                            disabled={order.status === 'CANCEL_BY_SELLER'}
-                        >
-                            Cancel Order
-                        </Button>
-                    </>
+                {!isOrderCancelled && !isOrderCompleted && availableStatuses.map((status) => (
+                    <Button
+                        key={status}
+                        onClick={() => handleStatusChange(status)}
+                        color="primary"
+                        variant="contained"
+                        style={{ marginLeft: '10px' }}
+                    >
+                        {statusLabels[status]}
+                    </Button>
+                ))}
+                {!isOrderCancelled && !isOrderCompleted && (
+                    <Button
+                        onClick={() => handleStatusChange('CANCEL_BY_SELLER')}
+                        color="error"
+                        variant="contained"
+                        style={{ marginLeft: '10px' }}
+                    >
+                        Cancel Order
+                    </Button>
                 )}
             </DialogActions>
         </Dialog>

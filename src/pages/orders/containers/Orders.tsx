@@ -2,11 +2,29 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-    Paper, CircularProgress, Typography, Container, Button
+    Paper, CircularProgress, Typography, Container, Button, Chip
 } from '@mui/material';
 import { fetchSellerOrders } from '../actions/orderActions';
 import { RootState } from 'app/reducers';
 import EditOrderModal from '../components/EditOrderModal';
+
+const statusColors: { [key: string]: "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" } = {
+    'APPROVE_BY_BUYER': 'info',
+    'APPROVE_BY_SELLER': 'primary',
+    'SENT': 'secondary',
+    'DELIVERED': 'warning',
+    'COMPLETED': 'success',
+    'CANCEL_BY_SELLER': 'error'
+};
+
+const statusMessages: { [key: string]: string } = {
+    'APPROVE_BY_BUYER': 'Order created',
+    'APPROVE_BY_SELLER': 'Order approved',
+    'SENT': 'Sent',
+    'ARRIVED': 'Delivered',
+    'COMPLETED': 'Completed',
+    'CANCEL_BY_SELLER': 'Cancelled by seller'
+};
 
 const Orders: React.FC = () => {
     const dispatch = useDispatch();
@@ -58,7 +76,13 @@ const Orders: React.FC = () => {
                             <TableRow key={order.id}>
                                 <TableCell>{new Date(order.createTimestampGMT).toLocaleString()}</TableCell>
                                 <TableCell>{order.orderNumber}</TableCell>
-                                <TableCell>{order.status}</TableCell>
+                                <TableCell>
+                                    <Chip
+                                        label={statusMessages[order.status]}
+                                        color={statusColors[order.status]}
+                                        size="small"
+                                    />
+                                </TableCell>
                                 <TableCell>{order.quantity}</TableCell>
                                 <TableCell>{order.priceInOrder}</TableCell>
                                 <TableCell>{order.quantity * order.priceInOrder}</TableCell>

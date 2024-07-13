@@ -20,9 +20,12 @@ export const fetchSellerOrders = (sellerUID: string) => async (dispatch: Dispatc
 
         if (snapshot.exists()) {
             const orders = Object.values(snapshot.val());
+            const sortedOrders = orders.sort((a: any, b: any) =>
+                new Date(b.createTimestampGMT).getTime() - new Date(a.createTimestampGMT).getTime()
+            );
             dispatch({
                 type: FETCH_SELLER_ORDERS_SUCCESS,
-                payload: orders
+                payload: sortedOrders
             });
         } else {
             dispatch({
