@@ -7,6 +7,7 @@ const result = {
     [pages.profile]: `/${pages.profile}`,
     [pages.catalog]: `/${pages.catalog}`,
     [pages.orders]: `/${pages.orders}`,
+    [pages.chats]: `/${pages.chats}`,
 };
 
 export default result;
