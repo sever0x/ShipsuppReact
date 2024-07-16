@@ -1,12 +1,4 @@
 import React from 'react';
-import {
-    Box,
-    List,
-    ListItem,
-    ListItemButton,
-    ListItemIcon,
-    ListItemText,
-} from '@mui/material';
 import CatalogIcon from '@mui/icons-material/Category';
 import OrdersIcon from '@mui/icons-material/ShoppingCart';
 import ChatsIcon from '@mui/icons-material/Chat';
@@ -15,6 +7,12 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import pageURLs from 'constants/pagesURLs';
 import * as pages from 'constants/pages';
 import Typography from 'components/Typography';
+import Box from 'components/Box';
+import List from 'components/List';
+import ListItem from 'components/ListItem';
+import ListItemButton from 'components/ListItemButton';
+import ListItemIcon from 'components/ListItemIcon';
+import ListItemText from 'components/ListItemText';
 
 const Sidebar: React.FC = () => {
     const navigate = useNavigate();

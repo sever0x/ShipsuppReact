@@ -1,11 +1,11 @@
 import React from 'react';
 import {
-    Box,
     CssBaseline,
     Drawer,
 } from '@mui/material';
 import { Outlet } from 'react-router-dom';
 import Sidebar from 'components/Sidebar';
+import Box from 'components/Box';
 
 const drawerWidth = 297;
 
