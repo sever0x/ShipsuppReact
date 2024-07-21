@@ -6,11 +6,11 @@ interface CustomListProps extends MuiListProps {
 }
 
 const List: React.FC<CustomListProps> = ({
-                                             children,
-                                             spacing = null,
-                                             sx,
-                                             ...props
-                                         }) => {
+    children,
+    spacing = null,
+    sx,
+    ...props
+}) => {
     return (
         <MuiList
             sx={{

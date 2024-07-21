@@ -8,6 +8,8 @@ const result = {
     [pages.catalog]: `/${pages.catalog}`,
     [pages.orders]: `/${pages.orders}`,
     [pages.chats]: `/${pages.chats}`,
+
+    [pages.notFound]: '/404',
 };
 
 export default result;

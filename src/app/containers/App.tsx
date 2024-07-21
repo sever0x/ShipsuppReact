@@ -13,6 +13,7 @@ import MainLayout from "app/layouts/MainLayout";
 import SignIn from "pages/login";
 import Register from "pages/register";
 import Orders from "pages/orders";
+import NotFound from "pages/notFound";
 
 function App() {
     return (
@@ -42,6 +43,7 @@ function App() {
                                     <Orders />
                                 </ProtectedRoute>
                             } />
+                            <Route path="*" element={<NotFound />} />
                         </Route>
                         <Route element={<AuthLayout />}>
                             <Route path={`${pageURLs[pages.login]}`} element={
