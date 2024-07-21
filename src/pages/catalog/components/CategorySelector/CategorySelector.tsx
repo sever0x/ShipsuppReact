@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { Menu, MenuItem, ListItemText, ListItemIcon, Collapse } from '@mui/material';
+import { ListItemText, ListItemIcon, Collapse } from '@mui/material';
 import { ExpandMore, ChevronRight } from '@mui/icons-material';
+import MenuItem from 'components/MenuItem';
+import Menu from 'components/Menu';
 
 interface Category {
     id: string;
