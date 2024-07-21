@@ -45,7 +45,7 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({ categories, onCateg
         onClose();
     };
 
-    const renderCategories = (categories: Category[], depth = 0) => {
+    const renderCategories = (categories: Category[], depth = 1) => {
         const sortedCategories = [...categories].sort((a, b) => (a.index ?? 0) - (b.index ?? 0));
 
         return sortedCategories.map((category) => {
@@ -55,7 +55,9 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({ categories, onCateg
                 <React.Fragment key={category.id}>
                     <MenuItem
                         onClick={() => hasSubcategories ? handleCategoryClick(category.id) : handleCategorySelect(category)}
-                        style={{ paddingLeft: `${depth * 16}px` }}
+                        sx={{
+                            paddingLeft: `${depth * 16}px`,
+                        }}
                     >
                         <ListItemText primary={category.title} />
                         {hasSubcategories && (
@@ -79,6 +81,13 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({ categories, onCateg
             anchorEl={anchorEl}
             open={Boolean(anchorEl)}
             onClose={onClose}
+            slotProps={{
+                paper: {
+                    sx: {
+                        width: '24%',
+                    },
+                }
+            }}
         >
             {renderCategories(categories)}
         </Menu>
