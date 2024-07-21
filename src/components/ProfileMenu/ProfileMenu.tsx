@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Avatar, Menu, MenuItem, Typography } from '@mui/material';
+import { Avatar } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import useAuth from 'misc/hooks/useAuth';
 import pageURLs from 'constants/pagesURLs';
@@ -7,6 +7,9 @@ import * as pages from 'constants/pages';
 import Box from 'components/Box';
 import IconButton from "../IconButton";
 import {MoreVert} from "@mui/icons-material";
+import Typography from 'components/Typography';
+import Menu from 'components/Menu';
+import MenuItem from 'components/MenuItem';
 
 const ProfileMenu: React.FC = () => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);

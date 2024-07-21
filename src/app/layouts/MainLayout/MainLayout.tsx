@@ -54,7 +54,6 @@ const MainLayout: React.FC = () => {
             </Drawer>
             <Box component="main" sx={{
                 display: `flex`,
-                height: `100vh`,
                 padding: `0 60px`,
                 width: `calc(100% - 60px)`,
                 marginTop: '88px',
