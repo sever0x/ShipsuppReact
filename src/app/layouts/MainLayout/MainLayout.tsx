@@ -26,7 +26,8 @@ const MainLayout: React.FC = () => {
             >
                 <Toolbar sx={{
                     justifyContent: 'flex-end',
-                    padding: '24px 48px !important'
+                    padding: '24px 48px !important',
+                    minHeight: '88px !important',
                 }}>
                     <ProfileMenu/>
                 </Toolbar>
@@ -54,12 +55,13 @@ const MainLayout: React.FC = () => {
             <Box component="main" sx={{
                 display: `flex`,
                 height: `100vh`,
-                padding: `36px 60px`,
-                flexGrow: 1,
-                p: 3,
+                padding: `0 60px`,
                 width: `calc(100% - 60px)`,
+                marginTop: '88px',
             }}>
-                <Outlet />
+                <Box sx={{ flexGrow: 3, display: 'flex', flexDirection: 'column', height: '100%' }}>
+                    <Outlet />
+                </Box>
             </Box>
         </Box>
     );

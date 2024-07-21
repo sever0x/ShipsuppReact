@@ -97,11 +97,6 @@ const Profile: React.FC = () => {
                                 <Typography variant="body1">{profile.data?.phone || 'Not provided'}</Typography>
                             </Grid>
                         </Grid>
-                        <Box mt={4}>
-                            <Button variant="contained" color="secondary" onClick={handleLogout}>
-                                Logout
-                            </Button>
-                        </Box>
                     </Stack>
                 </>
             )}

@@ -14,7 +14,6 @@ const NotFound: React.FC = () => {
             flexDirection="column"
             alignItems="center"
             justifyContent="center"
-            sx={{ flexGrow: 3 }}
         >
             <Typography variant="h1" gutterBottom>
                 404
