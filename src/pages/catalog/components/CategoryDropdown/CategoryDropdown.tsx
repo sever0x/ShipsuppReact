@@ -47,7 +47,7 @@ const CategoryDropdown: React.FC<CategoryDropdownProps> = ({ categories, onCateg
     };
 
     return (
-        <Box sx={{ flex: 3 }}>
+        <Box sx={{ mr: 2, flex: 3 }}>
             <Box
                 onClick={handleClick}
                 sx={{

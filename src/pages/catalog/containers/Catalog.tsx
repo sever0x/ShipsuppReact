@@ -1,6 +1,13 @@
 import React, {useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import {fetchCategories, fetchGoods, updateGood, deleteGood, addGood} from '../actions/catalogActions';
+import {
+    fetchCategories,
+    fetchGoods,
+    updateGood,
+    deleteGood,
+    addGood,
+    fetchAllUserGoods
+} from '../actions/catalogActions';
 import CategoryDropdown from '../components/CategoryDropdown';
 import EditGoodModal from '../components/EditGoodModal';
 import AddGoodModal from '../components/AddGoodModal';
@@ -34,7 +41,7 @@ import IconButton from 'components/IconButton';
 
 const Catalog: React.FC = () => {
     const dispatch = useDispatch();
-    const {categories, goods, loading, error} = useSelector((state: RootState) => state.catalog);
+    const { categories, goods, loading, error } = useSelector((state: RootState) => state.catalog);
     const [editingGood, setEditingGood] = useState<Good | null>(null);
     const [deletingGood, setDeletingGood] = useState<Good | null>(null);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -42,6 +49,7 @@ const Catalog: React.FC = () => {
 
     useEffect(() => {
         dispatch(fetchCategories() as any);
+        dispatch(fetchAllUserGoods() as any);
     }, [dispatch]);
 
     const handleCategorySelect = (categoryId: string) => {
@@ -98,6 +106,10 @@ const Catalog: React.FC = () => {
             <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3}}>
                 <Typography variant="h4" sx={{ flex: 1 }}>Goods</Typography>
                 <Box justifyContent='flex-end' sx={{display: 'flex', alignItems: 'center', flex: 4}}>
+                    <CategoryDropdown
+                        categories={categories}
+                        onCategorySelect={handleCategorySelect}
+                    />
                     <TextField
                         placeholder="Search for goods..."
                         variant="outlined"
@@ -107,11 +119,7 @@ const Catalog: React.FC = () => {
                         InputProps={{
                             startAdornment: <SearchIcon color="action"/>,
                         }}
-                        sx={{ mr: 2, flex: 3 }}
-                    />
-                    <CategoryDropdown
-                        categories={categories}
-                        onCategorySelect={handleCategorySelect}
+                        sx={{ flex: 3 }}
                     />
                     <Button
                         variant="contained"
@@ -170,7 +178,7 @@ const Catalog: React.FC = () => {
                                             backgroundColor: good.available ? '#e6f4ea' : '#fce8e6',
                                             color: good.available ? '#34a853' : '#ea4335'
                                         }}>
-                                            {good.available ? 'Enable' : 'Disable'}
+                                            {good.available ? 'Available' : 'Unavailable'}
                                         </span>
                                     </TableCell>
                                     <TableCell>

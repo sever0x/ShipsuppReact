@@ -30,6 +30,42 @@ export const fetchCategories = () => async (dispatch: Dispatch) => {
     }
 };
 
+export const fetchAllUserGoods = () => async (dispatch: Dispatch) => {
+    dispatch({ type: actionTypes.FETCH_GOODS_REQUEST });
+
+    try {
+        const userData = JSON.parse(storage.getItem(storage.keys.USER_DATA) ?? '{}');
+        const portId = userData.port?.id;
+        const userId = userData.id;
+
+        if (!portId || !userId) {
+            throw new Error('User port or ID not found');
+        }
+
+        const goodsRef = ref(database, `goods/${portId}/${userId}`);
+        const snapshot = await get(goodsRef);
+
+        if (snapshot.exists()) {
+            const userGoods = Object.values(snapshot.val()) as Good[];
+
+            dispatch({
+                type: actionTypes.FETCH_GOODS_SUCCESS,
+                payload: userGoods
+            });
+        } else {
+            dispatch({
+                type: actionTypes.FETCH_GOODS_SUCCESS,
+                payload: []
+            });
+        }
+    } catch (error) {
+        dispatch({
+            type: actionTypes.FETCH_GOODS_FAILURE,
+            payload: error instanceof Error ? error.message : 'An unknown error occurred'
+        });
+    }
+};
+
 export const fetchGoods = (categoryId: string) => async (dispatch: Dispatch) => {
     dispatch({ type: actionTypes.FETCH_GOODS_REQUEST });
 
