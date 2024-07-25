@@ -19,14 +19,14 @@ const MainLayout: React.FC = () => {
             <AppBar
                 position="fixed"
                 sx={{
-                    zIndex: (theme) => theme.zIndex.drawer + 1,
-                    backgroundColor: 'transparent',
+                    zIndex: (theme) => theme.zIndex.drawer - 1,
+                    backgroundColor: 'white',
                     boxShadow: 'none',
                 }}
             >
                 <Toolbar sx={{
                     justifyContent: 'flex-end',
-                    padding: '24px 48px !important',
+                    padding: '24px 64px !important',
                     minHeight: '88px !important',
                 }}>
                     <ProfileMenu/>
@@ -56,7 +56,8 @@ const MainLayout: React.FC = () => {
                 display: `flex`,
                 padding: `0 60px`,
                 width: `calc(100% - 60px)`,
-                marginTop: '88px',
+                marginTop: '98px',
+                marginBottom: '24px'
             }}>
                 <Box sx={{ flexGrow: 3, display: 'flex', flexDirection: 'column', height: '100%' }}>
                     <Outlet />
