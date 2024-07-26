@@ -203,6 +203,7 @@ const Catalog: React.FC = () => {
                     onClose={handleCloseModal}
                     good={editingGood}
                     onSave={handleSaveGood}
+                    categories={categories}
                 />
             )}
             <AddGoodModal

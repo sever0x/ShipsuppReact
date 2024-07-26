@@ -26,7 +26,7 @@ const Button: React.FC<CustomButtonProps> = ({
                 textTransform: 'none',
                 padding: '10px 20px',
                 '&:hover': {
-                    backgroundColor: color === 'primary' ? '#333' : undefined,
+                    backgroundColor: color === 'primary' ? '#5BFEC5' : undefined,
                 },
                 ...sx,
             }}
