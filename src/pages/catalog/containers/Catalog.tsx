@@ -217,6 +217,11 @@ const Catalog: React.FC = () => {
                 onClose={handleCloseDeleteDialog}
                 aria-labelledby="alert-dialog-title"
                 aria-describedby="alert-dialog-description"
+                PaperProps={{
+                    style: {
+                        backgroundColor: 'white',
+                    },
+                }}
             >
                 <DialogTitle id="alert-dialog-title">{"Confirm deletion"}</DialogTitle>
                 <DialogContent>
@@ -225,7 +230,7 @@ const Catalog: React.FC = () => {
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleCloseDeleteDialog}>Cancel</Button>
+                    <Button onClick={handleCloseDeleteDialog} variant="outlined" color="error">Cancel</Button>
                     <Button onClick={handleConfirmDelete} autoFocus>
                         Delete
                     </Button>
