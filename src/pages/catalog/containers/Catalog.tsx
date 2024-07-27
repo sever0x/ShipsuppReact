@@ -47,6 +47,7 @@ const Catalog: React.FC = () => {
     const [deletingGood, setDeletingGood] = useState<Good | null>(null);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState<{ id: string; title: string } | null>(null);
 
     useEffect(() => {
         const loadData = async () => {
@@ -64,7 +65,8 @@ const Catalog: React.FC = () => {
         }
     }, [loading, isInitialLoad]);
 
-    const handleCategorySelect = (categoryId: string) => {
+    const handleCategorySelect = (categoryId: string, categoryTitle: string) => {
+        setSelectedCategory({ id: categoryId, title: categoryTitle });
         dispatch(fetchGoods(categoryId) as any);
     };
 
@@ -118,17 +120,9 @@ const Catalog: React.FC = () => {
         </TableRow>
     );
 
-    if (isInitialLoad || loading) {
-        return (
-            <Container maxWidth="xl">
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                    <Typography variant="h4" sx={{ flex: 1 }}>Goods</Typography>
-                    <Box justifyContent='flex-end' sx={{ display: 'flex', alignItems: 'center', flex: 4 }}>
-                        <Skeleton variant="rectangular" width={200} height={40} sx={{ mr: 2 }} />
-                        <Skeleton variant="rectangular" width={300} height={40} sx={{ mr: 2 }} />
-                        <Skeleton variant="rectangular" width={150} height={40} />
-                    </Box>
-                </Box>
+    const renderTable = () => {
+        if (isInitialLoad || loading) {
+            return (
                 <TableContainer component={props => <Paper {...props} variant="outlined" sx={{ backgroundColor: 'transparent' }} />}>
                     <Table>
                         <TableHead>
@@ -148,46 +142,11 @@ const Catalog: React.FC = () => {
                         </TableBody>
                     </Table>
                 </TableContainer>
-            </Container>
-        );
-    }
+            );
+        }
 
-    if (error) {
-        return <Typography color="error">{error}</Typography>;
-    }
-
-    return (
-        <Container maxWidth="xl">
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                <Typography variant="h4" sx={{ flex: 1 }}>Goods</Typography>
-                <Box justifyContent='flex-end' sx={{ display: 'flex', alignItems: 'center', flex: 4 }}>
-                    <CategoryDropdown
-                        categories={categories}
-                        onCategorySelect={handleCategorySelect}
-                    />
-                    <TextField
-                        placeholder="Search for goods..."
-                        variant="outlined"
-                        size="small"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        InputProps={{
-                            startAdornment: <SearchIcon color="action" />,
-                        }}
-                        sx={{ flex: 3 }}
-                    />
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        startIcon={<AddIcon />}
-                        onClick={() => setIsAddModalOpen(true)}
-                        sx={{ ml: 2, flex: 1 }}
-                    >
-                        Add New Good
-                    </Button>
-                </Box>
-            </Box>
-            {filteredGoods.length > 0 ? (
+        if (filteredGoods.length > 0) {
+            return (
                 <TableContainer component={props => <Paper {...props} variant="outlined" sx={{ backgroundColor: 'transparent' }} />}>
                     <Table>
                         <TableHead>
@@ -244,32 +203,74 @@ const Catalog: React.FC = () => {
                         </TableBody>
                     </Table>
                 </TableContainer>
-            ) : (
-                <Box sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    height: '50vh',
-                    textAlign: 'center'
-                }}>
-                    <Typography variant="h6" gutterBottom>
-                        You don't have any goods yet.
-                    </Typography>
-                    <Typography variant="body1" gutterBottom>
-                        Click the "Add New Good" button to start adding your products.
-                    </Typography>
+            );
+        }
+
+        return (
+            <Box sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: '50vh',
+                textAlign: 'center'
+            }}>
+                <Typography variant="h6" gutterBottom>
+                    You don't have any goods yet.
+                </Typography>
+                <Typography variant="body1" gutterBottom>
+                    Click the "Add New Good" button to start adding your products.
+                </Typography>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    startIcon={<AddIcon />}
+                    onClick={() => setIsAddModalOpen(true)}
+                    sx={{ mt: 2 }}
+                >
+                    Add New Good
+                </Button>
+            </Box>
+        );
+    };
+
+    if (error) {
+        return <Typography color="error">{error}</Typography>;
+    }
+
+    return (
+        <Container maxWidth="xl">
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                <Typography variant="h4" sx={{ flex: 1 }}>Goods</Typography>
+                <Box justifyContent='flex-end' sx={{ display: 'flex', alignItems: 'center', flex: 4 }}>
+                    <CategoryDropdown
+                        categories={categories}
+                        onCategorySelect={handleCategorySelect}
+                        selectedCategory={selectedCategory}
+                    />
+                    <TextField
+                        placeholder="Search for goods..."
+                        variant="outlined"
+                        size="small"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        InputProps={{
+                            startAdornment: <SearchIcon color="action" />,
+                        }}
+                        sx={{ flex: 3 }}
+                    />
                     <Button
                         variant="contained"
                         color="primary"
                         startIcon={<AddIcon />}
                         onClick={() => setIsAddModalOpen(true)}
-                        sx={{ mt: 2 }}
+                        sx={{ ml: 2, flex: 1 }}
                     >
                         Add New Good
                     </Button>
                 </Box>
-            )}
+            </Box>
+            {renderTable()}
             {editingGood && (
                 <EditGoodModal
                     open={!!editingGood}
