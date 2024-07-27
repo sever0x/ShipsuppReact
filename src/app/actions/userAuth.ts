@@ -33,14 +33,25 @@ const serializeUser = (user: User | null) => {
     };
 };
 
+const createSafeUserObject = (user: User) => ({
+    uid: user.uid,
+    email: user.email,
+    emailVerified: user.emailVerified,
+    displayName: user.displayName,
+});
+
 const requestSignIn = () => ({
     type: REQUEST_SIGN_IN,
 });
 
-const successSignIn = (user: User) => ({
-    type: SUCCESS_SIGN_IN,
-    payload: serializeUser(user),
-});
+const successSignIn = (user: User) => {
+    const safeUser = createSafeUserObject(user);
+    storage.setItem('safeUser', JSON.stringify(safeUser));
+    return {
+        type: SUCCESS_SIGN_IN,
+        payload: safeUser,
+    };
+};
 
 const errorSignIn = (error: any) => ({
     type: ERROR_SIGN_IN,
@@ -92,7 +103,6 @@ const fetchLogin = (email: string, password: string) => async (dispatch: any) =>
     try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
-        storage.setItem('user', JSON.stringify(user));
         dispatch(successSignIn(user));
     } catch (error) {
         dispatch(errorSignIn(error));
@@ -113,7 +123,8 @@ const fetchLogout = () => async (dispatch: any) => {
     dispatch(requestSignOut());
     try {
         await signOut(auth);
-        storage.removeItem('user');
+        storage.removeItem('safeUser');
+        storage.removeItem(storage.keys.USER_DATA);
         dispatch(successSignOut());
     } catch (error) {
         // Handle error if needed

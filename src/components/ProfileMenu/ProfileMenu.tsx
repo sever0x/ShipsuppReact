@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Avatar } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Avatar, Skeleton } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import useAuth from 'misc/hooks/useAuth';
 import pageURLs from 'constants/pagesURLs';
@@ -10,12 +10,28 @@ import {MoreVert} from "@mui/icons-material";
 import Typography from 'components/Typography';
 import Menu from 'components/Menu';
 import MenuItem from 'components/MenuItem';
+import storage from 'misc/storage';
 
 const ProfileMenu: React.FC = () => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const [userData, setUserData] = useState<{ firstName: string; lastName: string; profilePhoto: string } | null>(null);
     const { logout } = useAuth();
     const navigate = useNavigate();
     const open = Boolean(anchorEl);
+
+    useEffect(() => {
+        const loadUserData = () => {
+            const storedUserData = storage.getItem('USER_DATA');
+            if (storedUserData) {
+                setUserData(JSON.parse(storedUserData));
+            }
+        };
+
+        loadUserData();
+        const intervalId = setInterval(loadUserData, 1000);
+
+        return () => clearInterval(intervalId);
+    }, []);
 
     const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
@@ -36,11 +52,20 @@ const ProfileMenu: React.FC = () => {
         handleClose();
     };
 
-    const userData = JSON.parse(localStorage.getItem('USER_DATA') ?? '{}');
-    const { firstName, lastName, profilePhoto } = userData;
+    const renderContent = () => {
+        if (!userData) {
+            return (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Skeleton variant="circular" width={40} height={40} />
+                    <Skeleton variant="text" width={100} height={20} />
+                    <Skeleton variant="circular" width={24} height={24} />
+                </Box>
+            );
+        }
 
-    return (
-        <Box>
+        const { firstName, lastName, profilePhoto } = userData;
+
+        return (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Avatar src={profilePhoto} alt={`${firstName} ${lastName}`} sx={{ width: 40, height: 40, mr: 1 }} />
                 <Typography variant="subtitle1">{`${firstName} ${lastName}`}</Typography>
@@ -55,6 +80,12 @@ const ProfileMenu: React.FC = () => {
                     <MoreVert />
                 </IconButton>
             </Box>
+        );
+    };
+
+    return (
+        <Box>
+            {renderContent()}
             <Menu
                 anchorEl={anchorEl}
                 open={Boolean(anchorEl)}

@@ -3,6 +3,7 @@ import { ThunkDispatch } from 'redux-thunk';
 import { UnknownAction } from 'redux';
 import {RootState} from "../../app/reducers";
 import actions from "../../app/actions/userAuth";
+import {googleSignInAndLoadProfile, signInAndLoadProfile} from "../../app/actions/compoundActions";
 
 const useAuth = () => {
     const dispatch: ThunkDispatch<RootState, unknown, UnknownAction> = useDispatch();
@@ -12,10 +13,10 @@ const useAuth = () => {
         user,
         loading,
         error,
-        login: (email: string, password: string) => dispatch(actions.fetchLogin(email, password)),
+        login: (email: string, password: string) => dispatch(signInAndLoadProfile(email, password)),
         register: (email: string, password: string) => dispatch(actions.fetchRegister(email, password)),
         logout: () => dispatch(actions.fetchLogout()),
-        googleSignIn: () => dispatch(actions.fetchGoogleSignIn()),
+        googleSignIn: () => dispatch(googleSignInAndLoadProfile()),
     };
 };
 
