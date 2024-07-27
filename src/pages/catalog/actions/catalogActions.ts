@@ -7,6 +7,8 @@ import {database, storage as firebaseStorage} from 'app/config/firebaseConfig';
 import {Good} from "pages/catalog/types/Good";
 import {v4 as uuidv4} from 'uuid';
 
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 export const fetchCategories = () => async (dispatch: Dispatch) => {
     dispatch({ type: actionTypes.FETCH_CATEGORIES_REQUEST });
 
@@ -34,7 +36,22 @@ export const fetchAllUserGoods = () => async (dispatch: Dispatch) => {
     dispatch({ type: actionTypes.FETCH_GOODS_REQUEST });
 
     try {
-        const userData = JSON.parse(storage.getItem(storage.keys.USER_DATA) ?? '{}');
+        let userData = null;
+        let attempts = 0;
+        const maxAttempts = 10;
+
+        while (!userData && attempts < maxAttempts) {
+            userData = JSON.parse(storage.getItem(storage.keys.USER_DATA) ?? 'null');
+            if (!userData) {
+                await delay(500);
+                attempts++;
+            }
+        }
+
+        if (!userData) {
+            throw new Error('Failed to load user data');
+        }
+
         const portId = userData.port?.id;
         const userId = userData.id;
 
@@ -46,7 +63,7 @@ export const fetchAllUserGoods = () => async (dispatch: Dispatch) => {
         const snapshot = await get(goodsRef);
 
         if (snapshot.exists()) {
-            const userGoods = Object.values(snapshot.val()) as Good[];
+            const userGoods = Object.values(snapshot.val());
 
             dispatch({
                 type: actionTypes.FETCH_GOODS_SUCCESS,

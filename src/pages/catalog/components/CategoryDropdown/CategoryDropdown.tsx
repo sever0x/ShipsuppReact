@@ -1,5 +1,5 @@
-import React, {useState} from 'react';
-import {ExpandMore} from '@mui/icons-material';
+import React, { useState, useEffect } from 'react';
+import { ExpandMore } from '@mui/icons-material';
 import Box from 'components/Box';
 import Typography from 'components/Typography';
 import CategorySelector from '../CategorySelector';
@@ -14,23 +14,20 @@ interface Category {
 interface CategoryDropdownProps {
     categories: Category[];
     onCategorySelect: (categoryId: string, categoryTitle: string) => void;
+    selectedCategory: { id: string; title: string } | null;
 }
 
-interface Category {
-    id: string;
-    title: string;
-    categories?: Category[];
-    index?: number;
-}
-
-interface CategoryDropdownProps {
-    categories: Category[];
-    onCategorySelect: (categoryId: string, categoryTitle: string) => void;
-}
-
-const CategoryDropdown: React.FC<CategoryDropdownProps> = ({ categories, onCategorySelect }) => {
+const CategoryDropdown: React.FC<CategoryDropdownProps> = ({ categories, onCategorySelect, selectedCategory }) => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-    const [selectedCategory, setSelectedCategory] = useState<string>('Select category');
+    const [displayedCategory, setDisplayedCategory] = useState<string>('Select category');
+
+    useEffect(() => {
+        if (selectedCategory) {
+            setDisplayedCategory(selectedCategory.title);
+        } else {
+            setDisplayedCategory('Select category');
+        }
+    }, [selectedCategory]);
 
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
@@ -41,7 +38,6 @@ const CategoryDropdown: React.FC<CategoryDropdownProps> = ({ categories, onCateg
     };
 
     const handleCategorySelect = (categoryId: string, categoryTitle: string) => {
-        setSelectedCategory(categoryTitle);
         onCategorySelect(categoryId, categoryTitle);
         handleClose();
     };
@@ -60,7 +56,7 @@ const CategoryDropdown: React.FC<CategoryDropdownProps> = ({ categories, onCateg
                 }}
                 justifyContent='space-between'
             >
-                <Typography>{selectedCategory}</Typography>
+                <Typography>{displayedCategory}</Typography>
                 <ExpandMore sx={{ ml: 1 }} />
             </Box>
             <CategorySelector
