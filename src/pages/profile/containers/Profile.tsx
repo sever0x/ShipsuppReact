@@ -1,10 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import {Avatar, Box, Button, CircularProgress, Container, Grid, Divider} from '@mui/material';
-import {useNavigate} from 'react-router-dom';
+import {Avatar, Box, Button, CircularProgress, Container, Divider, Grid} from '@mui/material';
 import useAuth from 'misc/hooks/useAuth';
-import pageURLs from 'constants/pagesURLs';
-import * as pages from 'constants/pages';
 import {fetchUserProfile} from '../actions/profileActions';
 import {RootState} from 'app/reducers';
 import EditProfile from '../components/EditProfile';
@@ -13,8 +10,7 @@ import Stack from 'components/Stack';
 import Typography from 'components/Typography';
 
 const Profile: React.FC = () => {
-    const {user, logout} = useAuth();
-    const navigate = useNavigate();
+    const {user} = useAuth();
     const dispatch = useDispatch();
     const profile = useSelector((state: RootState) => state.profile);
     const [isEditing, setIsEditing] = useState(false);
@@ -24,11 +20,6 @@ const Profile: React.FC = () => {
             dispatch(fetchUserProfile(user.uid) as any);
         }
     }, [user, dispatch]);
-
-    const handleLogout = async () => {
-        await logout();
-        navigate(`${pageURLs[pages.login]}`);
-    };
 
     if (!user) {
         return <Typography variant="body1">No user is logged in</Typography>;

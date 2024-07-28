@@ -73,6 +73,8 @@ export const updateProfile = (uid: string, profileData: any) => async (dispatch:
         const userRef = ref(database, `users/${uid}`);
         await update(userRef, profileData);
 
+        storage.setItem(storage.keys.USER_DATA, profileData);
+
         dispatch({
             type: UPDATE_PROFILE_SUCCESS,
             payload: profileData
