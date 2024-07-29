@@ -10,12 +10,12 @@ import {
     UPDATE_ORDER_STATUS_FAILURE
 } from '../constants/actionTypes';
 
-export const fetchSellerOrders = (sellerUID: string) => async (dispatch: Dispatch) => {
+export const fetchSellerOrders = (sellerId: string) => async (dispatch: Dispatch) => {
     dispatch({ type: FETCH_SELLER_ORDERS_REQUEST });
 
     try {
         const ordersRef = ref(database, 'orders');
-        const sellerOrdersQuery = query(ordersRef, orderByChild('sellerUID'), equalTo(sellerUID));
+        const sellerOrdersQuery = query(ordersRef, orderByChild('sellerId'), equalTo(sellerId));
         const snapshot = await get(sellerOrdersQuery);
 
         if (snapshot.exists()) {

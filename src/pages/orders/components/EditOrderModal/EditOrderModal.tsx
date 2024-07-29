@@ -123,17 +123,17 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order })
     const isOrderCompleted = order.status === 'COMPLETED';
 
     const getBuyerInfo = () => {
-        if (typeof order.buyer === 'object' && order.buyer !== null) {
+        if (order.buyer && typeof order.buyer === 'object') {
             return `${order.buyer.firstName || ''} ${order.buyer.lastName || ''}`.trim() || 'Unknown';
         }
-        return order.buyer || 'Unknown';
+        return 'Unknown';
     };
 
     const getPortInfo = () => {
-        if (typeof order.port === 'object' && order.port !== null) {
+        if (order.port && typeof order.port === 'object') {
             return order.port.title || 'Unknown';
         }
-        return order.port || 'Unknown';
+        return 'Unknown';
     };
 
     const sortedStatusChanges = Object.entries(order.datesOfStatusChange as Record<string, string>)
@@ -169,11 +169,11 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order })
                         </InfoRow>
                         <InfoRow>
                             <Typography variant="body1">Article:</Typography>
-                            <Typography variant="body1">{order.article || '-'}</Typography>
+                            <Typography variant="body1">{order.good.article || '-'}</Typography>
                         </InfoRow>
                         <InfoRow>
                             <Typography variant="body1">Title:</Typography>
-                            <Typography variant="body1">{order.title || '-'}</Typography>
+                            <Typography variant="body1">{order.good.title || '-'}</Typography>
                         </InfoRow>
                         <InfoRow>
                             <Typography variant="body1">Quantity:</Typography>

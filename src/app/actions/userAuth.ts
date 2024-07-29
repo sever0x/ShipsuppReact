@@ -11,6 +11,7 @@ import {
 } from '../constants/actionTypes';
 import {
     createUserWithEmailAndPassword,
+    getIdToken,
     GoogleAuthProvider,
     signInWithEmailAndPassword,
     signInWithPopup,
@@ -103,6 +104,10 @@ const fetchLogin = (email: string, password: string) => async (dispatch: any) =>
     try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
+
+        // fixme delete this after refactoring
+        const token = await getIdToken(user);
+        console.log(`Bearer: ${token}`);
         dispatch(successSignIn(user));
     } catch (error) {
         dispatch(errorSignIn(error));
