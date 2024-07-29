@@ -20,7 +20,8 @@ export const fetchSellerOrders = (sellerUID: string) => async (dispatch: Dispatc
 
         if (snapshot.exists()) {
             const orders = Object.values(snapshot.val());
-            const sortedOrders = orders.sort((a: any, b: any) =>
+            const filteredOrders = orders.filter((order: any) => order.status !== 'ADD_TO_CART');
+            const sortedOrders = filteredOrders.sort((a: any, b: any) =>
                 new Date(b.createTimestampGMT).getTime() - new Date(a.createTimestampGMT).getTime()
             );
             dispatch({
