@@ -71,6 +71,9 @@ const Orders: React.FC = () => {
         <TableRow>
             <TableCell><Skeleton variant="text" /></TableCell>
             <TableCell><Skeleton variant="text" /></TableCell>
+            <TableCell><Skeleton variant="text" /></TableCell>
+            <TableCell><Skeleton variant="text" /></TableCell>
+            <TableCell><Skeleton variant="rectangular" width={40} height={40} /></TableCell>
             <TableCell><Skeleton variant="rectangular" width={80} height={30} /></TableCell>
             <TableCell><Skeleton variant="text" /></TableCell>
             <TableCell><Skeleton variant="text" /></TableCell>
@@ -89,6 +92,9 @@ const Orders: React.FC = () => {
                             <TableRow>
                                 <TableCell>Date</TableCell>
                                 <TableCell>Order number</TableCell>
+                                <TableCell>Goods article</TableCell>
+                                <TableCell>Goods title</TableCell>
+                                <TableCell>Image</TableCell>
                                 <TableCell>Status</TableCell>
                                 <TableCell>Quantity</TableCell>
                                 <TableCell>Price per one</TableCell>
@@ -113,6 +119,9 @@ const Orders: React.FC = () => {
                             <TableRow>
                                 <TableCell>Date</TableCell>
                                 <TableCell>Order number</TableCell>
+                                <TableCell>Goods article</TableCell>
+                                <TableCell>Goods title</TableCell>
+                                <TableCell>Image</TableCell>
                                 <TableCell>Status</TableCell>
                                 <TableCell>Quantity</TableCell>
                                 <TableCell>Price per one</TableCell>
@@ -122,10 +131,21 @@ const Orders: React.FC = () => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {filteredOrders.map((order: any) => (
+                            {filteredOrders.map((order: Order) => (
                                 <TableRow key={order.id}>
                                     <TableCell>{new Date(order.createTimestampGMT).toLocaleString()}</TableCell>
                                     <TableCell>{order.orderNumber}</TableCell>
+                                    <TableCell>{order.good.article}</TableCell>
+                                    <TableCell>{order.good.title}</TableCell>
+                                    <TableCell>
+                                        {order.good.images && Object.values(order.good.images)[0] && (
+                                            <img
+                                                src={Object.values(order.good.images)[0]}
+                                                alt={order.good.title}
+                                                style={{ width: '50px', height: '50px', objectFit: 'cover' }}
+                                            />
+                                        )}
+                                    </TableCell>
                                     <TableCell>
                                         <Chip
                                             label={statusMessages[order.status]}

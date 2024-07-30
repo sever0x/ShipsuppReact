@@ -6,6 +6,7 @@ export interface Order {
     good: {
         article: string;
         title: string;
+        images: Record<string, string>;
     };
     quantity: number;
     priceInOrder: number;
