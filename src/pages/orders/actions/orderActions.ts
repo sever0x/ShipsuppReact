@@ -1,14 +1,17 @@
 import { Dispatch } from 'redux';
 import { ref, query, orderByChild, equalTo, get, update } from 'firebase/database';
-import { database } from 'app/config/firebaseConfig';
+import {auth, database} from 'app/config/firebaseConfig';
 import {
     FETCH_SELLER_ORDERS_REQUEST,
     FETCH_SELLER_ORDERS_SUCCESS,
     FETCH_SELLER_ORDERS_FAILURE,
     UPDATE_ORDER_STATUS_REQUEST,
     UPDATE_ORDER_STATUS_SUCCESS,
-    UPDATE_ORDER_STATUS_FAILURE
+    UPDATE_ORDER_STATUS_FAILURE, FETCH_ORDER_DETAILS_REQUEST, FETCH_ORDER_DETAILS_SUCCESS, FETCH_ORDER_DETAILS_FAILURE
 } from '../constants/actionTypes';
+import {getIdToken} from "firebase/auth";
+import axios from "axios";
+import {Order} from "pages/orders/types/Order";
 
 export const fetchSellerOrders = (sellerId: string) => async (dispatch: Dispatch) => {
     dispatch({ type: FETCH_SELLER_ORDERS_REQUEST });
@@ -37,6 +40,41 @@ export const fetchSellerOrders = (sellerId: string) => async (dispatch: Dispatch
     } catch (error) {
         dispatch({
             type: FETCH_SELLER_ORDERS_FAILURE,
+            payload: error instanceof Error ? error.message : 'An unknown error occurred'
+        });
+    }
+};
+
+export const fetchOrderDetails = (orderId: string) => async (dispatch: Dispatch) => {
+    dispatch({ type: FETCH_ORDER_DETAILS_REQUEST });
+
+    try {
+        const user = auth.currentUser;
+        if (!user) {
+            throw new Error("User not authenticated");
+        }
+
+        const token = await getIdToken(user);
+
+        const response = await axios.get('https://getorderdetails-br4hzq7ova-uc.a.run.app', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            params: {
+                userId: user.uid,
+                orderId: orderId,
+            }
+        });
+
+        const order: Order = response.data;
+
+        dispatch({
+            type: FETCH_ORDER_DETAILS_SUCCESS,
+            payload: order
+        });
+    } catch (error) {
+        dispatch({
+            type: FETCH_ORDER_DETAILS_FAILURE,
             payload: error instanceof Error ? error.message : 'An unknown error occurred'
         });
     }

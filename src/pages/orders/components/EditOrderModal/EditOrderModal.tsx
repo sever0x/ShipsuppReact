@@ -1,5 +1,5 @@
 import React from 'react';
-import { useDispatch } from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {
     Dialog,
     DialogTitle,
@@ -9,10 +9,11 @@ import {
     Box,
     Chip,
     IconButton,
-    styled
+    styled, CircularProgress
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { updateOrderStatus } from '../../actions/orderActions';
+import { RootState } from 'app/reducers';
 
 interface EditOrderModalProps {
     open: boolean;
@@ -110,6 +111,7 @@ const HistoryItem = styled(Box)(({ theme }) => ({
 
 const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order }) => {
     const dispatch = useDispatch();
+    const { loading, orderDetails, error } = useSelector((state: RootState) => state.orders);
 
     const handleStatusChange = (newStatus: string) => {
         dispatch(updateOrderStatus(order.id, newStatus) as any);
@@ -123,26 +125,50 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order })
     const isOrderCompleted = order.status === 'COMPLETED';
 
     const getBuyerInfo = () => {
-        if (order.buyer && typeof order.buyer === 'object') {
-            return `${order.buyer.firstName || ''} ${order.buyer.lastName || ''}`.trim() || 'Unknown';
+        if (orderDetails?.buyer) {
+            return `${orderDetails.buyer.firstName || ''} ${orderDetails.buyer.lastName || ''}`.trim() || 'Unknown';
         }
-        return 'Unknown';
+        return `${order.buyer.firstName || ''} ${order.buyer.lastName || ''}`.trim() || 'Unknown';
     };
 
     const getPortInfo = () => {
-        if (order.port && typeof order.port === 'object') {
-            return order.port.title || 'Unknown';
+        if (orderDetails?.port) {
+            return orderDetails.port.title || 'Unknown';
         }
-        return 'Unknown';
+        return order.port.title || 'Unknown';
     };
+
+    const displayOrder = orderDetails || order;
 
     const sortedStatusChanges = Object.entries(order.datesOfStatusChange as Record<string, string>)
         .sort(([, dateA], [, dateB]) => new Date(dateA).getTime() - new Date(dateB).getTime());
 
+    if (loading) {
+        return (
+            <Dialog open={open} onClose={onClose}>
+                <DialogContent>
+                    <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
+                        <CircularProgress />
+                    </Box>
+                </DialogContent>
+            </Dialog>
+        );
+    }
+
+    if (error) {
+        return (
+            <Dialog open={open} onClose={onClose}>
+                <DialogContent>
+                    <Typography color="error">Error: {error}</Typography>
+                </DialogContent>
+            </Dialog>
+        );
+    }
+
     return (
         <StyledDialog open={open} onClose={onClose} maxWidth="md" fullWidth>
             <DialogTitle>
-                #{order.orderNumber}
+                #{displayOrder.orderNumber}
                 <IconButton
                     aria-label="close"
                     onClick={onClose}
@@ -162,30 +188,30 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order })
                         <InfoRow>
                             <Typography variant="body1">Current status:</Typography>
                             <Chip
-                                label={statusMessages[order.status]}
-                                color={statusColors[order.status]}
+                                label={statusMessages[displayOrder.status]}
+                                color={statusColors[displayOrder.status]}
                                 size="small"
                             />
                         </InfoRow>
                         <InfoRow>
                             <Typography variant="body1">Article:</Typography>
-                            <Typography variant="body1">{order.good.article || '-'}</Typography>
+                            <Typography variant="body1">{displayOrder.good.article || '-'}</Typography>
                         </InfoRow>
                         <InfoRow>
                             <Typography variant="body1">Title:</Typography>
-                            <Typography variant="body1">{order.good.title || '-'}</Typography>
+                            <Typography variant="body1">{displayOrder.good.title || '-'}</Typography>
                         </InfoRow>
                         <InfoRow>
                             <Typography variant="body1">Quantity:</Typography>
-                            <Typography variant="body1">{order.quantity}</Typography>
+                            <Typography variant="body1">{displayOrder.quantity}</Typography>
                         </InfoRow>
                         <InfoRow>
                             <Typography variant="body1">Price per one:</Typography>
-                            <Typography variant="body1">{order.priceInOrder}</Typography>
+                            <Typography variant="body1">{displayOrder.priceInOrder}</Typography>
                         </InfoRow>
                         <InfoRow>
                             <Typography variant="body1">Total price:</Typography>
-                            <Typography variant="body1">{order.quantity * order.priceInOrder}</Typography>
+                            <Typography variant="body1">{displayOrder.quantity * displayOrder.priceInOrder}</Typography>
                         </InfoRow>
                         <InfoRow>
                             <Typography variant="body1">Buyer:</Typography>

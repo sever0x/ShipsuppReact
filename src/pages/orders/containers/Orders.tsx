@@ -16,12 +16,14 @@ import {
     TextField,
     Typography
 } from '@mui/material';
-import {fetchSellerOrders} from '../actions/orderActions';
+import {fetchOrderDetails, fetchSellerOrders} from '../actions/orderActions';
 import {RootState} from 'app/reducers';
 import EditOrderModal from '../components/EditOrderModal';
 import SearchIcon from '@mui/icons-material/Search';
 import EditIcon from '@mui/icons-material/Edit';
 import IconButton from "../../../components/IconButton";
+import useAuth from "../../../misc/hooks/useAuth";
+import {Order} from "pages/orders/types/Order";
 
 const statusColors: { [key: string]: "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" } = {
     'APPROVE_BY_BUYER': 'info',
@@ -45,7 +47,7 @@ const Orders: React.FC = () => {
     const dispatch = useDispatch();
     const { loading, data: orders, error } = useSelector((state: RootState) => state.orders);
     const user = useSelector((state: RootState) => state.userAuth.user);
-    const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
+    const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
@@ -54,8 +56,9 @@ const Orders: React.FC = () => {
         }
     }, [dispatch, user]);
 
-    const handleEditOrder = (order: any) => {
+    const handleEditOrder = (order: Order) => {
         setSelectedOrder(order);
+        dispatch(fetchOrderDetails(order.id) as any);
     };
 
     const handleCloseModal = () => {
