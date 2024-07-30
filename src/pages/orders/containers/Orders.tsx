@@ -2,7 +2,6 @@ import React, {useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {
     Box,
-    Button,
     Chip,
     Container,
     Paper,
@@ -22,7 +21,6 @@ import EditOrderModal from '../components/EditOrderModal';
 import SearchIcon from '@mui/icons-material/Search';
 import EditIcon from '@mui/icons-material/Edit';
 import IconButton from "../../../components/IconButton";
-import useAuth from "../../../misc/hooks/useAuth";
 import {Order} from "pages/orders/types/Order";
 
 const statusColors: { [key: string]: "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" } = {
@@ -45,7 +43,7 @@ const statusMessages: { [key: string]: string } = {
 
 const Orders: React.FC = () => {
     const dispatch = useDispatch();
-    const { loading, data: orders, error } = useSelector((state: RootState) => state.orders);
+    const { loadingOrders, data: orders, error } = useSelector((state: RootState) => state.orders);
     const user = useSelector((state: RootState) => state.userAuth.user);
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
@@ -83,7 +81,7 @@ const Orders: React.FC = () => {
     );
 
     const renderTable = () => {
-        if (loading) {
+        if (loadingOrders) {
             return (
                 <TableContainer component={props => <Paper {...props} variant="outlined" sx={{ backgroundColor: 'transparent' }} />}>
                     <Table>

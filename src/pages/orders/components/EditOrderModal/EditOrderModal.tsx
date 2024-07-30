@@ -9,7 +9,7 @@ import {
     Box,
     Chip,
     IconButton,
-    styled, CircularProgress
+    styled, CircularProgress, Skeleton
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { updateOrderStatus } from '../../actions/orderActions';
@@ -111,7 +111,7 @@ const HistoryItem = styled(Box)(({ theme }) => ({
 
 const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order }) => {
     const dispatch = useDispatch();
-    const { loading, orderDetails, error } = useSelector((state: RootState) => state.orders);
+    const { loadingDetails, orderDetails, error } = useSelector((state: RootState) => state.orders);
 
     const handleStatusChange = (newStatus: string) => {
         dispatch(updateOrderStatus(order.id, newStatus) as any);
@@ -143,15 +143,42 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order })
     const sortedStatusChanges = Object.entries(order.datesOfStatusChange as Record<string, string>)
         .sort(([, dateA], [, dateB]) => new Date(dateA).getTime() - new Date(dateB).getTime());
 
-    if (loading) {
+    const renderSkeleton = () => (
+        <Box>
+            <Skeleton variant="text" height={30} width="80%" />
+            <Skeleton variant="text" height={24} width="60%" />
+            <Skeleton variant="rectangular" height={40} width="100%" />
+            <Skeleton variant="text" height={24} width="70%" />
+            <Skeleton variant="text" height={24} width="50%" />
+            <Skeleton variant="text" height={24} width="60%" />
+            <Skeleton variant="text" height={24} width="40%" />
+            <Skeleton variant="rectangular" height={60} width="100%" />
+        </Box>
+    );
+
+    if (loadingDetails) {
         return (
-            <Dialog open={open} onClose={onClose}>
+            <StyledDialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+                <DialogTitle>
+                    <Skeleton variant="text" width="60%" />
+                </DialogTitle>
                 <DialogContent>
-                    <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
-                        <CircularProgress />
-                    </Box>
+                    <ContentWrapper>
+                        <InfoColumn>
+                            {renderSkeleton()}
+                        </InfoColumn>
+                        <HistoryColumn>
+                            <Skeleton variant="text" height={30} width="80%" />
+                            {[1, 2, 3].map((_, index) => (
+                                <Box key={index} mb={2}>
+                                    <Skeleton variant="text" width="70%" />
+                                    <Skeleton variant="text" width="50%" />
+                                </Box>
+                            ))}
+                        </HistoryColumn>
+                    </ContentWrapper>
                 </DialogContent>
-            </Dialog>
+            </StyledDialog>
         );
     }
 

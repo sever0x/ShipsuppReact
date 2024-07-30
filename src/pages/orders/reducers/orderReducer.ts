@@ -8,14 +8,16 @@ import {
 } from '../constants/actionTypes';
 
 interface OrderState {
-    loading: boolean;
+    loadingOrders: boolean;
+    loadingDetails: boolean;
     data: any[];
     orderDetails: any | null;
     error: string | null;
 }
 
 const initialState: OrderState = {
-    loading: false,
+    loadingOrders: false,
+    loadingDetails: false,
     data: [],
     orderDetails: null,
     error: null
@@ -24,26 +26,29 @@ const initialState: OrderState = {
 const orderReducer = (state = initialState, action: any): OrderState => {
     switch (action.type) {
         case FETCH_SELLER_ORDERS_REQUEST:
-        case UPDATE_ORDER_STATUS_REQUEST:
+            return { ...state, loadingOrders: true, error: null };
         case FETCH_ORDER_DETAILS_REQUEST:
-            return { ...state, loading: true, error: null };
+            return { ...state, loadingDetails: true, error: null };
+        case UPDATE_ORDER_STATUS_REQUEST:
+            return { ...state, error: null };
         case FETCH_SELLER_ORDERS_SUCCESS:
-            return { ...state, loading: false, data: action.payload, error: null };
+            return { ...state, loadingOrders: false, data: action.payload, error: null };
         case UPDATE_ORDER_STATUS_SUCCESS:
             return {
                 ...state,
-                loading: false,
                 data: state.data.map(order =>
                     order.id === action.payload.id ? action.payload : order
                 ),
                 error: null
             };
         case FETCH_ORDER_DETAILS_SUCCESS:
-            return { ...state, loading: false, orderDetails: action.payload, error: null };
+            return { ...state, loadingDetails: false, orderDetails: action.payload, error: null };
         case FETCH_SELLER_ORDERS_FAILURE:
+            return { ...state, loadingOrders: false, error: action.payload };
         case UPDATE_ORDER_STATUS_FAILURE:
+            return { ...state, error: action.payload };
         case FETCH_ORDER_DETAILS_FAILURE:
-            return { ...state, loading: false, error: action.payload };
+            return { ...state, loadingDetails: false, error: action.payload };
         default:
             return state;
     }
