@@ -241,7 +241,7 @@ const Catalog: React.FC = () => {
     return (
         <Container maxWidth="xl">
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                <Typography variant="h4" sx={{ flex: 1 }}>Goods</Typography>
+                <Typography variant="h4" sx={{ flex: 1 }}>Catalog</Typography>
                 <Box justifyContent='flex-end' sx={{ display: 'flex', alignItems: 'center', flex: 4 }}>
                     <CategoryDropdown
                         categories={categories}
@@ -266,7 +266,7 @@ const Catalog: React.FC = () => {
                         onClick={() => setIsAddModalOpen(true)}
                         sx={{ ml: 2, flex: 1 }}
                     >
-                        Add New Good
+                        Add New Item
                     </Button>
                 </Box>
             </Box>
