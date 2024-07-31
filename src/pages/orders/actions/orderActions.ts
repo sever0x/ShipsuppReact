@@ -13,6 +13,8 @@ import {getIdToken} from "firebase/auth";
 import axios from "axios";
 import {Order} from "pages/orders/types/Order";
 
+const excludedStatuses = ['ADD_TO_CART', 'CANCEL_BY_BUYER'];
+
 export const fetchSellerOrders = (sellerId: string) => async (dispatch: Dispatch) => {
     dispatch({ type: FETCH_SELLER_ORDERS_REQUEST });
 
@@ -23,8 +25,8 @@ export const fetchSellerOrders = (sellerId: string) => async (dispatch: Dispatch
 
         if (snapshot.exists()) {
             const orders = Object.values(snapshot.val());
-            const filteredOrders = orders.filter((order: any) => order.status !== 'ADD_TO_CART');
-            const sortedOrders = filteredOrders.sort((a: any, b: any) =>
+            const filteredOrders = orders.filter((order: any) => !excludedStatuses.includes(order.status));
+            const sortedOrders = [...filteredOrders].sort((a: any, b: any) =>
                 new Date(b.createTimestampGMT).getTime() - new Date(a.createTimestampGMT).getTime()
             );
             dispatch({
