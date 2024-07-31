@@ -1,26 +1,32 @@
 import { Dispatch } from 'redux';
 import { ref, query, orderByChild, equalTo, get, update } from 'firebase/database';
-import { database } from 'app/config/firebaseConfig';
+import {auth, database} from 'app/config/firebaseConfig';
 import {
     FETCH_SELLER_ORDERS_REQUEST,
     FETCH_SELLER_ORDERS_SUCCESS,
     FETCH_SELLER_ORDERS_FAILURE,
     UPDATE_ORDER_STATUS_REQUEST,
     UPDATE_ORDER_STATUS_SUCCESS,
-    UPDATE_ORDER_STATUS_FAILURE
+    UPDATE_ORDER_STATUS_FAILURE, FETCH_ORDER_DETAILS_REQUEST, FETCH_ORDER_DETAILS_SUCCESS, FETCH_ORDER_DETAILS_FAILURE
 } from '../constants/actionTypes';
+import {getIdToken} from "firebase/auth";
+import axios from "axios";
+import {Order} from "pages/orders/types/Order";
 
-export const fetchSellerOrders = (sellerUID: string) => async (dispatch: Dispatch) => {
+const excludedStatuses = ['ADD_TO_CART', 'CANCEL_BY_BUYER'];
+
+export const fetchSellerOrders = (sellerId: string) => async (dispatch: Dispatch) => {
     dispatch({ type: FETCH_SELLER_ORDERS_REQUEST });
 
     try {
         const ordersRef = ref(database, 'orders');
-        const sellerOrdersQuery = query(ordersRef, orderByChild('sellerUID'), equalTo(sellerUID));
+        const sellerOrdersQuery = query(ordersRef, orderByChild('sellerId'), equalTo(sellerId));
         const snapshot = await get(sellerOrdersQuery);
 
         if (snapshot.exists()) {
             const orders = Object.values(snapshot.val());
-            const sortedOrders = orders.sort((a: any, b: any) =>
+            const filteredOrders = orders.filter((order: any) => !excludedStatuses.includes(order.status));
+            const sortedOrders = [...filteredOrders].sort((a: any, b: any) =>
                 new Date(b.createTimestampGMT).getTime() - new Date(a.createTimestampGMT).getTime()
             );
             dispatch({
@@ -36,6 +42,41 @@ export const fetchSellerOrders = (sellerUID: string) => async (dispatch: Dispatc
     } catch (error) {
         dispatch({
             type: FETCH_SELLER_ORDERS_FAILURE,
+            payload: error instanceof Error ? error.message : 'An unknown error occurred'
+        });
+    }
+};
+
+export const fetchOrderDetails = (orderId: string) => async (dispatch: Dispatch) => {
+    dispatch({ type: FETCH_ORDER_DETAILS_REQUEST });
+
+    try {
+        const user = auth.currentUser;
+        if (!user) {
+            throw new Error("User not authenticated");
+        }
+
+        const token = await getIdToken(user);
+
+        const response = await axios.get('https://getorderdetails-br4hzq7ova-uc.a.run.app', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            params: {
+                userId: user.uid,
+                orderId: orderId,
+            }
+        });
+
+        const order: Order = response.data;
+
+        dispatch({
+            type: FETCH_ORDER_DETAILS_SUCCESS,
+            payload: order
+        });
+    } catch (error) {
+        dispatch({
+            type: FETCH_ORDER_DETAILS_FAILURE,
             payload: error instanceof Error ? error.message : 'An unknown error occurred'
         });
     }

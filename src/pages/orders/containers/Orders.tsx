@@ -2,7 +2,6 @@ import React, {useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {
     Box,
-    Button,
     Chip,
     Container,
     Paper,
@@ -16,12 +15,13 @@ import {
     TextField,
     Typography
 } from '@mui/material';
-import {fetchSellerOrders} from '../actions/orderActions';
+import {fetchOrderDetails, fetchSellerOrders} from '../actions/orderActions';
 import {RootState} from 'app/reducers';
 import EditOrderModal from '../components/EditOrderModal';
 import SearchIcon from '@mui/icons-material/Search';
 import EditIcon from '@mui/icons-material/Edit';
 import IconButton from "../../../components/IconButton";
+import {Order} from "pages/orders/types/Order";
 
 const statusColors: { [key: string]: "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" } = {
     'APPROVE_BY_BUYER': 'info',
@@ -43,9 +43,9 @@ const statusMessages: { [key: string]: string } = {
 
 const Orders: React.FC = () => {
     const dispatch = useDispatch();
-    const { loading, data: orders, error } = useSelector((state: RootState) => state.orders);
+    const { loadingOrders, data: orders, error } = useSelector((state: RootState) => state.orders);
     const user = useSelector((state: RootState) => state.userAuth.user);
-    const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
+    const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
@@ -54,8 +54,9 @@ const Orders: React.FC = () => {
         }
     }, [dispatch, user]);
 
-    const handleEditOrder = (order: any) => {
+    const handleEditOrder = (order: Order) => {
         setSelectedOrder(order);
+        dispatch(fetchOrderDetails(order.id) as any);
     };
 
     const handleCloseModal = () => {
@@ -70,6 +71,9 @@ const Orders: React.FC = () => {
         <TableRow>
             <TableCell><Skeleton variant="text" /></TableCell>
             <TableCell><Skeleton variant="text" /></TableCell>
+            <TableCell><Skeleton variant="text" /></TableCell>
+            <TableCell><Skeleton variant="text" /></TableCell>
+            <TableCell><Skeleton variant="rectangular" width={40} height={40} /></TableCell>
             <TableCell><Skeleton variant="rectangular" width={80} height={30} /></TableCell>
             <TableCell><Skeleton variant="text" /></TableCell>
             <TableCell><Skeleton variant="text" /></TableCell>
@@ -80,7 +84,7 @@ const Orders: React.FC = () => {
     );
 
     const renderTable = () => {
-        if (loading) {
+        if (loadingOrders) {
             return (
                 <TableContainer component={props => <Paper {...props} variant="outlined" sx={{ backgroundColor: 'transparent' }} />}>
                     <Table>
@@ -88,6 +92,9 @@ const Orders: React.FC = () => {
                             <TableRow>
                                 <TableCell>Date</TableCell>
                                 <TableCell>Order number</TableCell>
+                                <TableCell>Goods article</TableCell>
+                                <TableCell>Goods title</TableCell>
+                                <TableCell>Image</TableCell>
                                 <TableCell>Status</TableCell>
                                 <TableCell>Quantity</TableCell>
                                 <TableCell>Price per one</TableCell>
@@ -112,6 +119,9 @@ const Orders: React.FC = () => {
                             <TableRow>
                                 <TableCell>Date</TableCell>
                                 <TableCell>Order number</TableCell>
+                                <TableCell>Goods article</TableCell>
+                                <TableCell>Goods title</TableCell>
+                                <TableCell>Image</TableCell>
                                 <TableCell>Status</TableCell>
                                 <TableCell>Quantity</TableCell>
                                 <TableCell>Price per one</TableCell>
@@ -121,10 +131,21 @@ const Orders: React.FC = () => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {filteredOrders.map((order: any) => (
+                            {filteredOrders.map((order: Order) => (
                                 <TableRow key={order.id}>
                                     <TableCell>{new Date(order.createTimestampGMT).toLocaleString()}</TableCell>
                                     <TableCell>{order.orderNumber}</TableCell>
+                                    <TableCell>{order.good.article}</TableCell>
+                                    <TableCell>{order.good.title}</TableCell>
+                                    <TableCell>
+                                        {order.good.images && Object.values(order.good.images)[0] && (
+                                            <img
+                                                src={Object.values(order.good.images)[0]}
+                                                alt={order.good.title}
+                                                style={{ width: '50px', height: '50px', objectFit: 'cover' }}
+                                            />
+                                        )}
+                                    </TableCell>
                                     <TableCell>
                                         <Chip
                                             label={statusMessages[order.status]}
