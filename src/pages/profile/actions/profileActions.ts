@@ -19,7 +19,7 @@ import {calculateRetryDelay, RETRY_CONFIG} from 'app/config/retryConfig';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-export const fetchUserProfile = (uid: string, isNewProfile: boolean = false) => async (dispatch: Dispatch) => {
+export const fetchUserProfile = (uid: string) => async (dispatch: Dispatch) => {
     dispatch({ type: FETCH_PROFILE_REQUEST });
 
     let retryCount = 0;

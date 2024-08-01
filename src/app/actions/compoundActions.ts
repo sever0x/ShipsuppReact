@@ -18,7 +18,7 @@ export const googleSignInAndLoadProfile = (): ThunkAction<Promise<void>, RootSta
         await dispatch(actions.fetchGoogleSignIn());
         const user = JSON.parse(localStorage.getItem('safeUser') ?? '{}');
         if (user.uid) {
-            await dispatch(fetchUserProfile(user.uid, true) as any);
+            await dispatch(fetchUserProfile(user.uid) as any);
         }
     };
 
@@ -27,6 +27,6 @@ export const signUpAndLoadProfile = (email: string, password: string): ThunkActi
         await dispatch(actions.fetchRegister(email, password) as any);
         const user = JSON.parse(localStorage.getItem('safeUser') ?? '{}');
         if (user.uid) {
-            await dispatch(fetchUserProfile(user.uid, true) as any);
+            await dispatch(fetchUserProfile(user.uid) as any);
         }
     };
