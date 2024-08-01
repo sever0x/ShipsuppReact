@@ -8,6 +8,7 @@ import pageURLs from 'constants/pagesURLs';
 import * as pages from 'constants/pages';
 import EmailField from 'components/EmailField';
 import PasswordField from 'components/PasswordField';
+import TextField from 'components/TextField';
 import SubmitButton from 'components/SubmitButton';
 import GoogleSignInButton from 'components/GoogleSignInButton';
 
@@ -36,30 +37,43 @@ const RegisterForm: React.FC = () => {
     const { register, googleSignIn, error } = useAuth();
     const navigate = useNavigate();
 
+    const [step, setStep] = useState(1);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [phone, setPhone] = useState('');
 
-    const handleSubmit = async (event: React.FormEvent) => {
+    const handleNextStep = (event: React.FormEvent) => {
         event.preventDefault();
         if (password !== confirmPassword) {
             alert("Passwords do not match!");
             return;
         }
-        await register(email, password);
-        navigate('/profile');
+        setStep(2);
+    };
+
+    const handleSubmit = async (event: React.FormEvent) => {
+        event.preventDefault();
+        try {
+            await register(email, password, { firstName, lastName, phone });
+            navigate('/catalog');
+        } catch (error) {
+            console.error("Registration error:", error);
+        }
     };
 
     const handleGoogleSignIn = async () => {
         await googleSignIn();
-        navigate('/profile');
+        navigate('/catalog');
     };
 
     return (
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={step === 1 ? handleNextStep : handleSubmit}>
             <div className={classes.textContainer}>
                 <Typography sx={{ fontSize: '2.25rem', fontWeight: 'bold' }}>
-                    Sign Up.
+                    Sign Up
                 </Typography>
                 <Typography sx={{ paddingTop: '16px' }}>
                     Already have an account? <Link href={`${pageURLs[pages.login]}`} sx={{
@@ -69,18 +83,45 @@ const RegisterForm: React.FC = () => {
                 </Typography>
             </div>
             <div className={classes.fieldsContainer}>
-                <EmailField email={email} setEmail={setEmail} />
-                <PasswordField password={password} setPassword={setPassword} />
-                <PasswordField
-                    password={confirmPassword}
-                    setPassword={setConfirmPassword}
-                    placeholder="Confirm Password"
-                />
+                {step === 1 ? (
+                    <>
+                        <EmailField email={email} setEmail={setEmail} />
+                        <PasswordField password={password} setPassword={setPassword} />
+                        <PasswordField
+                            password={confirmPassword}
+                            setPassword={setConfirmPassword}
+                            placeholder="Confirm Password"
+                        />
+                    </>
+                ) : (
+                    <>
+                        <TextField
+                            label="First Name"
+                            value={firstName}
+                            onChange={(e) => setFirstName(e.target.value)}
+                            required
+                        />
+                        <TextField
+                            label="Last Name"
+                            value={lastName}
+                            onChange={(e) => setLastName(e.target.value)}
+                            required
+                        />
+                        <TextField
+                            label="Phone"
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                            required
+                        />
+                    </>
+                )}
             </div>
             {error && <Typography color="error">{error.message}</Typography>}
             <div className={classes.buttonsContainer}>
-                <SubmitButton text="Sign Up" />
-                <GoogleSignInButton onClick={handleGoogleSignIn} text="Sign Up with Google" />
+                <SubmitButton text={step === 1 ? "Next" : "Sign Up"} />
+                {step === 1 && (
+                    <GoogleSignInButton onClick={handleGoogleSignIn} text="Sign Up with Google" />
+                )}
             </div>
         </form>
     );

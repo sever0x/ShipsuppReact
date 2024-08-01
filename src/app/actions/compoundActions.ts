@@ -21,3 +21,16 @@ export const googleSignInAndLoadProfile = (): ThunkAction<Promise<void>, RootSta
             await dispatch(fetchUserProfile(user.uid) as any);
         }
     };
+
+export const signUpAndLoadProfile = (
+    email: string,
+    password: string,
+    additionalInfo: { firstName: string, lastName: string, phone: string }
+): ThunkAction<Promise<void>, RootState, unknown, UnknownAction> =>
+    async (dispatch) => {
+        await dispatch(actions.fetchRegister(email, password, additionalInfo) as any);
+        const user = JSON.parse(localStorage.getItem('safeUser') ?? '{}');
+        if (user.uid) {
+            await dispatch(fetchUserProfile(user.uid) as any);
+        }
+    };

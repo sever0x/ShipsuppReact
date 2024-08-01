@@ -1,6 +1,6 @@
 import { Dispatch } from 'redux';
 import { ref, get, update } from 'firebase/database';
-import { ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { ref as storageRef, uploadBytes, getDownloadURL, deleteObject, getMetadata } from 'firebase/storage';
 import { database, storage as firebaseStorage } from 'app/config/firebaseConfig';
 import {
     FETCH_PROFILE_REQUEST,
@@ -15,24 +15,43 @@ import {
 } from '../constants/actionTypes';
 import storage from 'misc/storage';
 import { v4 as uuidv4 } from 'uuid';
+import {calculateRetryDelay, RETRY_CONFIG} from 'app/config/retryConfig';
+
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const fetchUserProfile = (uid: string) => async (dispatch: Dispatch) => {
     dispatch({ type: FETCH_PROFILE_REQUEST });
 
-    try {
-        const userRef = ref(database, `users/${uid}`);
-        const snapshot = await get(userRef);
+    let retryCount = 0;
 
-        if (snapshot.exists()) {
-            const userData = snapshot.val();
-            storage.setItem(storage.keys.USER_DATA, userData);
-            dispatch({
-                type: FETCH_PROFILE_SUCCESS,
-                payload: userData
-            });
-        } else {
-            throw new Error('User profile not found');
+    const fetchProfile = async (): Promise<any> => {
+        try {
+            const userRef = ref(database, `users/${uid}`);
+            const snapshot = await get(userRef);
+
+            if (snapshot.exists()) {
+                return snapshot.val();
+            } else if (retryCount < RETRY_CONFIG.maxRetries) {
+                console.log(`Profile not found, retrying... (Attempt ${retryCount + 1}/${RETRY_CONFIG.maxRetries})`);
+                retryCount++;
+                const retryDelay = calculateRetryDelay(retryCount);
+                await delay(retryDelay);
+                return fetchProfile();
+            } else {
+                throw new Error('User profile not found');
+            }
+        } catch (error) {
+            throw error;
         }
+    };
+
+    try {
+        const userData = await fetchProfile();
+        storage.setItem(storage.keys.USER_DATA, userData);
+        dispatch({
+            type: FETCH_PROFILE_SUCCESS,
+            payload: userData
+        });
     } catch (error) {
         dispatch({
             type: FETCH_PROFILE_FAILURE,
@@ -55,10 +74,16 @@ export const updateProfilePhoto = (uid: string, file: File) => async (dispatch: 
 
         const userData = snapshot.val();
 
-        // Delete old profile photo if it exists
-        if (userData.profilePhoto) {
-            const oldPhotoRef = storageRef(firebaseStorage, userData.profilePhoto);
-            await deleteObject(oldPhotoRef);
+        // Check if the current profile photo is in Firebase Storage
+        if (userData.profilePhoto?.startsWith('https://firebasestorage.googleapis.com')) {
+            try {
+                const oldPhotoRef = storageRef(firebaseStorage, userData.profilePhoto);
+                await getMetadata(oldPhotoRef); // This will throw an error if the file doesn't exist
+                await deleteObject(oldPhotoRef);
+            } catch (error) {
+                console.log('Previous profile photo not found in Storage or error deleting:', error);
+                // Continue with uploading new photo even if deleting old one fails
+            }
         }
 
         // Upload new profile photo
