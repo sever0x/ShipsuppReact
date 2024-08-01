@@ -11,7 +11,6 @@ import {
 } from '../constants/actionTypes';
 import {
     createUserWithEmailAndPassword,
-    getIdToken,
     GoogleAuthProvider,
     signInWithEmailAndPassword,
     signInWithPopup,
@@ -19,10 +18,11 @@ import {
     User
 } from 'firebase/auth';
 import storage from 'misc/storage';
-import {auth} from 'app/config/firebaseConfig';
+import {auth, database} from 'app/config/firebaseConfig';
 import {ThunkAction} from "redux-thunk";
 import {RootState} from "../reducers";
 import {UnknownAction} from "redux";
+import {get, ref, set} from "firebase/database";
 
 const serializeUser = (user: User | null) => {
     if (!user) return null;
@@ -92,7 +92,43 @@ const fetchGoogleSignIn = (): ThunkAction<Promise<void>, RootState, unknown, Unk
     try {
         const result = await signInWithPopup(auth, googleProvider);
         const user = result.user;
-        storage.setItem('user', JSON.stringify(user));
+
+        const userRef = ref(database, `users/${user.uid}`);
+        const snapshot = await get(userRef);
+
+        if (!snapshot.exists()) {
+            const userProfile = {
+                id: user.uid,
+                email: user.email,
+                firstName: user.displayName ? user.displayName.split(' ')[0] : '',
+                lastName: user.displayName ? user.displayName.split(' ').slice(1).join(' ') : '',
+                accessType: 'GRANTED',
+                date: new Date().toLocaleString(),
+                role: 'SELLER',
+                fcmTokens: [],
+                notifications: {},
+                phone: user.phoneNumber ?? '',
+                profilePhoto: user.photoURL ?? '',
+                port: {
+                    city: {
+                        country: {
+                            id: "ua",
+                            phoneCode: "",
+                            title: "Ukraine"
+                        },
+                        id: "odessa",
+                        title: "Odessa"
+                    },
+                    id: "ua_port_odessa",
+                    title: "Port of Odessa"
+                },
+                vesselIMO: "",
+                vesselMMSI: ""
+            };
+
+            await set(userRef, userProfile);
+        }
+
         dispatch(successSignIn(user));
     } catch (error) {
         dispatch(errorSignIn(error));
@@ -105,9 +141,6 @@ const fetchLogin = (email: string, password: string) => async (dispatch: any) =>
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        // fixme delete this after refactoring
-        const token = await getIdToken(user);
-        console.log(`Bearer: ${token}`);
         dispatch(successSignIn(user));
     } catch (error) {
         dispatch(errorSignIn(error));
@@ -117,8 +150,43 @@ const fetchLogin = (email: string, password: string) => async (dispatch: any) =>
 const fetchRegister = (email: string, password: string) => async (dispatch: any) => {
     dispatch(requestSignUp());
     try {
-        await createUserWithEmailAndPassword(auth, email, password);
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        const userProfile = {
+            id: user.uid,
+            email: user.email,
+            firstName: '',
+            lastName: '',
+            accessType: 'GRANTED',
+            date: new Date().toLocaleString(),
+            role: 'SELLER',
+            fcmTokens: [],
+            notifications: {},
+            phone: '',
+            profilePhoto: '',
+            port: {
+                city: {
+                    country: {
+                        id: "ua",
+                        phoneCode: "",
+                        title: "Ukraine"
+                    },
+                    id: "odessa",
+                    title: "Odessa"
+                },
+                id: "ua_port_odessa",
+                title: "Port of Odessa"
+            },
+            vesselIMO: "",
+            vesselMMSI: ""
+        };
+
+        const userRef = ref(database, `users/${user.uid}`);
+        await set(userRef, userProfile);
+
         dispatch(successSignUp());
+        dispatch(successSignIn(user));
     } catch (error) {
         dispatch(errorSignUp(error));
     }

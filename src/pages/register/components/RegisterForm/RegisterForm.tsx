@@ -47,12 +47,12 @@ const RegisterForm: React.FC = () => {
             return;
         }
         await register(email, password);
-        navigate('/profile');
+        navigate('/catalog');
     };
 
     const handleGoogleSignIn = async () => {
         await googleSignIn();
-        navigate('/profile');
+        navigate('/catalog');
     };
 
     return (

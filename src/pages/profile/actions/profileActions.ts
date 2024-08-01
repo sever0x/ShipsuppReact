@@ -15,24 +15,43 @@ import {
 } from '../constants/actionTypes';
 import storage from 'misc/storage';
 import { v4 as uuidv4 } from 'uuid';
+import {calculateRetryDelay, RETRY_CONFIG} from 'app/config/retryConfig';
 
-export const fetchUserProfile = (uid: string) => async (dispatch: Dispatch) => {
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+export const fetchUserProfile = (uid: string, isNewProfile: boolean = false) => async (dispatch: Dispatch) => {
     dispatch({ type: FETCH_PROFILE_REQUEST });
 
-    try {
-        const userRef = ref(database, `users/${uid}`);
-        const snapshot = await get(userRef);
+    let retryCount = 0;
 
-        if (snapshot.exists()) {
-            const userData = snapshot.val();
-            storage.setItem(storage.keys.USER_DATA, userData);
-            dispatch({
-                type: FETCH_PROFILE_SUCCESS,
-                payload: userData
-            });
-        } else {
-            throw new Error('User profile not found');
+    const fetchProfile = async (): Promise<any> => {
+        try {
+            const userRef = ref(database, `users/${uid}`);
+            const snapshot = await get(userRef);
+
+            if (snapshot.exists()) {
+                return snapshot.val();
+            } else if (retryCount < RETRY_CONFIG.maxRetries) {
+                console.log(`Profile not found, retrying... (Attempt ${retryCount + 1}/${RETRY_CONFIG.maxRetries})`);
+                retryCount++;
+                const retryDelay = calculateRetryDelay(retryCount);
+                await delay(retryDelay);
+                return fetchProfile();
+            } else {
+                throw new Error('User profile not found');
+            }
+        } catch (error) {
+            throw error;
         }
+    };
+
+    try {
+        const userData = await fetchProfile();
+        storage.setItem(storage.keys.USER_DATA, userData);
+        dispatch({
+            type: FETCH_PROFILE_SUCCESS,
+            payload: userData
+        });
     } catch (error) {
         dispatch({
             type: FETCH_PROFILE_FAILURE,
