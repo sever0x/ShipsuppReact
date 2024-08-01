@@ -147,7 +147,7 @@ const fetchLogin = (email: string, password: string) => async (dispatch: any) =>
     }
 };
 
-const fetchRegister = (email: string, password: string) => async (dispatch: any) => {
+const fetchRegister = (email: string, password: string, additionalInfo: { firstName: string, lastName: string, phone: string }) => async (dispatch: any) => {
     dispatch(requestSignUp());
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -156,14 +156,14 @@ const fetchRegister = (email: string, password: string) => async (dispatch: any)
         const userProfile = {
             id: user.uid,
             email: user.email,
-            firstName: '',
-            lastName: '',
+            firstName: additionalInfo.firstName,
+            lastName: additionalInfo.lastName,
             accessType: 'GRANTED',
             date: new Date().toLocaleString(),
             role: 'SELLER',
             fcmTokens: [],
             notifications: {},
-            phone: '',
+            phone: additionalInfo.phone,
             profilePhoto: '',
             port: {
                 city: {

@@ -22,9 +22,13 @@ export const googleSignInAndLoadProfile = (): ThunkAction<Promise<void>, RootSta
         }
     };
 
-export const signUpAndLoadProfile = (email: string, password: string): ThunkAction<Promise<void>, RootState, unknown, UnknownAction> =>
+export const signUpAndLoadProfile = (
+    email: string,
+    password: string,
+    additionalInfo: { firstName: string, lastName: string, phone: string }
+): ThunkAction<Promise<void>, RootState, unknown, UnknownAction> =>
     async (dispatch) => {
-        await dispatch(actions.fetchRegister(email, password) as any);
+        await dispatch(actions.fetchRegister(email, password, additionalInfo) as any);
         const user = JSON.parse(localStorage.getItem('safeUser') ?? '{}');
         if (user.uid) {
             await dispatch(fetchUserProfile(user.uid) as any);
