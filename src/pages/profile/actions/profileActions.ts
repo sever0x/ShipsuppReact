@@ -1,6 +1,6 @@
 import { Dispatch } from 'redux';
 import { ref, get, update } from 'firebase/database';
-import { ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { ref as storageRef, uploadBytes, getDownloadURL, deleteObject, getMetadata } from 'firebase/storage';
 import { database, storage as firebaseStorage } from 'app/config/firebaseConfig';
 import {
     FETCH_PROFILE_REQUEST,
@@ -74,10 +74,16 @@ export const updateProfilePhoto = (uid: string, file: File) => async (dispatch: 
 
         const userData = snapshot.val();
 
-        // Delete old profile photo if it exists
-        if (userData.profilePhoto) {
-            const oldPhotoRef = storageRef(firebaseStorage, userData.profilePhoto);
-            await deleteObject(oldPhotoRef);
+        // Check if the current profile photo is in Firebase Storage
+        if (userData.profilePhoto?.startsWith('https://firebasestorage.googleapis.com')) {
+            try {
+                const oldPhotoRef = storageRef(firebaseStorage, userData.profilePhoto);
+                await getMetadata(oldPhotoRef); // This will throw an error if the file doesn't exist
+                await deleteObject(oldPhotoRef);
+            } catch (error) {
+                console.log('Previous profile photo not found in Storage or error deleting:', error);
+                // Continue with uploading new photo even if deleting old one fails
+            }
         }
 
         // Upload new profile photo
