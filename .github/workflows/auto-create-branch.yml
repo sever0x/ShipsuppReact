@@ -14,6 +14,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           mode: auto
-          prefix: '${issue.labels[0].name}/'
-          branchName: '${issue.number}-${issue.title}'
+          prefix: '{{label_name}}/'
+          branchName: '${issue.number}'
           autoLinkIssue: true
