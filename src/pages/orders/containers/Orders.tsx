@@ -67,8 +67,8 @@ const Orders: React.FC = () => {
         order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const renderSkeleton = () => (
-        <TableRow>
+    const renderSkeleton = (index: number) => (
+        <TableRow key={`skeleton-${index}`}>
             <TableCell><Skeleton variant="text" /></TableCell>
             <TableCell><Skeleton variant="text" /></TableCell>
             <TableCell><Skeleton variant="text" /></TableCell>
@@ -104,7 +104,7 @@ const Orders: React.FC = () => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {Array.from(new Array(5)).map((_, index) => renderSkeleton())}
+                            {Array.from(new Array(5)).map((_, index) => renderSkeleton(index))}
                         </TableBody>
                     </Table>
                 </TableContainer>
