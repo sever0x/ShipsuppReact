@@ -9,7 +9,7 @@ const result = {
     [pages.orders]: `/${pages.orders}`,
     [pages.chats]: `/${pages.chats}`,
 
-    [pages.notFound]: '/404',
+    [pages.notFound]: `/${pages.notFound}`,
 };
 
 export default result;

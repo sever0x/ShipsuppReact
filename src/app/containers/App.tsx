@@ -14,6 +14,7 @@ import SignIn from "pages/login";
 import Register from "pages/register";
 import Orders from "pages/orders";
 import NotFound from "pages/notFound";
+import Chats from "pages/chats";
 
 function App() {
     return (
@@ -25,7 +26,7 @@ function App() {
                         <Route element={<MainLayout />}>
                             <Route path={`${pageURLs[pages.home]}`} element={
                                 <ProtectedRoute>
-                                    <Profile />
+                                    <Catalog />
                                 </ProtectedRoute>
                             } />
                             <Route path={`${pageURLs[pages.profile]}`} element={
@@ -41,6 +42,11 @@ function App() {
                             <Route path={`${pageURLs[pages.orders]}`} element={
                                 <ProtectedRoute>
                                     <Orders />
+                                </ProtectedRoute>
+                            } />
+                            <Route path={`${pageURLs[pages.chats]}`} element={
+                                <ProtectedRoute>
+                                    <Chats />
                                 </ProtectedRoute>
                             } />
                             <Route path="*" element={<NotFound />} />
