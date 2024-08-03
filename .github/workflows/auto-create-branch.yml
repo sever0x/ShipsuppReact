@@ -1,0 +1,44 @@
+name: Create Branch on Issue Assignment
+
+on:
+  issues:
+    types: [assigned]
+
+jobs:
+  create_issue_branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Issue Branch
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const issue = context.payload.issue;
+            const assignee = issue.assignee.login;
+            if (assignee === context.actor) {
+              const issueNumber = issue.number;
+              const issueTitle = issue.title.replace(/^\[.*?\]\s*/, '').toLowerCase().replace(/[^\w\-]+/g, '-').slice(0, 30);
+            
+              let branchPrefix = 'feature';
+              if (issue.labels.some(label => label.name === 'bug')) {
+                branchPrefix = 'bugfix';
+              } else if (issue.labels.some(label => label.name === 'enhancement')) {
+                branchPrefix = 'enhancement';
+              } else if (issue.labels.some(label => label.name === 'documentation')) {
+                branchPrefix = 'docs';
+              }
+            
+              const branchName = `${branchPrefix}/${issueNumber}-${issueTitle}`;
+            
+              try {
+                await github.rest.git.createRef({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  ref: `refs/heads/${branchName}`,
+                  sha: context.sha
+                });
+                console.log(`Branch ${branchName} created successfully.`);
+              } catch (error) {
+                console.log(`Error creating branch: ${error}`);
+              }
+            }
