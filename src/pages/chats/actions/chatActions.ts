@@ -84,7 +84,7 @@ export const sendMessage = (groupId: string, senderId: string, text: string) => 
         const newMessageRef = push(messagesRef);
         const localTimestamp = new Date().toISOString();
         const newMessage: Message = {
-            id: newMessageRef.key || '',
+            id: newMessageRef.key ?? '',
             createTimestampGMT: null,
             localTimestamp,
             groupId,

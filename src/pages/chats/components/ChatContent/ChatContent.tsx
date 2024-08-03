@@ -1,4 +1,6 @@
-import React, {useState} from 'react';
+import './ChatContent.css';
+
+import React, {useEffect, useRef, useState} from 'react';
 import {Avatar, List, ListItem, Paper, Typography} from '@mui/material';
 import {Message} from 'pages/chats/types/Message';
 import {User} from "pages/chats/types/User";
@@ -14,6 +16,13 @@ interface ChatContentProps {
 
 const ChatContent: React.FC<ChatContentProps> = ({ messages, membersData, currentUserId, onSendMessage }) => {
     const [newMessage, setNewMessage] = useState('');
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+
+    useEffect(scrollToBottom, [messages]);
 
     const handleSendMessage = () => {
         if (newMessage.trim()) {
@@ -24,8 +33,18 @@ const ChatContent: React.FC<ChatContentProps> = ({ messages, membersData, curren
 
     return (
         <Paper style={{ height: '500px', display: 'flex', flexDirection: 'column' }}>
-            <List style={{ flexGrow: 1, overflowY: 'auto', padding: '20px' }}>
-                {messages.map((message) => {
+            <List
+                className="chat-content-list"
+                style={{
+                    flexGrow: 1,
+                    overflowY: 'auto',
+                    padding: '20px',
+                    display: 'flex',
+                    flexDirection: 'column-reverse',
+                }}
+            >
+                <div ref={messagesEndRef} />
+                {messages.slice().reverse().map((message) => {
                     const isSender = message.senderId === currentUserId;
                     const user = membersData[message.senderId];
                     const timestamp = message.createTimestampGMT || message.localTimestamp;

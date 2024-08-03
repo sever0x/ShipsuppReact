@@ -4,7 +4,7 @@ import Chats from "pages/chats/containers/Chats";
 
 const ChatsPage: React.FC = () => {
     return (
-        <Container>
+        <Container maxWidth="xl">
             <Typography variant="h4" gutterBottom>Your Chats</Typography>
             <Chats />
         </Container>

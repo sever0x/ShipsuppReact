@@ -39,7 +39,7 @@ const Chats: React.FC = () => {
 
     return (
         <Grid container spacing={2}>
-            <Grid item xs={4}>
+            <Grid item xs={3}>
                 <Paper style={{ height: '100%' }}>
                     <ChatList
                         chats={chats}
@@ -48,7 +48,7 @@ const Chats: React.FC = () => {
                     />
                 </Paper>
             </Grid>
-            <Grid item xs={8}>
+            <Grid item xs={9}>
                 <Paper style={{ height: '100%', padding: '20px' }}>
                     {selectedChatId ? (
                         <ChatContent
