@@ -1,0 +1,29 @@
+name: Auto-Update Issue
+
+on:
+  issues:
+    types: [opened, edited]
+
+permissions:
+  issues: write
+
+jobs:
+  update-issue-title:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update issue title with number
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const issueNumber = context.issue.number;
+            const issueTitle = context.payload.issue.title;
+            if (!issueTitle.startsWith(`[${issueNumber}]`)) {
+              const newTitle = `[${issueNumber}] ${issueTitle}`;
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+                title: newTitle
+              });
+            }
