@@ -48,31 +48,35 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({ categories, onCateg
     const renderCategories = (categories: Category[], depth = 1) => {
         const sortedCategories = [...categories].sort((a, b) => (a.index ?? 0) - (b.index ?? 0));
 
-        return sortedCategories.map((category) => {
+        return sortedCategories.flatMap((category) => {
             const hasSubcategories = shouldRenderSubcategories(category);
 
-            return (
-                <React.Fragment key={category.id}>
-                    <MenuItem
-                        onClick={() => hasSubcategories ? handleCategoryClick(category.id) : handleCategorySelect(category)}
-                        sx={{
-                            paddingLeft: `${depth * 16}px`,
-                        }}
-                    >
-                        <ListItemText primary={category.title} />
-                        {hasSubcategories && (
-                            <ListItemIcon>
-                                {openCategories[category.id] ? <ExpandMore /> : <ChevronRight />}
-                            </ListItemIcon>
-                        )}
-                    </MenuItem>
-                    {hasSubcategories && category.categories && (
-                        <Collapse in={openCategories[category.id]} timeout="auto" unmountOnExit>
-                            {renderCategories(category.categories, depth + 1)}
-                        </Collapse>
+            const items = [
+                <MenuItem
+                    key={category.id}
+                    onClick={() => hasSubcategories ? handleCategoryClick(category.id) : handleCategorySelect(category)}
+                    sx={{
+                        paddingLeft: `${depth * 16}px`,
+                    }}
+                >
+                    <ListItemText primary={category.title} />
+                    {hasSubcategories && (
+                        <ListItemIcon>
+                            {openCategories[category.id] ? <ExpandMore /> : <ChevronRight />}
+                        </ListItemIcon>
                     )}
-                </React.Fragment>
-            );
+                </MenuItem>
+            ];
+
+            if (hasSubcategories && category.categories) {
+                items.push(
+                    <Collapse key={`collapse-${category.id}`} in={openCategories[category.id]} timeout="auto" unmountOnExit>
+                        {renderCategories(category.categories, depth + 1)}
+                    </Collapse>
+                );
+            }
+
+            return items;
         });
     };
 

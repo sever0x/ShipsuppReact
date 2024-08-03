@@ -108,7 +108,7 @@ const Catalog: React.FC = () => {
     );
 
     const renderSkeleton = () => (
-        <TableRow>
+        <TableRow key={`skeleton-${Math.random()}`}>
             <TableCell><Skeleton variant="rectangular" width={50} height={50} /></TableCell>
             <TableCell><Skeleton variant="text" /></TableCell>
             <TableCell><Skeleton variant="text" /></TableCell>
@@ -138,7 +138,11 @@ const Catalog: React.FC = () => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {Array.from(new Array(5)).map((_, index) => renderSkeleton())}
+                            {Array.from(new Array(5)).map((_, index) => (
+                                <React.Fragment key={`skeleton-row-${index}`}>
+                                    {renderSkeleton()}
+                                </React.Fragment>
+                            ))}
                         </TableBody>
                     </Table>
                 </TableContainer>
