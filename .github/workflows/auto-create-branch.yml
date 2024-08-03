@@ -14,6 +14,47 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           mode: auto
-          prefix: '{{label_name}}/'
-          branchName: '${issue.number}-${issue.title}'
+          silent: true
+          branchName: '${issue.number}/${issue.title}'
           autoLinkIssue: true
+          gitSafeReplacementChar: '-'
+
+      - name: Rename Branch
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const issue = context.payload.issue;
+            const issueNumber = issue.number;
+            const issueTitle = issue.title
+              .toLowerCase()
+              .replace(/^\[.*?\]\s*/, '')
+              .replace(/[^\w\-]+/g, '-')
+              .replace(/^-+|-+$/g, '')
+              .slice(0, 50);
+            
+            let branchPrefix = 'feature';
+            if (issue.labels.some(label => label.name === 'bug')) {
+              branchPrefix = 'bugfix';
+            } else if (issue.labels.some(label => label.name === 'enhancement')) {
+              branchPrefix = 'enhancement';
+            } else if (issue.labels.some(label => label.name === 'documentation')) {
+              branchPrefix = 'docs';
+            }
+            
+            const newBranchName = `${branchPrefix}/${issueNumber}-${issueTitle}`;
+            const oldBranchName = `${issueNumber}/${issue.title.replace(/[^\w-]/g, '-')}`;
+            
+            try {
+              await github.rest.git.updateRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: `heads/${oldBranchName}`,
+                sha: context.sha,
+                force: true,
+                new_name: newBranchName
+              });
+              console.log(`Branch renamed to ${newBranchName}`);
+            } catch (error) {
+              console.log(`Error renaming branch: ${error}`);
+            }
