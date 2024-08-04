@@ -1,12 +1,13 @@
 import './ChatContent.css';
 
 import React, {useEffect, useRef, useState} from 'react';
-import {Avatar, List, ListItem, Paper, Typography} from '@mui/material';
+import {Avatar, List, ListItem, ListItemAvatar, Typography} from '@mui/material';
 import {Message} from 'pages/chats/types/Message';
 import {User} from "pages/chats/types/User";
 import TextField from 'components/TextField';
-import Button from 'components/Button';
 import Box from 'components/Box';
+import IconButton from 'components/IconButton';
+import {Send} from '@mui/icons-material';
 
 interface ChatContentProps {
     messages: Message[];
@@ -34,17 +35,8 @@ const ChatContent: React.FC<ChatContentProps> = ({ messages, membersData, curren
 
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-            <List
-                sx={{
-                    flexGrow: 1,
-                    overflowY: 'auto',
-                    display: 'flex',
-                    flexDirection: 'column-reverse',
-                    padding: 2,
-                }}
-            >
-                <div ref={messagesEndRef} />
-                {messages.slice().reverse().map((message) => {
+            <List sx={{ flexGrow: 1, overflowY: 'auto', padding: 2 }}>
+                {messages.map((message) => {
                     const isSender = message.senderId === currentUserId;
                     const user = membersData[message.senderId];
                     const timestamp = message.createTimestampGMT || message.localTimestamp;
@@ -52,32 +44,39 @@ const ChatContent: React.FC<ChatContentProps> = ({ messages, membersData, curren
                     return (
                         <ListItem
                             key={message.id}
-                            style={{
+                            sx={{
                                 flexDirection: isSender ? 'row-reverse' : 'row',
                                 alignItems: 'flex-start',
+                                mb: 2,
                             }}
                         >
-                            <Avatar src={user.photoUrl} alt={`${user.firstName} ${user.lastName}`} />
-                            <div style={{
+                            <ListItemAvatar>
+                                <Avatar src={user.photoUrl} alt={`${user.firstName} ${user.lastName}`} />
+                            </ListItemAvatar>
+                            <Box sx={{
                                 maxWidth: '70%',
-                                marginLeft: isSender ? 0 : '10px',
-                                marginRight: isSender ? '10px' : 0
+                                ml: isSender ? 0 : 0,
+                                mr: isSender ? 2 : 0,
+                                backgroundColor: isSender ? '#e3f2fd' : '#f5f5f5',
+                                borderRadius: 2,
+                                padding: 2,
                             }}>
-                                <Paper elevation={2} style={{
-                                    padding: '10px',
-                                    backgroundColor: isSender ? '#DCF8C6' : '#FFFFFF'
-                                }}>
-                                    <Typography variant="body1">{message.text}</Typography>
-                                </Paper>
-                                <Typography variant="caption" style={{ marginTop: '5px' }}>
+                                <Typography variant="body1">{message.text}</Typography>
+                                <Typography variant="caption" sx={{ display: 'block', mt: 1, color: 'text.secondary' }}>
                                     {new Date(timestamp).toLocaleString()}
                                 </Typography>
-                            </div>
+                            </Box>
                         </ListItem>
                     );
                 })}
+                <div ref={messagesEndRef} />
             </List>
-            <Box sx={{ padding: 2, borderTop: '1px solid #e0e0e0' }}>
+            <Box sx={{
+                display: 'flex',
+                alignItems: 'center',
+                padding: 2,
+                borderTop: '1px solid #e0e0e0'
+            }}>
                 <TextField
                     fullWidth
                     variant="outlined"
@@ -87,13 +86,13 @@ const ChatContent: React.FC<ChatContentProps> = ({ messages, membersData, curren
                     onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                     sx={{ mr: 1 }}
                 />
-                <Button
-                    variant="contained"
+                <IconButton
                     color="primary"
                     onClick={handleSendMessage}
+                    sx={{ backgroundColor: '#e3f2fd', '&:hover': { backgroundColor: '#bbdefb' } }}
                 >
-                    Send
-                </Button>
+                    <Send />
+                </IconButton>
             </Box>
         </Box>
     );
