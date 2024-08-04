@@ -6,6 +6,7 @@ import {Message} from 'pages/chats/types/Message';
 import {User} from "pages/chats/types/User";
 import TextField from 'components/TextField';
 import Button from 'components/Button';
+import Box from 'components/Box';
 
 interface ChatContentProps {
     messages: Message[];
@@ -32,15 +33,14 @@ const ChatContent: React.FC<ChatContentProps> = ({ messages, membersData, curren
     };
 
     return (
-        <Paper style={{ height: '500px', display: 'flex', flexDirection: 'column' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
             <List
-                className="chat-content-list"
-                style={{
+                sx={{
                     flexGrow: 1,
                     overflowY: 'auto',
-                    padding: '20px',
                     display: 'flex',
                     flexDirection: 'column-reverse',
+                    padding: 2,
                 }}
             >
                 <div ref={messagesEndRef} />
@@ -77,7 +77,7 @@ const ChatContent: React.FC<ChatContentProps> = ({ messages, membersData, curren
                     );
                 })}
             </List>
-            <Paper elevation={3} style={{ padding: '10px', display: 'flex' }}>
+            <Box sx={{ padding: 2, borderTop: '1px solid #e0e0e0' }}>
                 <TextField
                     fullWidth
                     variant="outlined"
@@ -85,17 +85,17 @@ const ChatContent: React.FC<ChatContentProps> = ({ messages, membersData, curren
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                    sx={{ mr: 1 }}
                 />
                 <Button
                     variant="contained"
                     color="primary"
                     onClick={handleSendMessage}
-                    style={{ marginLeft: '10px' }}
                 >
                     Send
                 </Button>
-            </Paper>
-        </Paper>
+            </Box>
+        </Box>
     );
 };
 

@@ -2,6 +2,7 @@ import React from 'react';
 import { List, ListItem, ListItemText, ListItemAvatar, Avatar, Typography } from '@mui/material';
 import {Chat} from "pages/chats/types/Chat";
 
+
 interface ChatListProps {
     chats: Chat[];
     onSelectChat: (chatId: string) => void;
@@ -10,7 +11,7 @@ interface ChatListProps {
 
 const ChatList: React.FC<ChatListProps> = ({ chats, onSelectChat, selectedChatId }) => {
     return (
-        <List>
+        <List sx={{ padding: 0 }}>
             {chats.map((chat) => {
                 const otherUser = Object.values(chat.membersData).find(user => user.role === 'BUYER');
                 return (
@@ -19,6 +20,12 @@ const ChatList: React.FC<ChatListProps> = ({ chats, onSelectChat, selectedChatId
                         button
                         onClick={() => onSelectChat(chat.id)}
                         selected={selectedChatId === chat.id}
+                        sx={{
+                            borderBottom: '1px solid #e0e0e0',
+                            '&.Mui-selected': {
+                                backgroundColor: '#e3f2fd',
+                            },
+                        }}
                     >
                         <ListItemAvatar>
                             <Avatar src={otherUser?.photoUrl} alt={`${otherUser?.firstName} ${otherUser?.lastName}`} />
@@ -29,7 +36,8 @@ const ChatList: React.FC<ChatListProps> = ({ chats, onSelectChat, selectedChatId
                                 <Typography
                                     component="span"
                                     variant="body2"
-                                    color="textPrimary"
+                                    color="textSecondary"
+                                    noWrap
                                 >
                                     {chat.lastMessage}
                                 </Typography>

@@ -5,6 +5,7 @@ import { RootState } from 'app/reducers';
 import { fetchChats, fetchMessages, sendMessage } from "../actions/chatActions";
 import ChatList from '../components/ChatList';
 import ChatContent from '../components/ChatContent';
+import Box from 'components/Box';
 
 const Chats: React.FC = () => {
     const dispatch = useDispatch();
@@ -38,31 +39,29 @@ const Chats: React.FC = () => {
     }
 
     return (
-        <Grid container spacing={2}>
-            <Grid item xs={3}>
-                <Paper style={{ height: '100%' }}>
-                    <ChatList
-                        chats={chats}
-                        onSelectChat={handleChatSelect}
-                        selectedChatId={selectedChatId}
+        <Box sx={{ display: 'flex', height: '70vh' }}>
+            <Box sx={{ width: '340px', borderRight: '1px solid #e0e0e0', overflowY: 'auto' }}>
+                <ChatList
+                    chats={chats}
+                    onSelectChat={handleChatSelect}
+                    selectedChatId={selectedChatId}
+                />
+            </Box>
+            <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+                {selectedChatId ? (
+                    <ChatContent
+                        messages={messages[selectedChatId] || []}
+                        membersData={chats.find(chat => chat.id === selectedChatId)?.membersData || {}}
+                        currentUserId={user?.uid || ''}
+                        onSendMessage={handleSendMessage}
                     />
-                </Paper>
-            </Grid>
-            <Grid item xs={9}>
-                <Paper style={{ height: '100%', padding: '20px' }}>
-                    {selectedChatId ? (
-                        <ChatContent
-                            messages={messages[selectedChatId] || []}
-                            membersData={chats.find(chat => chat.id === selectedChatId)?.membersData || {}}
-                            currentUserId={user?.uid || ''}
-                            onSendMessage={handleSendMessage}
-                        />
-                    ) : (
+                ) : (
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
                         <Typography>Select a chat to view messages</Typography>
-                    )}
-                </Paper>
-            </Grid>
-        </Grid>
+                    </Box>
+                )}
+            </Box>
+        </Box>
     );
 };
 
