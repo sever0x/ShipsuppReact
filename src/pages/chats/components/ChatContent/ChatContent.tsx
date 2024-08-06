@@ -26,31 +26,40 @@ const ChatContent: React.FC<ChatContentProps> = React.memo(({
 }) => {
     const [newMessage, setNewMessage] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    const [shouldScrollToBottom, setShouldScrollToBottom] = useState(true);
+    const [isInitialLoad, setIsInitialLoad] = useState(true);
+    const prevSelectedChatIdRef = useRef<string | null>(null);
 
-    const scrollToBottom = useCallback(() => {
-        if (shouldScrollToBottom) {
-            setTimeout(() => {
-                messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-            }, 100); // небольшая задержка для гарантии завершения рендеринга
+    const scrollToBottom = useCallback((smooth = true) => {
+        if (messagesEndRef.current) {
+            messagesEndRef.current.scrollIntoView({
+                behavior: smooth ? 'smooth' : 'auto',
+                block: 'end'
+            });
         }
-    }, [shouldScrollToBottom]);
+    }, []);
 
     useEffect(() => {
-        scrollToBottom();
-    }, [messages, scrollToBottom]);
+        if (selectedChatId !== prevSelectedChatIdRef.current) {
+            setIsInitialLoad(true);
+            prevSelectedChatIdRef.current = selectedChatId;
+        }
+    }, [selectedChatId]);
 
-    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-        const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
-        const isScrolledToBottom = scrollHeight - scrollTop === clientHeight;
-        setShouldScrollToBottom(isScrolledToBottom);
-    };
+    useEffect(() => {
+        if (messages.length > 0) {
+            if (isInitialLoad) {
+                scrollToBottom(false);
+                setIsInitialLoad(false);
+            } else {
+                scrollToBottom(true);
+            }
+        }
+    }, [messages, isInitialLoad, scrollToBottom]);
 
     const handleSendMessage = useCallback(() => {
         if (newMessage.trim()) {
             onSendMessage(newMessage.trim());
             setNewMessage('');
-            setShouldScrollToBottom(true);
         }
     }, [newMessage, onSendMessage]);
 
@@ -84,7 +93,6 @@ const ChatContent: React.FC<ChatContentProps> = React.memo(({
                     display: 'flex',
                     flexDirection: 'column'
                 }}
-                onScroll={handleScroll}
             >
                 {loading && messages.length === 0 ? (
                     Array.from({ length: 5 }).map((_, index) => (

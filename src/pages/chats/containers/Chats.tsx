@@ -1,7 +1,13 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from 'app/reducers';
-import { fetchChats, fetchMessages, sendMessage } from "../actions/chatActions";
+import {
+    fetchChats,
+    fetchMessages, resetUnreadCount,
+    sendMessage,
+    setupMessageListener,
+    setupRealtimeListeners
+} from "../actions/chatActions";
 import ChatList from '../components/ChatList';
 import ChatContent from '../components/ChatContent';
 import Box from 'components/Box';
@@ -39,17 +45,41 @@ const Chats: React.FC = () => {
     useEffect(() => {
         if (user?.uid) {
             dispatch(fetchChats(user.uid) as any);
+            const unsubscribe = dispatch(setupRealtimeListeners(user.uid) as any);
+            return () => unsubscribe();
+        }
+    }, [dispatch, user]);
+
+    useEffect(() => {
+        if (selectedChatId && user?.uid) {
+            dispatch(fetchMessages(selectedChatId) as any);
+            const unsubscribe = dispatch(setupMessageListener(selectedChatId, user.uid) as any);
+            return () => {
+                if (typeof unsubscribe === 'function') {
+                    unsubscribe();
+                }
+            };
+        }
+    }, [dispatch, selectedChatId, user]);
+
+    useEffect(() => {
+        if (user?.uid) {
+            dispatch(fetchChats(user.uid) as any);
         }
     }, [dispatch, user]);
 
     const handleChatSelect = useCallback((chatId: string) => {
         setSelectedChatId(chatId);
         dispatch(fetchMessages(chatId) as any);
-    }, [dispatch]);
+        if (user?.uid) {
+            dispatch(resetUnreadCount(chatId, user.uid) as any);
+        }
+    }, [dispatch, user]);
 
     const handleSendMessage = useCallback((text: string) => {
         if (selectedChatId && user?.uid) {
             dispatch(sendMessage(selectedChatId, user.uid, text) as any);
+            dispatch(resetUnreadCount(selectedChatId, user.uid) as any);
         }
     }, [dispatch, selectedChatId, user]);
 
@@ -70,6 +100,7 @@ const Chats: React.FC = () => {
                     onSelectChat={handleChatSelect}
                     selectedChatId={selectedChatId}
                     loading={loading}
+                    currentUserId={user?.uid ?? ''}
                 />
             </Box>
             <Box sx={{
