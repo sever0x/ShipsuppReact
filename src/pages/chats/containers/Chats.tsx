@@ -54,8 +54,17 @@ const Chats: React.FC = () => {
     }, [dispatch, selectedChatId, user]);
 
     return (
-        <Box sx={{ display: 'flex', height: '70vh' }}>
-            <Box sx={{ width: '340px', borderRight: '1px solid #e0e0e0', overflowY: 'auto' }}>
+        <Box sx={{
+            display: 'flex',
+            height: '80vh',
+            overflow: 'hidden'
+        }}>
+            <Box sx={{
+                width: '340px',
+                borderRight: '1px solid #e0e0e0',
+                overflowY: 'auto',
+                height: '100%'
+            }}>
                 <ChatList
                     chats={chats}
                     onSelectChat={handleChatSelect}
@@ -63,13 +72,20 @@ const Chats: React.FC = () => {
                     loading={loading}
                 />
             </Box>
-            <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+            <Box sx={{
+                flexGrow: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                height: '100%',
+                overflow: 'hidden'
+            }}>
                 <ChatContent
                     messages={currentChatMessages}
                     membersData={currentChatMembersData}
                     currentUserId={user?.uid || ''}
                     onSendMessage={handleSendMessage}
                     loading={loading && currentChatMessages.length === 0}
+                    selectedChatId={selectedChatId}
                 />
             </Box>
         </Box>

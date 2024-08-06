@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Avatar, ListItem, ListItemAvatar, Skeleton, Typography } from '@mui/material';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { Avatar, ListItem, ListItemAvatar, Typography, Skeleton } from '@mui/material';
 import { Message } from 'pages/chats/types/Message';
 import { User } from "pages/chats/types/User";
 import TextField from 'components/TextField';
@@ -14,17 +14,38 @@ interface ChatContentProps {
     currentUserId: string;
     onSendMessage: (text: string) => void;
     loading: boolean;
+    selectedChatId: string | null;
 }
 
-const ChatContent: React.FC<ChatContentProps> = React.memo(({ messages, membersData, currentUserId, onSendMessage, loading }) => {
+const ChatContent: React.FC<ChatContentProps> = React.memo(({
+    messages,
+    membersData,
+    currentUserId,
+    onSendMessage,
+    loading,
+    selectedChatId
+}) => {
     const [newMessage, setNewMessage] = useState('');
     const listRef = useRef<VirtualizedList>(null);
+    const [listHeight, setListHeight] = useState(500);
 
     const scrollToBottom = useCallback(() => {
         if (listRef.current) {
             listRef.current.scrollToItem(messages.length - 1, 'end');
         }
     }, [messages]);
+
+    useEffect(() => {
+        const updateHeight = () => {
+            const vh = window.innerHeight * 0.7;
+            setListHeight(vh);
+        };
+
+        updateHeight();
+
+        window.addEventListener('resize', updateHeight);
+        return () => window.removeEventListener('resize', updateHeight);
+    }, []);
 
     useEffect(scrollToBottom, [scrollToBottom]);
 
@@ -39,7 +60,7 @@ const ChatContent: React.FC<ChatContentProps> = React.memo(({ messages, membersD
         const message = messages[index];
         const isSender = message.senderId === currentUserId;
         const user = membersData[message.senderId];
-        const timestamp = message.createTimestampGMT || message.localTimestamp;
+        const timestamp = message.createTimestampGMT ?? message.localTimestamp;
 
         return (
             <ListItem
@@ -82,11 +103,26 @@ const ChatContent: React.FC<ChatContentProps> = React.memo(({ messages, membersD
         </ListItem>
     ), []);
 
+    if (!selectedChatId) {
+        return (
+            <Box sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: '100%'
+            }}>
+                <Typography variant="h6" color="text.secondary">
+                    Select a chat to start messaging
+                </Typography>
+            </Box>
+        );
+    }
+
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
             {loading && messages.length === 0 ? (
                 <VirtualizedList
-                    height={500}
+                    height={listHeight}
                     itemCount={5}
                     itemSize={80}
                     width="100%"
@@ -95,7 +131,7 @@ const ChatContent: React.FC<ChatContentProps> = React.memo(({ messages, membersD
                 </VirtualizedList>
             ) : (
                 <VirtualizedList
-                    height={500}
+                    height={listHeight}
                     itemCount={messages.length}
                     itemSize={80}
                     width="100%"
@@ -108,7 +144,8 @@ const ChatContent: React.FC<ChatContentProps> = React.memo(({ messages, membersD
                 display: 'flex',
                 alignItems: 'center',
                 padding: 2,
-                borderTop: '1px solid #e0e0e0'
+                borderTop: '1px solid #e0e0e0',
+                mt: 1
             }}>
                 <TextField
                     fullWidth
