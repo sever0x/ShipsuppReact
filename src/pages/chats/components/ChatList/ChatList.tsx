@@ -1,5 +1,5 @@
 import React from 'react';
-import { List, ListItem, ListItemText, ListItemAvatar, Avatar, Typography, Skeleton } from '@mui/material';
+import {List, ListItem, ListItemText, ListItemAvatar, Avatar, Typography, Skeleton, Badge} from '@mui/material';
 import { Chat } from "pages/chats/types/Chat";
 
 interface ChatListProps {
@@ -7,9 +7,10 @@ interface ChatListProps {
     onSelectChat: (chatId: string) => void;
     selectedChatId: string | null;
     loading: boolean;
+    currentUserId: string;
 }
 
-const ChatList: React.FC<ChatListProps> = React.memo(({ chats, onSelectChat, selectedChatId, loading }) => {
+const ChatList: React.FC<ChatListProps> = React.memo(({ chats, onSelectChat, selectedChatId, loading, currentUserId }) => {
     if (loading && chats.length === 0) {
         return (
             <List sx={{ padding: 0 }}>
@@ -32,6 +33,7 @@ const ChatList: React.FC<ChatListProps> = React.memo(({ chats, onSelectChat, sel
         <List sx={{ padding: 0 }}>
             {chats.map((chat) => {
                 const otherUser = Object.values(chat.membersData).find(user => user.role === 'BUYER');
+                const unreadCount = chat.unreadCount[currentUserId] || 0;
                 return (
                     <ListItem
                         key={chat.id}
@@ -46,7 +48,9 @@ const ChatList: React.FC<ChatListProps> = React.memo(({ chats, onSelectChat, sel
                         }}
                     >
                         <ListItemAvatar>
-                            <Avatar src={otherUser?.photoUrl} alt={`${otherUser?.firstName} ${otherUser?.lastName}`} />
+                            <Badge badgeContent={unreadCount} color="primary">
+                                <Avatar src={otherUser?.photoUrl} alt={`${otherUser?.firstName} ${otherUser?.lastName}`} />
+                            </Badge>
                         </ListItemAvatar>
                         <ListItemText
                             primary={`${otherUser?.firstName} ${otherUser?.lastName}`}

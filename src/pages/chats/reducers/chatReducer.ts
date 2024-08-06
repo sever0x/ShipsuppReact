@@ -10,6 +10,7 @@ import {
     SEND_MESSAGE_SUCCESS, UPDATE_CHAT_REALTIME, UPDATE_MESSAGES_REALTIME
 } from '../constants/actionTypes';
 import {ChatState} from "pages/chats/types/state/ChatState";
+import {Chat} from "pages/chats/types/Chat";
 
 const initialState: ChatState = {
     chats: [],
@@ -76,7 +77,10 @@ const chatReducer = (state = initialState, action: any): ChatState => {
         case UPDATE_CHAT_REALTIME:
             return {
                 ...state,
-                chats: action.payload
+                chats: action.payload.map((chat: Chat) => ({
+                    ...chat,
+                    unreadCount: chat.unreadCount || {}
+                }))
             };
         case UPDATE_MESSAGES_REALTIME:
             return {

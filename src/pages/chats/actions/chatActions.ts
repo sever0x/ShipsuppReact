@@ -113,12 +113,25 @@ export const sendMessage = (groupId: string, senderId: string, text: string) => 
 
         await set(newMessageRef, newMessage);
 
+        const groupRef = ref(database, `chat/groups/${groupId}`);
+        const groupSnapshot = await get(groupRef);
+        if (groupSnapshot.exists()) {
+            const groupData = groupSnapshot.val();
+            for (const userId of Object.keys(groupData.membersData)) {
+                if (userId !== senderId) {
+                    const userUnreadRef = ref(database, `chat/groups/${groupId}/unreadCount/${userId}`);
+                    const unreadSnapshot = await get(userUnreadRef);
+                    const currentUnread = unreadSnapshot.exists() ? unreadSnapshot.val() : 0;
+                    await set(userUnreadRef, currentUnread + 1);
+                }
+            }
+        }
+
         dispatch({
             type: SEND_MESSAGE_SUCCESS,
             payload: { groupId, message: newMessage }
         });
 
-        const groupRef = ref(database, `chat/groups/${groupId}`);
         await update(groupRef, { lastMessage: text });
 
     } catch (error) {
@@ -161,4 +174,22 @@ export const setupMessageListener = (groupId: string, currentUserId: string) => 
         off(messagesRef, 'child_added', newMessageHandler);
         debouncedDispatchNewMessage.clear();
     };
+};
+
+export const updateUnreadCount = (chatId: string, userId: string, count: number) => async (dispatch: Dispatch) => {
+    try {
+        const chatRef = ref(database, `chat/groups/${chatId}/unreadCount/${userId}`);
+        await set(chatRef, count);
+    } catch (error) {
+        console.error("Error updating unread count:", error);
+    }
+};
+
+export const resetUnreadCount = (chatId: string, userId: string) => async (dispatch: Dispatch) => {
+    try {
+        const chatRef = ref(database, `chat/groups/${chatId}/unreadCount/${userId}`);
+        await set(chatRef, 0);
+    } catch (error) {
+        console.error("Error resetting unread count:", error);
+    }
 };
