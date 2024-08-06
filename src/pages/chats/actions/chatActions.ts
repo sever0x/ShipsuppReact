@@ -1,5 +1,5 @@
 import {Dispatch} from 'redux';
-import {ref, push, serverTimestamp, set, update, get} from 'firebase/database';
+import {ref, push, serverTimestamp, set, update, get, onValue, off, onChildAdded} from 'firebase/database';
 import {database} from 'app/config/firebaseConfig';
 import {
     FETCH_CHATS_FAILURE,
@@ -7,10 +7,10 @@ import {
     FETCH_CHATS_SUCCESS,
     FETCH_MESSAGES_FAILURE,
     FETCH_MESSAGES_REQUEST,
-    FETCH_MESSAGES_SUCCESS,
+    FETCH_MESSAGES_SUCCESS, NEW_MESSAGE_RECEIVED,
     SEND_MESSAGE_FAILURE,
     SEND_MESSAGE_REQUEST,
-    SEND_MESSAGE_SUCCESS
+    SEND_MESSAGE_SUCCESS, UPDATE_CHAT_REALTIME, UPDATE_MESSAGES_REALTIME
 } from '../constants/actionTypes';
 import { Message } from '../types/Message';
 
@@ -110,4 +110,38 @@ export const sendMessage = (groupId: string, senderId: string, text: string) => 
             payload: error instanceof Error ? error.message : 'An unknown error occurred'
         });
     }
+};
+
+export const setupRealtimeListeners = (userId: string) => (dispatch: Dispatch) => {
+    const chatsRef = ref(database, 'chat/groups');
+
+    onValue(chatsRef, (snapshot) => {
+        if (snapshot.exists()) {
+            const chats = snapshot.val();
+            const userChats = Object.values(chats).filter((chat: any) => chat.membersData[userId]);
+
+            dispatch({
+                type: UPDATE_CHAT_REALTIME,
+                payload: userChats
+            });
+        }
+    });
+
+    return () => off(chatsRef);
+};
+
+export const setupMessageListener = (groupId: string, currentUserId: string) => (dispatch: Dispatch) => {
+    const messagesRef = ref(database, `chat/messages/${groupId}`);
+
+    const newMessageHandler = onChildAdded(messagesRef, (snapshot) => {
+        const newMessage = snapshot.val();
+        if (newMessage.senderId !== currentUserId) {
+            dispatch({
+                type: NEW_MESSAGE_RECEIVED,
+                payload: { groupId, message: newMessage }
+            });
+        }
+    });
+
+    return () => off(messagesRef, 'child_added', newMessageHandler);
 };

@@ -32,7 +32,7 @@ const ChatContent: React.FC<ChatContentProps> = React.memo(({
         if (shouldScrollToBottom) {
             setTimeout(() => {
                 messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-            }, 100); // небольшая задержка для гарантии завершения рендеринга
+            }, 100);
         }
     }, [shouldScrollToBottom]);
 

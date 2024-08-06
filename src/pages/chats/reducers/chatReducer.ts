@@ -4,10 +4,10 @@ import {
     FETCH_CHATS_SUCCESS,
     FETCH_MESSAGES_FAILURE,
     FETCH_MESSAGES_REQUEST,
-    FETCH_MESSAGES_SUCCESS,
+    FETCH_MESSAGES_SUCCESS, NEW_MESSAGE_RECEIVED,
     SEND_MESSAGE_FAILURE,
     SEND_MESSAGE_REQUEST,
-    SEND_MESSAGE_SUCCESS
+    SEND_MESSAGE_SUCCESS, UPDATE_CHAT_REALTIME, UPDATE_MESSAGES_REALTIME
 } from '../constants/actionTypes';
 import {ChatState} from "pages/chats/types/state/ChatState";
 
@@ -52,6 +52,7 @@ const chatReducer = (state = initialState, action: any): ChatState => {
                 error: action.payload
             };
         case SEND_MESSAGE_SUCCESS:
+        case NEW_MESSAGE_RECEIVED:
             return {
                 ...state,
                 loading: false,
@@ -67,6 +68,19 @@ const chatReducer = (state = initialState, action: any): ChatState => {
                         ? {...chat, lastMessage: action.payload.message.text}
                         : chat
                 )
+            };
+        case UPDATE_CHAT_REALTIME:
+            return {
+                ...state,
+                chats: action.payload
+            };
+        case UPDATE_MESSAGES_REALTIME:
+            return {
+                ...state,
+                messages: {
+                    ...state.messages,
+                    [action.payload.groupId]: action.payload.messages
+                }
             };
         default:
             return state;
