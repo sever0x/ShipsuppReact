@@ -1,15 +1,33 @@
 import React from 'react';
-import { List, ListItem, ListItemText, ListItemAvatar, Avatar, Typography } from '@mui/material';
-import {Chat} from "pages/chats/types/Chat";
-
+import { List, ListItem, ListItemText, ListItemAvatar, Avatar, Typography, Skeleton } from '@mui/material';
+import { Chat } from "pages/chats/types/Chat";
 
 interface ChatListProps {
     chats: Chat[];
     onSelectChat: (chatId: string) => void;
     selectedChatId: string | null;
+    loading: boolean;
 }
 
-const ChatList: React.FC<ChatListProps> = ({ chats, onSelectChat, selectedChatId }) => {
+const ChatList: React.FC<ChatListProps> = React.memo(({ chats, onSelectChat, selectedChatId, loading }) => {
+    if (loading && chats.length === 0) {
+        return (
+            <List sx={{ padding: 0 }}>
+                {[...Array(5)].map((_, index) => (
+                    <ListItem key={index} sx={{ borderBottom: '1px solid #e0e0e0' }}>
+                        <ListItemAvatar>
+                            <Skeleton variant="circular" width={40} height={40} />
+                        </ListItemAvatar>
+                        <ListItemText
+                            primary={<Skeleton variant="text" width="60%" />}
+                            secondary={<Skeleton variant="text" width="40%" />}
+                        />
+                    </ListItem>
+                ))}
+            </List>
+        );
+    }
+
     return (
         <List sx={{ padding: 0 }}>
             {chats.map((chat) => {
@@ -48,6 +66,6 @@ const ChatList: React.FC<ChatListProps> = ({ chats, onSelectChat, selectedChatId
             })}
         </List>
     );
-};
+});
 
 export default ChatList;
