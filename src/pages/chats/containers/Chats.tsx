@@ -54,7 +54,11 @@ const Chats: React.FC = () => {
         if (selectedChatId && user?.uid) {
             dispatch(fetchMessages(selectedChatId) as any);
             const unsubscribe = dispatch(setupMessageListener(selectedChatId, user.uid) as any);
-            return () => unsubscribe();
+            return () => {
+                if (typeof unsubscribe === 'function') {
+                    unsubscribe();
+                }
+            };
         }
     }, [dispatch, selectedChatId, user]);
 

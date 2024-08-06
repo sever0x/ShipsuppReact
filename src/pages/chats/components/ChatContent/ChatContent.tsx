@@ -27,17 +27,19 @@ const ChatContent: React.FC<ChatContentProps> = React.memo(({
     const [newMessage, setNewMessage] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const [shouldScrollToBottom, setShouldScrollToBottom] = useState(true);
+    const prevMessagesLengthRef = useRef(messages.length);
 
     const scrollToBottom = useCallback(() => {
         if (shouldScrollToBottom) {
-            setTimeout(() => {
-                messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-            }, 100);
+            messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
         }
     }, [shouldScrollToBottom]);
 
     useEffect(() => {
-        scrollToBottom();
+        if (messages.length > prevMessagesLengthRef.current) {
+            scrollToBottom();
+        }
+        prevMessagesLengthRef.current = messages.length;
     }, [messages, scrollToBottom]);
 
     const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {

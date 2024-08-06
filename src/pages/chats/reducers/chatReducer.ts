@@ -51,24 +51,28 @@ const chatReducer = (state = initialState, action: any): ChatState => {
                 loading: false,
                 error: action.payload
             };
-        case SEND_MESSAGE_SUCCESS:
         case NEW_MESSAGE_RECEIVED:
-            return {
-                ...state,
-                loading: false,
-                messages: {
-                    ...state.messages,
-                    [action.payload.groupId]: [
-                        ...(state.messages[action.payload.groupId] || []),
-                        action.payload.message
-                    ]
-                },
-                chats: state.chats.map(chat =>
-                    chat.id === action.payload.groupId
-                        ? {...chat, lastMessage: action.payload.message.text}
-                        : chat
-                )
-            };
+        case SEND_MESSAGE_SUCCESS:
+            const existingMessages = state.messages[action.payload.groupId] || [];
+            const newMessage = action.payload.message;
+            const isMessageExists = existingMessages.some(msg => msg.id === newMessage.id);
+
+            if (!isMessageExists) {
+                return {
+                    ...state,
+                    loading: false,
+                    messages: {
+                        ...state.messages,
+                        [action.payload.groupId]: [...existingMessages, newMessage]
+                    },
+                    chats: state.chats.map(chat =>
+                        chat.id === action.payload.groupId
+                            ? {...chat, lastMessage: newMessage.text}
+                            : chat
+                    )
+                };
+            }
+            return state;
         case UPDATE_CHAT_REALTIME:
             return {
                 ...state,

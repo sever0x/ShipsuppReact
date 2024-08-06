@@ -13,6 +13,19 @@ import {
     SEND_MESSAGE_SUCCESS, UPDATE_CHAT_REALTIME, UPDATE_MESSAGES_REALTIME
 } from '../constants/actionTypes';
 import { Message } from '../types/Message';
+import {debounce} from "@mui/material";
+
+let lastReceivedMessageId = '';
+
+const debouncedDispatchNewMessage = debounce((dispatch, payload) => {
+    if (payload.message.id !== lastReceivedMessageId) {
+        lastReceivedMessageId = payload.message.id;
+        dispatch({
+            type: NEW_MESSAGE_RECEIVED,
+            payload
+        });
+    }
+}, 100);
 
 export const fetchChats = (sellerId: string) => async (dispatch: Dispatch) => {
     dispatch({ type: FETCH_CHATS_REQUEST });
@@ -54,9 +67,13 @@ export const fetchMessages = (groupId: string) => async (dispatch: Dispatch) => 
 
         if (snapshot.exists()) {
             const messages = snapshot.val();
-            const messageList = Object.values(messages).sort((a: any, b: any) =>
-                new Date(a.createTimestampGMT).getTime() - new Date(b.createTimestampGMT).getTime()
-            );
+            const messageList = Object.values(messages)
+                .sort((a: any, b: any) =>
+                    new Date(a.createTimestampGMT).getTime() - new Date(b.createTimestampGMT).getTime()
+                )
+                .filter((message: any, index: number, self: any[]) =>
+                    index === self.findIndex((m: any) => m.id === message.id)
+                );
 
             dispatch({
                 type: FETCH_MESSAGES_SUCCESS,
@@ -136,12 +153,12 @@ export const setupMessageListener = (groupId: string, currentUserId: string) => 
     const newMessageHandler = onChildAdded(messagesRef, (snapshot) => {
         const newMessage = snapshot.val();
         if (newMessage.senderId !== currentUserId) {
-            dispatch({
-                type: NEW_MESSAGE_RECEIVED,
-                payload: { groupId, message: newMessage }
-            });
+            debouncedDispatchNewMessage(dispatch, { groupId, message: newMessage });
         }
     });
 
-    return () => off(messagesRef, 'child_added', newMessageHandler);
+    return () => {
+        off(messagesRef, 'child_added', newMessageHandler);
+        debouncedDispatchNewMessage.clear();
+    };
 };
