@@ -9,6 +9,8 @@ import {v4 as uuidv4} from 'uuid';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+const TEMP_PORT_ID = 'ua_port_odessa';
+
 export const fetchCategories = () => async (dispatch: Dispatch) => {
     dispatch({ type: actionTypes.FETCH_CATEGORIES_REQUEST });
 
@@ -37,7 +39,7 @@ export const fetchGoods = (categoryId?: string) => async (dispatch: Dispatch) =>
 
     try {
         const userData = JSON.parse(storage.getItem(storage.keys.USER_DATA) ?? '{}');
-        const portId = 'ua_port_odessa'; // fixme hardcode
+        const portId = TEMP_PORT_ID; // fixme hardcode
         const userId = userData.id;
 
         if (!userId) {
@@ -87,11 +89,11 @@ export const updateGood = (updatedGood: Good, newImages: File[], deletedImageKey
 
     try {
         const userData = JSON.parse(storage.getItem(storage.keys.USER_DATA) ?? '{}');
-        const portId = userData.port?.id;
+        const portId = TEMP_PORT_ID; // fixme hardcode
         const userId = userData.id;
 
-        if (!portId || !userId) {
-            throw new Error('User port or ID not found');
+        if (!userId) {
+            throw new Error('User ID not found');
         }
 
         // Upload new images
@@ -122,7 +124,8 @@ export const updateGood = (updatedGood: Good, newImages: File[], deletedImageKey
 
         const updatedGoodWithImages = {
             ...updatedGood,
-            images: mergedImages
+            images: mergedImages,
+            portId: portId
         };
 
         const goodRef = ref(database, `goods/${portId}/${userId}/${updatedGood.id}`);
@@ -145,11 +148,11 @@ export const deleteGood = (good: Good) => async (dispatch: Dispatch) => {
 
     try {
         const userData = JSON.parse(storage.getItem(storage.keys.USER_DATA) ?? '{}');
-        const portId = userData.port?.id;
+        const portId = TEMP_PORT_ID; // fixme hardcode
         const userId = userData.id;
 
-        if (!portId || !userId) {
-            throw new Error('User port or ID not found');
+        if (!userId) {
+            throw new Error('User ID not found');
         }
 
         // Delete images from Firebase Storage
@@ -181,11 +184,11 @@ export const addGood = (newGood: Omit<Good, 'id'>, newImages: File[]) => async (
 
     try {
         const userData = JSON.parse(storage.getItem(storage.keys.USER_DATA) ?? '{}');
-        const portId = userData.port?.id;
+        const portId = TEMP_PORT_ID;
         const userId = userData.id;
 
-        if (!portId || !userId) {
-            throw new Error('User port or ID not found');
+        if (!userId) {
+            throw new Error('User ID not found');
         }
 
         const goodId = uuidv4();
