@@ -30,7 +30,10 @@ export const fetchUserProfile = (uid: string) => async (dispatch: Dispatch) => {
             const snapshot = await get(userRef);
 
             if (snapshot.exists()) {
-                return snapshot.val();
+                const userData = snapshot.val();
+                // Convert ports object to array for easier handling in components
+                userData.portsArray = Object.values(userData.ports || {});
+                return userData;
             } else if (retryCount < RETRY_CONFIG.maxRetries) {
                 console.log(`Profile not found, retrying... (Attempt ${retryCount + 1}/${RETRY_CONFIG.maxRetries})`);
                 retryCount++;

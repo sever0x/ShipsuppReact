@@ -52,7 +52,7 @@ const Profile: React.FC = () => {
                                 <Typography
                                     variant="h4">{`${profile.data?.firstName} ${profile.data?.lastName}`}</Typography>
                                 <Typography variant="body1" color="secondary">
-                                    {profile.data.port.title} ({profile.data.port.city.title}, {profile.data.port.city.country.title})
+                                    {profile.data.portsArray.map((port: any) => port.title).join(', ')}
                                 </Typography>
                             </Box>
                         </Stack>
@@ -86,6 +86,12 @@ const Profile: React.FC = () => {
                             <Grid item xs={12} sm={6}>
                                 <Typography variant="body2" color="secondary">Phone</Typography>
                                 <Typography variant="body1">{profile.data?.phone || 'Not provided'}</Typography>
+                            </Grid>
+                            <Grid item xs={12}>
+                                <Typography variant="body2" color="secondary">Ports</Typography>
+                                <Typography variant="body1">
+                                    {profile.data.portsArray.map((port: any) => `${port.title} (${port.city.title}, ${port.city.country.title})`).join(', ')}
+                                </Typography>
                             </Grid>
                         </Grid>
                     </Stack>
