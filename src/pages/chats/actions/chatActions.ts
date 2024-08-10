@@ -99,11 +99,9 @@ export const sendMessage = (groupId: string, senderId: string, text: string) => 
     try {
         const messagesRef = ref(database, `chat/messages/${groupId}`);
         const newMessageRef = push(messagesRef);
-        const localTimestamp = new Date().toISOString();
-        const newMessage: Message = {
+        const newMessage = {
             id: newMessageRef.key ?? '',
-            createTimestampGMT: null,
-            localTimestamp,
+            createTimestampGMT: new Date().toISOString(),
             groupId,
             senderId,
             status: 'SENT',
@@ -132,7 +130,12 @@ export const sendMessage = (groupId: string, senderId: string, text: string) => 
             payload: { groupId, message: newMessage }
         });
 
-        await update(groupRef, { lastMessage: text });
+        await update(groupRef, {
+            lastMessage: {
+                text,
+                date: serverTimestamp()
+            }
+        });
 
     } catch (error) {
         dispatch({
@@ -145,7 +148,7 @@ export const sendMessage = (groupId: string, senderId: string, text: string) => 
 export const setupRealtimeListeners = (userId: string) => (dispatch: Dispatch) => {
     const chatsRef = ref(database, 'chat/groups');
 
-    onValue(chatsRef, (snapshot) => {
+    const onChange = (snapshot: { exists: () => any; val: () => any; }) => {
         if (snapshot.exists()) {
             const chats = snapshot.val();
             const userChats = Object.values(chats).filter((chat: any) => chat.membersData[userId]);
@@ -155,16 +158,26 @@ export const setupRealtimeListeners = (userId: string) => (dispatch: Dispatch) =
                 payload: userChats
             });
         }
-    });
+    };
 
-    return () => off(chatsRef);
+    onValue(chatsRef, onChange);
+
+    return () => off(chatsRef, 'value', onChange);
 };
+
 
 export const setupMessageListener = (groupId: string, currentUserId: string) => (dispatch: Dispatch) => {
     const messagesRef = ref(database, `chat/messages/${groupId}`);
 
     const newMessageHandler = onChildAdded(messagesRef, (snapshot) => {
         const newMessage = snapshot.val();
+        if (newMessage.createTimestampGMT) {
+            // fixme -3 hours from createTimestampGMT, see log newMessage
+            const date = new Date(newMessage.createTimestampGMT);
+            date.setHours(date.getHours() - 3);
+            newMessage.createTimestampGMT = date.toISOString();
+        }
+        console.log(newMessage);
         if (newMessage.senderId !== currentUserId) {
             debouncedDispatchNewMessage(dispatch, { groupId, message: newMessage });
         }

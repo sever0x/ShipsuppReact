@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
     addGood,
     deleteGood,
-    fetchAllUserGoods,
     fetchCategories,
     fetchGoods,
     updateGood
@@ -52,7 +51,7 @@ const Catalog: React.FC = () => {
     useEffect(() => {
         const loadData = async () => {
             await dispatch(fetchCategories() as any);
-            await dispatch(fetchAllUserGoods() as any);
+            await dispatch(fetchGoods() as any);
             setIsInitialLoad(false);
         };
 

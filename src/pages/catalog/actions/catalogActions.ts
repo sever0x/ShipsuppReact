@@ -9,6 +9,8 @@ import {v4 as uuidv4} from 'uuid';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+const TEMP_PORT_ID = 'ua_port_odessa';
+
 export const fetchCategories = () => async (dispatch: Dispatch) => {
     dispatch({ type: actionTypes.FETCH_CATEGORIES_REQUEST });
 
@@ -32,67 +34,16 @@ export const fetchCategories = () => async (dispatch: Dispatch) => {
     }
 };
 
-export const fetchAllUserGoods = () => async (dispatch: Dispatch) => {
-    dispatch({ type: actionTypes.FETCH_GOODS_REQUEST });
-
-    try {
-        let userData = null;
-        let attempts = 0;
-        const maxAttempts = 10;
-
-        while (!userData && attempts < maxAttempts) {
-            userData = JSON.parse(storage.getItem(storage.keys.USER_DATA) ?? 'null');
-            if (!userData) {
-                await delay(500);
-                attempts++;
-            }
-        }
-
-        if (!userData) {
-            throw new Error('Failed to load user data');
-        }
-
-        const portId = userData.port?.id;
-        const userId = userData.id;
-
-        if (!portId || !userId) {
-            throw new Error('User port or ID not found');
-        }
-
-        const goodsRef = ref(database, `goods/${portId}/${userId}`);
-        const snapshot = await get(goodsRef);
-
-        if (snapshot.exists()) {
-            const userGoods = Object.values(snapshot.val());
-
-            dispatch({
-                type: actionTypes.FETCH_GOODS_SUCCESS,
-                payload: userGoods
-            });
-        } else {
-            dispatch({
-                type: actionTypes.FETCH_GOODS_SUCCESS,
-                payload: []
-            });
-        }
-    } catch (error) {
-        dispatch({
-            type: actionTypes.FETCH_GOODS_FAILURE,
-            payload: error instanceof Error ? error.message : 'An unknown error occurred'
-        });
-    }
-};
-
-export const fetchGoods = (categoryId: string) => async (dispatch: Dispatch) => {
+export const fetchGoods = (categoryId?: string) => async (dispatch: Dispatch) => {
     dispatch({ type: actionTypes.FETCH_GOODS_REQUEST });
 
     try {
         const userData = JSON.parse(storage.getItem(storage.keys.USER_DATA) ?? '{}');
-        const portId = userData.port?.id;
+        const portId = TEMP_PORT_ID; // fixme hardcode
         const userId = userData.id;
 
-        if (!portId || !userId) {
-            throw new Error('User port or ID not found');
+        if (!userId) {
+            throw new Error('User ID not found');
         }
 
         const goodsRef = ref(database, `goods/${portId}`);
@@ -103,9 +54,16 @@ export const fetchGoods = (categoryId: string) => async (dispatch: Dispatch) => 
             const filteredGoods = Object.values(allGoods)
                 .flatMap(userGoods =>
                     Object.values(userGoods)
-                        .filter((good: Good) =>
-                            good.categoryId === categoryId && good.ownerId === userId
-                        )
+                        .filter((good: Good) => {
+                            let match = true;
+                            if (categoryId) {
+                                match = match && good.categoryId === categoryId;
+                            }
+                            if (userId) {
+                                match = match && good.ownerId === userId;
+                            }
+                            return match;
+                        })
                 );
 
             dispatch({
@@ -131,11 +89,11 @@ export const updateGood = (updatedGood: Good, newImages: File[], deletedImageKey
 
     try {
         const userData = JSON.parse(storage.getItem(storage.keys.USER_DATA) ?? '{}');
-        const portId = userData.port?.id;
+        const portId = TEMP_PORT_ID; // fixme hardcode
         const userId = userData.id;
 
-        if (!portId || !userId) {
-            throw new Error('User port or ID not found');
+        if (!userId) {
+            throw new Error('User ID not found');
         }
 
         // Upload new images
@@ -166,7 +124,8 @@ export const updateGood = (updatedGood: Good, newImages: File[], deletedImageKey
 
         const updatedGoodWithImages = {
             ...updatedGood,
-            images: mergedImages
+            images: mergedImages,
+            portId: portId
         };
 
         const goodRef = ref(database, `goods/${portId}/${userId}/${updatedGood.id}`);
@@ -189,11 +148,11 @@ export const deleteGood = (good: Good) => async (dispatch: Dispatch) => {
 
     try {
         const userData = JSON.parse(storage.getItem(storage.keys.USER_DATA) ?? '{}');
-        const portId = userData.port?.id;
+        const portId = TEMP_PORT_ID; // fixme hardcode
         const userId = userData.id;
 
-        if (!portId || !userId) {
-            throw new Error('User port or ID not found');
+        if (!userId) {
+            throw new Error('User ID not found');
         }
 
         // Delete images from Firebase Storage
@@ -225,11 +184,11 @@ export const addGood = (newGood: Omit<Good, 'id'>, newImages: File[]) => async (
 
     try {
         const userData = JSON.parse(storage.getItem(storage.keys.USER_DATA) ?? '{}');
-        const portId = userData.port?.id;
+        const portId = TEMP_PORT_ID;
         const userId = userData.id;
 
-        if (!portId || !userId) {
-            throw new Error('User port or ID not found');
+        if (!userId) {
+            throw new Error('User ID not found');
         }
 
         const goodId = uuidv4();

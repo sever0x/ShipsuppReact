@@ -56,6 +56,14 @@ const ChatContent: React.FC<ChatContentProps> = React.memo(({
         }
     }, [messages, isInitialLoad, scrollToBottom]);
 
+    useEffect(() => {
+        if (messages.length > 0) {
+            const lastMessage = messages[messages.length - 1];
+            const lastMessageTime = new Date(lastMessage.createTimestampGMT);
+            console.log('Time of Last Message:', lastMessageTime.toLocaleString());
+        }
+    }, [messages]);
+
     const handleSendMessage = useCallback(() => {
         if (newMessage.trim()) {
             onSendMessage(newMessage.trim());
@@ -136,7 +144,7 @@ const ChatContent: React.FC<ChatContentProps> = React.memo(({
                                 >
                                     <Typography variant="body1">{message.text}</Typography>
                                     <Typography variant="caption" sx={{ display: 'block', mt: 1, color: 'text.secondary' }}>
-                                        {new Date(message.createTimestampGMT ?? message.localTimestamp).toLocaleString()}
+                                        {new Date(message.createTimestampGMT).toLocaleString()}
                                     </Typography>
                                 </Box>
                                 {isSender && (

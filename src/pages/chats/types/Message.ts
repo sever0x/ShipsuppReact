@@ -1,7 +1,6 @@
 export interface Message {
     id: string;
-    createTimestampGMT: string | null;
-    localTimestamp: string;
+    createTimestampGMT: string;
     groupId: string;
     senderId: string;
     status: string;

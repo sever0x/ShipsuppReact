@@ -4,10 +4,13 @@ import {
     FETCH_CHATS_SUCCESS,
     FETCH_MESSAGES_FAILURE,
     FETCH_MESSAGES_REQUEST,
-    FETCH_MESSAGES_SUCCESS, NEW_MESSAGE_RECEIVED,
+    FETCH_MESSAGES_SUCCESS,
+    NEW_MESSAGE_RECEIVED,
     SEND_MESSAGE_FAILURE,
     SEND_MESSAGE_REQUEST,
-    SEND_MESSAGE_SUCCESS, UPDATE_CHAT_REALTIME, UPDATE_MESSAGES_REALTIME
+    SEND_MESSAGE_SUCCESS,
+    UPDATE_CHAT_REALTIME,
+    UPDATE_MESSAGES_REALTIME
 } from '../constants/actionTypes';
 import {ChatState} from "pages/chats/types/state/ChatState";
 import {Chat} from "pages/chats/types/Chat";
@@ -55,7 +58,10 @@ const chatReducer = (state = initialState, action: any): ChatState => {
         case NEW_MESSAGE_RECEIVED:
         case SEND_MESSAGE_SUCCESS:
             const existingMessages = state.messages[action.payload.groupId] || [];
-            const newMessage = action.payload.message;
+            const newMessage = {
+                ...action.payload.message,
+                createTimestampUTC: action.payload.message.createTimestampUTC ?? new Date().toISOString()
+            };
             const isMessageExists = existingMessages.some(msg => msg.id === newMessage.id);
 
             if (!isMessageExists) {
@@ -66,11 +72,23 @@ const chatReducer = (state = initialState, action: any): ChatState => {
                         ...state.messages,
                         [action.payload.groupId]: [...existingMessages, newMessage]
                     },
-                    chats: state.chats.map(chat =>
-                        chat.id === action.payload.groupId
-                            ? {...chat, lastMessage: newMessage.text}
-                            : chat
-                    )
+                    chats: state.chats.map(chat => {
+                        const updatedChat = chat.id === action.payload.groupId
+                            ? {
+                                ...chat,
+                                lastMessage: {
+                                    text: newMessage.text,
+                                    date: newMessage.createTimestampGMT
+                                }
+                            }
+                            : chat;
+
+                        if (chat.id === action.payload.groupId) {
+                            console.log('Updated Last Message for Chat:', updatedChat.lastMessage);
+                        }
+
+                        return updatedChat;
+                    })
                 };
             }
             return state;
