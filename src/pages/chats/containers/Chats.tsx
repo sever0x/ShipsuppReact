@@ -4,7 +4,7 @@ import { RootState } from 'app/reducers';
 import {
     fetchChats,
     fetchMessages, resetUnreadCount,
-    sendMessage,
+    sendMessage, setSelectedChatId,
     setupMessageListener,
     setupRealtimeListeners
 } from "../actions/chatActions";
@@ -14,7 +14,7 @@ import Box from 'components/Box';
 import { createSelector } from 'reselect';
 
 const selectChat = (state: RootState) => state.chat;
-const selectSelectedChatId = (_: RootState, selectedChatId: string | null) => selectedChatId;
+const selectSelectedChatId = (state: RootState) => state.chat.selectedChatId;
 
 const selectCurrentChatMessages = createSelector(
     [selectChat, selectSelectedChatId],
@@ -32,14 +32,13 @@ const selectCurrentChatMembersData = createSelector(
 const Chats: React.FC = () => {
     const dispatch = useDispatch();
     const user = useSelector((state: RootState) => state.userAuth.user);
-    const { chats, loading } = useSelector((state: RootState) => state.chat);
-    const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
+    const { chats, loading, selectedChatId } = useSelector((state: RootState) => state.chat);
 
     const currentChatMessages = useSelector((state: RootState) =>
-        selectCurrentChatMessages(state, selectedChatId)
+        selectCurrentChatMessages(state)
     );
     const currentChatMembersData = useSelector((state: RootState) =>
-        selectCurrentChatMembersData(state, selectedChatId)
+        selectCurrentChatMembersData(state)
     );
 
     useEffect(() => {
@@ -69,7 +68,7 @@ const Chats: React.FC = () => {
     }, [dispatch, user]);
 
     const handleChatSelect = useCallback((chatId: string) => {
-        setSelectedChatId(chatId);
+        dispatch(setSelectedChatId(chatId));
         dispatch(fetchMessages(chatId) as any);
         if (user?.uid) {
             dispatch(resetUnreadCount(chatId, user.uid) as any);
@@ -82,6 +81,19 @@ const Chats: React.FC = () => {
             dispatch(resetUnreadCount(selectedChatId, user.uid) as any);
         }
     }, [dispatch, selectedChatId, user]);
+
+    const handleKeyDown = useCallback((event: KeyboardEvent) => {
+        if (event.key === 'Escape') {
+            dispatch(setSelectedChatId(null));
+        }
+    }, [dispatch]);
+
+    useEffect(() => {
+        document.addEventListener('keydown', handleKeyDown);
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [handleKeyDown]);
 
     return (
         <Box sx={{
@@ -116,7 +128,7 @@ const Chats: React.FC = () => {
                     currentUserId={user?.uid || ''}
                     onSendMessage={handleSendMessage}
                     loading={loading && currentChatMessages.length === 0}
-                    selectedChatId={selectedChatId}
+                    // selectedChatId={selectedChatId}
                 />
             </Box>
         </Box>

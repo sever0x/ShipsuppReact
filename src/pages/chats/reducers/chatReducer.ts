@@ -14,12 +14,14 @@ import {
 } from '../constants/actionTypes';
 import {ChatState} from "pages/chats/types/state/ChatState";
 import {Chat} from "pages/chats/types/Chat";
+import {SET_SELECTED_CHAT_ID} from "pages/orders/constants/actionTypes";
 
 const initialState: ChatState = {
     chats: [],
     messages: {},
     loading: false,
-    error: null
+    error: null,
+    selectedChatId: null,
 };
 
 const chatReducer = (state = initialState, action: any): ChatState => {
@@ -73,7 +75,7 @@ const chatReducer = (state = initialState, action: any): ChatState => {
                         [action.payload.groupId]: [...existingMessages, newMessage]
                     },
                     chats: state.chats.map(chat => {
-                        const updatedChat = chat.id === action.payload.groupId
+                        return chat.id === action.payload.groupId
                             ? {
                                 ...chat,
                                 lastMessage: {
@@ -82,12 +84,6 @@ const chatReducer = (state = initialState, action: any): ChatState => {
                                 }
                             }
                             : chat;
-
-                        if (chat.id === action.payload.groupId) {
-                            console.log('Updated Last Message for Chat:', updatedChat.lastMessage);
-                        }
-
-                        return updatedChat;
                     })
                 };
             }
@@ -107,6 +103,12 @@ const chatReducer = (state = initialState, action: any): ChatState => {
                     ...state.messages,
                     [action.payload.groupId]: action.payload.messages
                 }
+            };
+        case SET_SELECTED_CHAT_ID:
+            return {
+                ...state,
+                selectedChatId: action.payload,
+                messages: action.payload ? state.messages : {}
             };
         default:
             return state;

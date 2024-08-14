@@ -6,12 +6,13 @@ import {
     UPDATE_ORDER_STATUS_SUCCESS,
     UPDATE_ORDER_STATUS_FAILURE, FETCH_ORDER_DETAILS_REQUEST, FETCH_ORDER_DETAILS_SUCCESS, FETCH_ORDER_DETAILS_FAILURE
 } from '../constants/actionTypes';
+import {Order} from "pages/orders/types/Order";
 
 interface OrderState {
     loadingOrders: boolean;
     loadingDetails: boolean;
     data: any[];
-    orderDetails: any | null;
+    orderDetails: Order | null;
     error: string | null;
 }
 

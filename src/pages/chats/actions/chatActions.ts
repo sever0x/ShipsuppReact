@@ -1,5 +1,5 @@
 import {Dispatch} from 'redux';
-import {ref, push, serverTimestamp, set, update, get, onValue, off, onChildAdded} from 'firebase/database';
+import {get, off, onChildAdded, onValue, push, ref, serverTimestamp, set, update} from 'firebase/database';
 import {database} from 'app/config/firebaseConfig';
 import {
     FETCH_CHATS_FAILURE,
@@ -7,13 +7,20 @@ import {
     FETCH_CHATS_SUCCESS,
     FETCH_MESSAGES_FAILURE,
     FETCH_MESSAGES_REQUEST,
-    FETCH_MESSAGES_SUCCESS, NEW_MESSAGE_RECEIVED,
+    FETCH_MESSAGES_SUCCESS,
+    NEW_MESSAGE_RECEIVED,
     SEND_MESSAGE_FAILURE,
     SEND_MESSAGE_REQUEST,
-    SEND_MESSAGE_SUCCESS, UPDATE_CHAT_REALTIME, UPDATE_MESSAGES_REALTIME
+    SEND_MESSAGE_SUCCESS,
+    UPDATE_CHAT_REALTIME
 } from '../constants/actionTypes';
-import { Message } from '../types/Message';
 import {debounce} from "@mui/material";
+import {Order} from "pages/orders/types/Order";
+import {
+    OPEN_CHAT_FROM_ORDERS_OR_CREATE_NEW_CHAT_FAILURE,
+    OPEN_CHAT_FROM_ORDERS_OR_CREATE_NEW_CHAT_SUCCESS, SET_SELECTED_CHAT_ID
+} from "pages/orders/constants/actionTypes";
+import {Chat} from "pages/chats/types/Chat";
 
 let lastReceivedMessageId = '';
 
@@ -26,6 +33,11 @@ const debouncedDispatchNewMessage = debounce((dispatch, payload) => {
         });
     }
 }, 100);
+
+export const setSelectedChatId = (chatId: string | null) => ({
+    type: SET_SELECTED_CHAT_ID,
+    payload: chatId
+});
 
 export const fetchChats = (sellerId: string) => async (dispatch: Dispatch) => {
     dispatch({ type: FETCH_CHATS_REQUEST });
@@ -177,7 +189,6 @@ export const setupMessageListener = (groupId: string, currentUserId: string) => 
             date.setHours(date.getHours() - 3);
             newMessage.createTimestampGMT = date.toISOString();
         }
-        console.log(newMessage);
         if (newMessage.senderId !== currentUserId) {
             debouncedDispatchNewMessage(dispatch, { groupId, message: newMessage });
         }
@@ -206,3 +217,65 @@ export const resetUnreadCount = (chatId: string, userId: string) => async (dispa
         console.error("Error resetting unread count:", error);
     }
 };
+
+export const switchToChatOrCreateNew = (order: Order, sellerId: string) => async (dispatch: Dispatch) => {
+    try {
+        const chatsRef = ref(database, 'chat/groups');
+        const snapshot = await get(chatsRef);
+
+        let existChat: Chat | null = null;
+
+        if (snapshot.exists()) {
+            const chats = snapshot.val();
+            existChat = findExistChat(chats, order.buyer.id, sellerId);
+        }
+
+        if (existChat) {
+            dispatch({ type: SET_SELECTED_CHAT_ID, payload: existChat.id });
+        } else {
+            const newChatRef = push(ref(database, 'chat/groups'));
+            const newChat = {
+                id: newChatRef.key,
+                [`_${order.buyer.id}`]: order.buyer.id,
+                [`_${sellerId}`]: sellerId,
+                lastMessage: {
+                    date: new Date().toISOString(),
+                    text: "Chat created",
+                },
+                membersData: {
+                    [order.buyer.id]: {
+                        firstName: order.buyer.firstName,
+                        id: order.buyer.id,
+                        lastName: order.buyer.lastName,
+                        photoUrl: order.buyer.profilePhoto,
+                        role: order.buyer.role
+                    },
+                    [sellerId]: {
+                        firstName: order.seller.firstName,
+                        id: sellerId,
+                        lastName: order.seller.lastName,
+                        photoUrl: order.seller.profilePhoto,
+                        role: order.seller.role
+                    },
+                },
+                title: `${order.seller.firstName} ${order.seller.lastName} in ${order.port.title}`,
+                unreadCount: {
+                    [order.buyer.id]: 0,
+                    [sellerId]: 0
+                }
+            };
+
+            await set(newChatRef, newChat);
+            dispatch({type: OPEN_CHAT_FROM_ORDERS_OR_CREATE_NEW_CHAT_SUCCESS, payload: newChat});
+        }
+    } catch (error) {
+        console.error("Error creating or opening chat:", error);
+        dispatch({ type: OPEN_CHAT_FROM_ORDERS_OR_CREATE_NEW_CHAT_FAILURE, payload: error instanceof Error ? error.message : 'An unknown error occurred' });
+    }
+}
+
+const findExistChat = (chats: any, buyerId: string, sellerId: string): Chat => {
+    return <Chat>Object.values(chats).find((chat: any) =>
+        chat[`_${buyerId}`] === buyerId && chat[`_${sellerId}`] === sellerId
+    );
+}

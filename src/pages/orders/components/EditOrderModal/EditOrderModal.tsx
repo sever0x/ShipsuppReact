@@ -14,6 +14,12 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import { updateOrderStatus } from '../../actions/orderActions';
 import { RootState } from 'app/reducers';
+import {switchToChatOrCreateNew} from "pages/chats/actions/chatActions";
+import {Order} from "pages/orders/types/Order";
+import userAuth from "../../../../app/actions/userAuth";
+import useAuth from "../../../../misc/hooks/useAuth";
+import {useNavigate} from "react-router-dom";
+import {Chat} from "@mui/icons-material";
 
 interface EditOrderModalProps {
     open: boolean;
@@ -111,12 +117,21 @@ const HistoryItem = styled(Box)(({ theme }) => ({
 
 const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order }) => {
     const dispatch = useDispatch();
+    const { user } = useAuth();
+    const navigate = useNavigate();
     const { loadingDetails, orderDetails, error } = useSelector((state: RootState) => state.orders);
 
     const handleStatusChange = (newStatus: string) => {
         dispatch(updateOrderStatus(order.id, newStatus) as any);
         onClose();
     };
+
+    const handleOpenChatWithBuyer = (order: Order | null) => {
+        if (user?.uid && order) {
+            dispatch(switchToChatOrCreateNew(order, user?.uid) as any);
+            navigate("/chats");
+        }
+    }
 
     const currentStatusIndex = statusOrder.indexOf(order.status);
     const nextStatus = statusOrder[currentStatusIndex + 1];
@@ -242,7 +257,12 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order })
                         </InfoRow>
                         <InfoRow>
                             <Typography variant="body1">Buyer:</Typography>
-                            <Typography variant="body1">{getBuyerInfo()}</Typography>
+                            <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                                <Typography variant="body1">{getBuyerInfo()}</Typography>
+                                <IconButton onClick={() => handleOpenChatWithBuyer(orderDetails)}>
+                                    <Chat fontSize='small' />
+                                </IconButton>
+                            </div>
                         </InfoRow>
                         <InfoRow>
                             <Typography variant="body1">Port:</Typography>

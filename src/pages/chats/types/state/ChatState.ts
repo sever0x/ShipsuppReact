@@ -6,4 +6,5 @@ export interface ChatState {
     messages: { [groupId: string]: Message[] };
     loading: boolean;
     error: string | null;
+    selectedChatId: string | null;
 }
