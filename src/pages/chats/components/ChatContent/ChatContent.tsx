@@ -6,6 +6,8 @@ import TextField from 'components/TextField';
 import Box from 'components/Box';
 import IconButton from 'components/IconButton';
 import { Send } from '@mui/icons-material';
+import {useSelector} from "react-redux";
+import {RootState} from "../../../../app/reducers";
 
 interface ChatContentProps {
     messages: Message[];
@@ -13,7 +15,7 @@ interface ChatContentProps {
     currentUserId: string;
     onSendMessage: (text: string) => void;
     loading: boolean;
-    selectedChatId: string | null;
+    // selectedChatId: string | null;
 }
 
 const ChatContent: React.FC<ChatContentProps> = React.memo(({
@@ -22,8 +24,9 @@ const ChatContent: React.FC<ChatContentProps> = React.memo(({
     currentUserId,
     onSendMessage,
     loading,
-    selectedChatId
+    // selectedChatId
 }) => {
+    const selectedChatId = useSelector((state: RootState) => state.chat.selectedChatId);
     const [newMessage, setNewMessage] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const [isInitialLoad, setIsInitialLoad] = useState(true);
@@ -56,20 +59,16 @@ const ChatContent: React.FC<ChatContentProps> = React.memo(({
         }
     }, [messages, isInitialLoad, scrollToBottom]);
 
-    useEffect(() => {
-        if (messages.length > 0) {
-            const lastMessage = messages[messages.length - 1];
-            const lastMessageTime = new Date(lastMessage.createTimestampGMT);
-            console.log('Time of Last Message:', lastMessageTime.toLocaleString());
-        }
-    }, [messages]);
-
     const handleSendMessage = useCallback(() => {
         if (newMessage.trim()) {
             onSendMessage(newMessage.trim());
             setNewMessage('');
         }
     }, [newMessage, onSendMessage]);
+
+    useEffect(() => {
+        setNewMessage('');
+    }, [selectedChatId]);
 
     if (!selectedChatId) {
         return (
@@ -189,4 +188,9 @@ const ChatContent: React.FC<ChatContentProps> = React.memo(({
     );
 });
 
-export default ChatContent;
+const areEqual = (prevProps: ChatContentProps, nextProps: ChatContentProps) => {
+    return prevProps.messages === nextProps.messages &&
+        prevProps.loading === nextProps.loading;
+};
+
+export default React.memo(ChatContent, areEqual);

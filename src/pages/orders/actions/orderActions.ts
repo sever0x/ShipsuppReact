@@ -68,7 +68,7 @@ export const fetchOrderDetails = (orderId: string) => async (dispatch: Dispatch)
             }
         });
 
-        const order: Order = response.data;
+        const order: Order = response.data.data;
 
         dispatch({
             type: FETCH_ORDER_DETAILS_SUCCESS,
