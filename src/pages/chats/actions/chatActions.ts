@@ -15,11 +15,12 @@ import {
     UPDATE_CHAT_REALTIME,
     OPEN_CHAT_FROM_ORDERS_OR_CREATE_NEW_CHAT_FAILURE,
     OPEN_CHAT_FROM_ORDERS_OR_CREATE_NEW_CHAT_SUCCESS,
-    SET_SELECTED_CHAT_ID
+    SET_SELECTED_CHAT_ID, MARK_MESSAGES_AS_READ, RESET_SELECTED_CHAT_ID
 } from '../constants/actionTypes';
 import {debounce} from "@mui/material";
 import {Order} from "pages/orders/types/Order";
 import {Chat} from "pages/chats/types/Chat";
+import {RootState} from "../../../app/reducers";
 
 let lastReceivedMessageId = '';
 
@@ -36,6 +37,10 @@ const debouncedDispatchNewMessage = debounce((dispatch, payload) => {
 export const setSelectedChatId = (chatId: string | null) => ({
     type: SET_SELECTED_CHAT_ID,
     payload: chatId
+});
+
+export const resetSelectedChatId = () => ({
+    type: RESET_SELECTED_CHAT_ID
 });
 
 export const fetchChats = (sellerId: string) => async (dispatch: Dispatch) => {
@@ -196,6 +201,38 @@ export const setupMessageListener = (groupId: string, currentUserId: string) => 
     return () => {
         off(messagesRef, 'child_added', newMessageHandler);
         debouncedDispatchNewMessage.clear();
+    };
+};
+
+export const markMessagesAsRead = (chatId: string, userId: string) => async (dispatch: Dispatch) => {
+    try {
+        const chatRef = ref(database, `chat/groups/${chatId}/unreadCount/${userId}`);
+        await set(chatRef, 0);
+
+        dispatch({
+            type: MARK_MESSAGES_AS_READ,
+            payload: { chatId, userId }
+        });
+    } catch (error) {
+        console.error("Error marking messages as read:", error);
+    }
+};
+
+export const watchAndResetUnreadCount = (chatId: string, userId: string) => (dispatch: Dispatch, getState: () => RootState) => {
+    const unreadCountRef = ref(database, `chat/groups/${chatId}/unreadCount/${userId}`);
+
+    const unreadCountListener = onValue(unreadCountRef, (snapshot) => {
+        const unreadCount = snapshot.val();
+        const state = getState();
+        const isActiveChat = state.chat.selectedChatId === chatId;
+
+        if (unreadCount > 0 && isActiveChat) {
+            dispatch(resetUnreadCount(chatId, userId) as any);
+        }
+    });
+
+    return () => {
+        off(unreadCountRef, 'value', unreadCountListener);
     };
 };
 
