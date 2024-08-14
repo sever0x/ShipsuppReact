@@ -11,7 +11,7 @@ import {
     SEND_MESSAGE_SUCCESS,
     UPDATE_CHAT_REALTIME,
     UPDATE_MESSAGES_REALTIME,
-    SET_SELECTED_CHAT_ID
+    SET_SELECTED_CHAT_ID, MARK_MESSAGES_AS_READ
 } from '../constants/actionTypes';
 import {ChatState} from "pages/chats/types/state/ChatState";
 import {Chat} from "pages/chats/types/Chat";
@@ -109,6 +109,15 @@ const chatReducer = (state = initialState, action: any): ChatState => {
                 ...state,
                 selectedChatId: action.payload,
                 messages: action.payload ? state.messages : {}
+            };
+        case MARK_MESSAGES_AS_READ:
+            return {
+                ...state,
+                chats: state.chats.map(chat =>
+                    chat.id === action.payload.chatId
+                        ? { ...chat, unreadCount: { ...chat.unreadCount, [action.payload.userId]: 0 } }
+                        : chat
+                )
             };
         default:
             return state;

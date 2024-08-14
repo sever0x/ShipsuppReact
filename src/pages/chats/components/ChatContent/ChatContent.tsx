@@ -6,8 +6,9 @@ import TextField from 'components/TextField';
 import Box from 'components/Box';
 import IconButton from 'components/IconButton';
 import { Send } from '@mui/icons-material';
-import {useSelector} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {RootState} from "../../../../app/reducers";
+import {markMessagesAsRead, resetUnreadCount, watchAndResetUnreadCount} from "pages/chats/actions/chatActions";
 
 interface ChatContentProps {
     messages: Message[];
@@ -15,7 +16,6 @@ interface ChatContentProps {
     currentUserId: string;
     onSendMessage: (text: string) => void;
     loading: boolean;
-    // selectedChatId: string | null;
 }
 
 const ChatContent: React.FC<ChatContentProps> = React.memo(({
@@ -24,8 +24,8 @@ const ChatContent: React.FC<ChatContentProps> = React.memo(({
     currentUserId,
     onSendMessage,
     loading,
-    // selectedChatId
 }) => {
+    const dispatch = useDispatch();
     const selectedChatId = useSelector((state: RootState) => state.chat.selectedChatId);
     const [newMessage, setNewMessage] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -70,6 +70,41 @@ const ChatContent: React.FC<ChatContentProps> = React.memo(({
         setNewMessage('');
     }, [selectedChatId]);
 
+    const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+        const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+        if (scrollHeight - scrollTop - clientHeight <= 1) {
+            if (selectedChatId) {
+                dispatch(markMessagesAsRead(selectedChatId, currentUserId) as any);
+            }
+        }
+    }, [dispatch, selectedChatId, currentUserId]);
+
+    useEffect(() => {
+        if (selectedChatId && messages.length > 0) {
+            dispatch(markMessagesAsRead(selectedChatId, currentUserId) as any);
+        }
+    }, [dispatch, selectedChatId, currentUserId, messages]);
+
+    useEffect(() => {
+        let unsubscribe: (() => void) | undefined;
+
+        if (selectedChatId) {
+            unsubscribe = dispatch(watchAndResetUnreadCount(selectedChatId, currentUserId) as any);
+        }
+
+        return () => {
+            if (unsubscribe) {
+                unsubscribe();
+            }
+        };
+    }, [dispatch, selectedChatId, currentUserId]);
+
+    useEffect(() => {
+        if (selectedChatId && messages.length > 0) {
+            dispatch(resetUnreadCount(selectedChatId, currentUserId) as any);
+        }
+    }, [dispatch, selectedChatId, currentUserId, messages]);
+
     if (!selectedChatId) {
         return (
             <Box sx={{
@@ -98,8 +133,10 @@ const ChatContent: React.FC<ChatContentProps> = React.memo(({
                     overflowY: 'auto',
                     padding: 2,
                     display: 'flex',
-                    flexDirection: 'column'
+                    flexDirection: 'column',
+                    paddingBottom: 0
                 }}
+                onScroll={handleScroll}
             >
                 {loading && messages.length === 0 ? (
                     Array.from({ length: 5 }).map((_, index) => (
