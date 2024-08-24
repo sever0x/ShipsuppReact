@@ -19,16 +19,27 @@ export const fetchSellerOrders = (sellerId: string) => async (dispatch: Dispatch
     dispatch({ type: FETCH_SELLER_ORDERS_REQUEST });
 
     try {
-        const ordersRef = ref(database, 'orders');
-        const sellerOrdersQuery = query(ordersRef, orderByChild('sellerId'), equalTo(sellerId));
-        const snapshot = await get(sellerOrdersQuery);
+        const user = auth.currentUser;
+        if (!user) {
+            throw new Error("User not authenticated");
+        }
 
-        if (snapshot.exists()) {
-            const orders = Object.values(snapshot.val());
-            const filteredOrders = orders.filter((order: any) => !excludedStatuses.includes(order.status));
-            const sortedOrders = [...filteredOrders].sort((a: any, b: any) =>
+        const token = await getIdToken(user);
+        const response = await axios.get(`https://us-central1-shipsupp-dev-38d5e.cloudfunctions.net/getOrders?userId=${sellerId}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+        });
+
+        if (response.data.error === null && response.data.message === 'success') {
+            const orders: Order[] = response.data.data;
+
+            const filteredOrders = orders.filter((order: Order) => !excludedStatuses.includes(order.status));
+
+            const sortedOrders = [...filteredOrders].sort((a: Order, b: Order) =>
                 new Date(b.createTimestampGMT).getTime() - new Date(a.createTimestampGMT).getTime()
             );
+
             dispatch({
                 type: FETCH_SELLER_ORDERS_SUCCESS,
                 payload: sortedOrders
