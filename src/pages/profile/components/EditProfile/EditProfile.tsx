@@ -1,20 +1,20 @@
-import React, {useState} from 'react';
-import {useDispatch, useSelector} from 'react-redux';
+import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import {
     Avatar,
     Box,
     Button,
     CircularProgress,
-    FormControl,
+    Container,
+    Grid,
     IconButton,
-    InputLabel,
-    Select, SelectChangeEvent,
-    TextField
+    TextField,
+    useTheme,
 } from '@mui/material';
-import {CloudUpload} from '@mui/icons-material';
-import {RootState} from '../../../../app/reducers';
-import {updateProfile, updateProfilePhoto} from '../../actions/profileActions';
-import MenuItem from 'components/MenuItem';
+import { CloudUpload, Save, Cancel } from '@mui/icons-material';
+import { RootState } from '../../../../app/reducers';
+import { updateProfile, updateProfilePhoto } from '../../actions/profileActions';
+import Typography from 'components/Typography';
 
 interface EditProfileProps {
     onCancel: () => void;
@@ -22,28 +22,13 @@ interface EditProfileProps {
 
 const EditProfile: React.FC<EditProfileProps> = ({ onCancel }) => {
     const dispatch = useDispatch();
+    const theme = useTheme();
     const profile = useSelector((state: RootState) => state.profile.data);
     const [formData, setFormData] = useState(profile);
     const [isUploading, setIsUploading] = useState(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
-
-    const handlePortChange = (event: SelectChangeEvent<string[]>) => {
-        const portIds = event.target.value as string[];
-        const selectedPorts = portIds.reduce((acc, portId) => {
-            const selectedPort = profile.portsArray.find((port: any) => port.id === portId);
-            if (selectedPort) {
-                acc[portId] = selectedPort;
-            }
-            return acc;
-        }, {} as Record<string, any>);
-
-        setFormData((prev: any) => ({
-            ...prev,
-            ports: selectedPorts
-        }));
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -67,81 +52,146 @@ const EditProfile: React.FC<EditProfileProps> = ({ onCancel }) => {
         }
     };
 
+    const OutlinedBox = ({ children, sx }: { children: React.ReactNode; sx?: any }) => (
+        <Box
+            sx={{
+                p: 3,
+                borderRadius: 2,
+                border: `1px solid ${theme.palette.divider}`,
+                backgroundColor: 'white',
+                '&:hover': {
+                    boxShadow: `0 0 0 1px ${theme.palette.primary.main}`,
+                },
+                ...sx,
+            }}
+        >
+            {children}
+        </Box>
+    );
+
     return (
-        <form onSubmit={handleSubmit}>
-            <Box display="flex" flexDirection="column" alignItems="center" mb={3}>
-                <Box position="relative">
-                    <Avatar
-                        src={formData.profilePhoto}
-                        alt={`${formData.firstName} ${formData.lastName}`}
-                        sx={{ width: 100, height: 100, mb: 2 }}
-                    />
-                    <IconButton
-                        sx={{ position: 'absolute', bottom: 0, right: 0 }}
-                        component="label"
-                        disabled={isUploading}
-                    >
-                        {isUploading ? <CircularProgress size={24} /> : <CloudUpload />}
-                        <input
-                            type="file"
-                            hidden
-                            onChange={handlePhotoUpload}
-                            accept="image/*"
-                        />
-                    </IconButton>
-                </Box>
-            </Box>
-            <TextField
-                fullWidth
-                margin="normal"
-                name="firstName"
-                label="First Name"
-                value={formData.firstName}
-                onChange={handleChange}
-            />
-            <TextField
-                fullWidth
-                margin="normal"
-                name="lastName"
-                label="Last Name"
-                value={formData.lastName}
-                onChange={handleChange}
-            />
-            <TextField
-                fullWidth
-                margin="normal"
-                name="phone"
-                label="Phone"
-                value={formData.phone}
-                onChange={handleChange}
-            />
-            <FormControl fullWidth margin="normal">
-                <InputLabel id="ports-select-label">Ports</InputLabel>
-                <Select
-                    labelId="ports-select-label"
-                    multiple
-                    value={Object.keys(formData.ports || {})}
-                    onChange={handlePortChange}
-                    renderValue={(selected) => (selected).map(id => formData.ports[id].title).join(', ')}
-                    variant="outlined"
-                    disabled={true}
-                >
-                    {profile.portsArray.map((port: any) => (
-                        <MenuItem key={port.id} value={port.id}>
-                            {port.title}
-                        </MenuItem>
-                    ))}
-                </Select>
-            </FormControl>
-            <Box mt={3}>
-                <Button type="submit" variant="contained" color="primary" sx={{ mr: 2 }}>
-                    Save
-                </Button>
-                <Button variant="outlined" onClick={onCancel}>
-                    Cancel
-                </Button>
-            </Box>
-        </form>
+        <Container maxWidth="xl">
+            <form onSubmit={handleSubmit}>
+                <Grid container spacing={3}>
+                    <Grid item xs={12} md={4}>
+                        <OutlinedBox>
+                            <Box display="flex" flexDirection="column" alignItems="center" mb={3}>
+                                <Box position="relative">
+                                    <Avatar
+                                        src={formData.profilePhoto}
+                                        alt={`${formData.firstName} ${formData.lastName}`}
+                                        sx={{ width: 120, height: 120, mb: 2 }}
+                                    />
+                                    <IconButton
+                                        sx={{
+                                            position: 'absolute',
+                                            bottom: 0,
+                                            right: 0,
+                                            backgroundColor: theme.palette.background.paper,
+                                            '&:hover': { backgroundColor: theme.palette.action.hover },
+                                        }}
+                                        component="label"
+                                        disabled={isUploading}
+                                    >
+                                        {isUploading ? <CircularProgress size={24} /> : <CloudUpload />}
+                                        <input
+                                            type="file"
+                                            hidden
+                                            onChange={handlePhotoUpload}
+                                            accept="image/*"
+                                        />
+                                    </IconButton>
+                                </Box>
+                                <Typography variant="h5" gutterBottom>Edit Profile</Typography>
+                            </Box>
+                            <Box mt={2}>
+                                <Button
+                                    fullWidth
+                                    type="submit"
+                                    variant="contained"
+                                    color="primary"
+                                    startIcon={<Save />}
+                                    sx={{ mb: 1 }}
+                                >
+                                    Save Changes
+                                </Button>
+                                <Button
+                                    fullWidth
+                                    variant="outlined"
+                                    color="secondary"
+                                    onClick={onCancel}
+                                    startIcon={<Cancel />}
+                                >
+                                    Cancel
+                                </Button>
+                            </Box>
+                        </OutlinedBox>
+                    </Grid>
+                    <Grid item xs={12} md={8}>
+                        <OutlinedBox>
+                            <Typography variant="h6" gutterBottom>Personal Information</Typography>
+                            <Grid container spacing={2} pt={2}>
+                                <Grid item xs={12} sm={6}>
+                                    <TextField
+                                        fullWidth
+                                        name="firstName"
+                                        label="First Name"
+                                        value={formData.firstName}
+                                        onChange={handleChange}
+                                        variant="outlined"
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={6}>
+                                    <TextField
+                                        fullWidth
+                                        name="lastName"
+                                        label="Last Name"
+                                        value={formData.lastName}
+                                        onChange={handleChange}
+                                        variant="outlined"
+                                    />
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <TextField
+                                        fullWidth
+                                        name="phone"
+                                        label="Phone"
+                                        value={formData.phone}
+                                        onChange={handleChange}
+                                        variant="outlined"
+                                    />
+                                </Grid>
+                            </Grid>
+                        </OutlinedBox>
+                        <OutlinedBox sx={{ mt: 3 }}>
+                            <Typography variant="h6" gutterBottom>Account Details</Typography>
+                            <Grid container spacing={2} pt={2}>
+                                <Grid item xs={12}>
+                                    <TextField
+                                        fullWidth
+                                        name="currentPlan"
+                                        label="Current ShipSupp Plan"
+                                        value={formData.currentPlan}
+                                        onChange={handleChange}
+                                        variant="outlined"
+                                    />
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <TextField
+                                        fullWidth
+                                        name="commercialPlan"
+                                        label="Commercial Plan"
+                                        value={formData.commercialPlan}
+                                        onChange={handleChange}
+                                        variant="outlined"
+                                    />
+                                </Grid>
+                            </Grid>
+                        </OutlinedBox>
+                    </Grid>
+                </Grid>
+            </form>
+        </Container>
     );
 };
 
