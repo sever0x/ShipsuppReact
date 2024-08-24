@@ -12,6 +12,7 @@ import EditGoodModal from '../components/EditGoodModal';
 import AddGoodModal from '../components/AddGoodModal';
 import { RootState } from "app/reducers";
 import {
+    Checkbox,
     Container,
     Dialog,
     DialogActions,
@@ -47,6 +48,7 @@ const Catalog: React.FC = () => {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState<{ id: string; title: string } | null>(null);
+    const [selectedGoods, setSelectedGoods] = useState<Good[]>([]);
 
     useEffect(() => {
         const loadData = async () => {
@@ -63,6 +65,14 @@ const Catalog: React.FC = () => {
             setIsInitialLoad(false);
         }
     }, [loading, isInitialLoad]);
+
+    const handleSelectGood = (good: Good) => {
+        setSelectedGoods(prev => [...prev, good]);
+    };
+
+    const handleDeselectGood = (goodId: string) => {
+        setSelectedGoods(prev => prev.filter(g => g.id !== goodId));
+    };
 
     const handleCategorySelect = (categoryId: string, categoryTitle: string) => {
         setSelectedCategory({ id: categoryId, title: categoryTitle });
@@ -100,6 +110,19 @@ const Catalog: React.FC = () => {
         dispatch(addGood(newGood, newImages) as any);
     };
 
+    const handleBulkDelete = () => {
+        selectedGoods.forEach(good => dispatch(deleteGood(good) as any));
+        setSelectedGoods([]);
+    };
+
+    const handleBulkMoveToCategory = (categoryId: string, categoryTitle: string) => {
+        selectedGoods.forEach(good => {
+            const updatedGood = { ...good, categoryId };
+            dispatch(updateGood(updatedGood, [], []) as any);
+        });
+        setSelectedGoods([]);
+    };
+
     const filteredGoods = goods.filter(good =>
         good.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         good.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -108,6 +131,7 @@ const Catalog: React.FC = () => {
 
     const renderSkeleton = () => (
         <TableRow key={`skeleton-${Math.random()}`}>
+            <TableCell><Skeleton variant="rectangular" width={16} height={16} /></TableCell>
             <TableCell><Skeleton variant="rectangular" width={50} height={50} /></TableCell>
             <TableCell><Skeleton variant="text" /></TableCell>
             <TableCell><Skeleton variant="text" /></TableCell>
@@ -126,6 +150,7 @@ const Catalog: React.FC = () => {
                     <Table>
                         <TableHead>
                             <TableRow>
+                                <TableCell></TableCell>
                                 <TableCell>Image</TableCell>
                                 <TableCell>Article</TableCell>
                                 <TableCell>Title</TableCell>
@@ -154,6 +179,19 @@ const Catalog: React.FC = () => {
                     <Table>
                         <TableHead>
                             <TableRow>
+                                <TableCell padding="checkbox">
+                                    <Checkbox
+                                        indeterminate={selectedGoods.length > 0 && selectedGoods.length < filteredGoods.length}
+                                        checked={filteredGoods.length > 0 && selectedGoods.length === filteredGoods.length}
+                                        onChange={(_, checked) => {
+                                            if (checked) {
+                                                setSelectedGoods(filteredGoods);
+                                            } else {
+                                                setSelectedGoods([]);
+                                            }
+                                        }}
+                                    />
+                                </TableCell>
                                 <TableCell>Image</TableCell>
                                 <TableCell>Article</TableCell>
                                 <TableCell>Title</TableCell>
@@ -167,6 +205,16 @@ const Catalog: React.FC = () => {
                         <TableBody>
                             {filteredGoods.map((good: Good) => (
                                 <TableRow key={good.id}>
+                                    <TableCell padding="checkbox">
+                                        <Checkbox
+                                            checked={selectedGoods.some(g => g.id === good.id)}
+                                            onChange={() =>
+                                                selectedGoods.some(g => g.id === good.id)
+                                                    ? handleDeselectGood(good.id)
+                                                    : handleSelectGood(good)
+                                            }
+                                        />
+                                    </TableCell>
                                     <TableCell>
                                         {good.images && Object.values(good.images)[0] && (
                                             <img
@@ -243,25 +291,66 @@ const Catalog: React.FC = () => {
 
     return (
         <Container maxWidth="xl">
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                <Typography variant="h4" sx={{ flex: 1 }}>Catalog</Typography>
-                <Box justifyContent='flex-end' sx={{ display: 'flex', alignItems: 'center', flex: 4 }}>
-                    <CategoryDropdown
-                        categories={categories}
-                        onCategorySelect={handleCategorySelect}
-                        selectedCategory={selectedCategory}
-                    />
-                    <TextField
-                        placeholder="Search for goods..."
-                        variant="outlined"
-                        size="small"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        InputProps={{
-                            startAdornment: <SearchIcon color="action" />,
-                        }}
-                        sx={{ flex: 3 }}
-                    />
+            <Box
+                sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    mb: 3,
+                }}
+            >
+                <Typography variant="h4" sx={{ flex: 1 }}>
+                    Catalog
+                </Typography>
+                <Box
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        flex: 4,
+                    }}
+                >
+                    {selectedGoods.length > 0 ? (
+                        <>
+                            <Typography variant="body1" sx={{ mr: 2 }}>
+                                {selectedGoods.length} item{selectedGoods.length !== 1 ? 's' : ''} selected
+                            </Typography>
+                            <Button
+                                variant="outlined"
+                                color="error"
+                                startIcon={<DeleteIcon />}
+                                onClick={handleBulkDelete}
+                                sx={{ mr: 2 }}
+                            >
+                                Delete Selected
+                            </Button>
+                            <CategoryDropdown
+                                categories={categories}
+                                onCategorySelect={(categoryId, categoryTitle) => handleBulkMoveToCategory(categoryId, categoryTitle)}
+                                selectedCategory={null}
+                                label="Move to Category"
+                            />
+                        </>
+                    ) : (
+                        <>
+                            <CategoryDropdown
+                                categories={categories}
+                                onCategorySelect={handleCategorySelect}
+                                selectedCategory={selectedCategory}
+                                label="Select category"
+                            />
+                            <TextField
+                                placeholder="Search for goods..."
+                                variant="outlined"
+                                size="small"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                InputProps={{
+                                    startAdornment: <SearchIcon color="action" />,
+                                }}
+                                sx={{ flex: 3, mx: 2 }}
+                            />
+                        </>
+                    )}
                     <Button
                         variant="contained"
                         color="primary"
