@@ -1,17 +1,21 @@
-import { Dispatch } from 'redux';
-import { ref, query, orderByChild, equalTo, get, update } from 'firebase/database';
+import {Dispatch} from 'redux';
+import {get, ref, update} from 'firebase/database';
 import {auth, database} from 'app/config/firebaseConfig';
 import {
+    FETCH_ORDER_DETAILS_FAILURE,
+    FETCH_ORDER_DETAILS_REQUEST,
+    FETCH_ORDER_DETAILS_SUCCESS,
+    FETCH_SELLER_ORDERS_FAILURE,
     FETCH_SELLER_ORDERS_REQUEST,
     FETCH_SELLER_ORDERS_SUCCESS,
-    FETCH_SELLER_ORDERS_FAILURE,
+    UPDATE_ORDER_STATUS_FAILURE,
     UPDATE_ORDER_STATUS_REQUEST,
-    UPDATE_ORDER_STATUS_SUCCESS,
-    UPDATE_ORDER_STATUS_FAILURE, FETCH_ORDER_DETAILS_REQUEST, FETCH_ORDER_DETAILS_SUCCESS, FETCH_ORDER_DETAILS_FAILURE
+    UPDATE_ORDER_STATUS_SUCCESS
 } from '../constants/actionTypes';
 import {getIdToken} from "firebase/auth";
 import axios from "axios";
 import {Order} from "pages/orders/types/Order";
+import {BACKEND_SERVICE} from "../../../constants/api";
 
 const excludedStatuses = ['ADD_TO_CART', 'CANCEL_BY_BUYER'];
 
@@ -25,7 +29,7 @@ export const fetchSellerOrders = (sellerId: string) => async (dispatch: Dispatch
         }
 
         const token = await getIdToken(user);
-        const response = await axios.get(`https://us-central1-shipsupp-dev-38d5e.cloudfunctions.net/getOrders?userId=${sellerId}`, {
+        const response = await axios.get(`${BACKEND_SERVICE}/getOrders?userId=${sellerId}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             },
@@ -69,7 +73,7 @@ export const fetchOrderDetails = (orderId: string) => async (dispatch: Dispatch)
 
         const token = await getIdToken(user);
 
-        const response = await axios.get('https://getorderdetails-br4hzq7ova-uc.a.run.app', {
+        const response = await axios.get(`${BACKEND_SERVICE}/getOrderDetails`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             },
