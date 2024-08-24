@@ -1,20 +1,13 @@
-import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import {
-    Avatar,
-    Box,
-    Button,
-    CircularProgress,
-    Container,
-    Grid,
-    IconButton,
-    TextField,
-    useTheme,
-} from '@mui/material';
-import { CloudUpload, Save, Cancel } from '@mui/icons-material';
-import { RootState } from '../../../../app/reducers';
-import { updateProfile, updateProfilePhoto } from '../../actions/profileActions';
+import React, {useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
+import {Box, Button, Container, Grid, useMediaQuery, useTheme,} from '@mui/material';
+import {Cancel, Save} from '@mui/icons-material';
+import {RootState} from '../../../../app/reducers';
+import {updateProfile, updateProfilePhoto} from '../../actions/profileActions';
 import Typography from 'components/Typography';
+import OutlinedBox from '../OutlinedBox';
+import PersonalInformationForm from '../PersonalInformationForm';
+import PhotoUpload from '../PhotoUpload';
 
 interface EditProfileProps {
     onCancel: () => void;
@@ -52,58 +45,28 @@ const EditProfile: React.FC<EditProfileProps> = ({ onCancel }) => {
         }
     };
 
-    const OutlinedBox = ({ children, sx }: { children: React.ReactNode; sx?: any }) => (
-        <Box
-            sx={{
-                p: 3,
-                borderRadius: 2,
-                border: `1px solid ${theme.palette.divider}`,
-                backgroundColor: 'white',
-                '&:hover': {
-                    boxShadow: `0 0 0 1px ${theme.palette.primary.main}`,
-                },
-                ...sx,
-            }}
-        >
-            {children}
-        </Box>
-    );
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     return (
-        <Container maxWidth="xl">
+        <Container maxWidth="xl" sx={{
+            paddingLeft: 0,
+            paddingRight: 0,
+            [theme.breakpoints.up('sm')]: {
+                paddingLeft: 0,
+                paddingRight: 0,
+            },
+        }}>
             <form onSubmit={handleSubmit}>
                 <Grid container spacing={3}>
                     <Grid item xs={12} md={4}>
                         <OutlinedBox>
-                            <Box display="flex" flexDirection="column" alignItems="center" mb={3}>
-                                <Box position="relative">
-                                    <Avatar
-                                        src={formData.profilePhoto}
-                                        alt={`${formData.firstName} ${formData.lastName}`}
-                                        sx={{ width: 120, height: 120, mb: 2 }}
-                                    />
-                                    <IconButton
-                                        sx={{
-                                            position: 'absolute',
-                                            bottom: 0,
-                                            right: 0,
-                                            backgroundColor: theme.palette.background.paper,
-                                            '&:hover': { backgroundColor: theme.palette.action.hover },
-                                        }}
-                                        component="label"
-                                        disabled={isUploading}
-                                    >
-                                        {isUploading ? <CircularProgress size={24} /> : <CloudUpload />}
-                                        <input
-                                            type="file"
-                                            hidden
-                                            onChange={handlePhotoUpload}
-                                            accept="image/*"
-                                        />
-                                    </IconButton>
-                                </Box>
-                                <Typography variant="h5" gutterBottom>Edit Profile</Typography>
-                            </Box>
+                            <PhotoUpload
+                                profilePhoto={formData.profilePhoto}
+                                firstName={formData.firstName}
+                                lastName={formData.lastName}
+                                isUploading={isUploading}
+                                handlePhotoUpload={handlePhotoUpload}
+                            />
                             <Box mt={2}>
                                 <Button
                                     fullWidth
@@ -130,63 +93,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ onCancel }) => {
                     <Grid item xs={12} md={8}>
                         <OutlinedBox>
                             <Typography variant="h6" gutterBottom>Personal Information</Typography>
-                            <Grid container spacing={2} pt={2}>
-                                <Grid item xs={12} sm={6}>
-                                    <TextField
-                                        fullWidth
-                                        name="firstName"
-                                        label="First Name"
-                                        value={formData.firstName}
-                                        onChange={handleChange}
-                                        variant="outlined"
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <TextField
-                                        fullWidth
-                                        name="lastName"
-                                        label="Last Name"
-                                        value={formData.lastName}
-                                        onChange={handleChange}
-                                        variant="outlined"
-                                    />
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <TextField
-                                        fullWidth
-                                        name="phone"
-                                        label="Phone"
-                                        value={formData.phone}
-                                        onChange={handleChange}
-                                        variant="outlined"
-                                    />
-                                </Grid>
-                            </Grid>
-                        </OutlinedBox>
-                        <OutlinedBox sx={{ mt: 3 }}>
-                            <Typography variant="h6" gutterBottom>Account Details</Typography>
-                            <Grid container spacing={2} pt={2}>
-                                <Grid item xs={12}>
-                                    <TextField
-                                        fullWidth
-                                        name="currentPlan"
-                                        label="Current ShipSupp Plan"
-                                        value={formData.currentPlan}
-                                        onChange={handleChange}
-                                        variant="outlined"
-                                    />
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <TextField
-                                        fullWidth
-                                        name="commercialPlan"
-                                        label="Commercial Plan"
-                                        value={formData.commercialPlan}
-                                        onChange={handleChange}
-                                        variant="outlined"
-                                    />
-                                </Grid>
-                            </Grid>
+                            <PersonalInformationForm formData={formData} handleChange={handleChange} />
                         </OutlinedBox>
                     </Grid>
                 </Grid>

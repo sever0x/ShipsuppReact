@@ -6,9 +6,8 @@ import {
     Button,
     CircularProgress,
     Container,
-    Divider,
     Grid,
-    Paper, SxProps,
+    useMediaQuery,
     useTheme,
 } from '@mui/material';
 import useAuth from 'misc/hooks/useAuth';
@@ -23,16 +22,14 @@ import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import WorkIcon from '@mui/icons-material/Work';
 import DateRangeIcon from '@mui/icons-material/DateRange';
 import Typography from 'components/Typography';
-
-interface OutlinedBoxProps {
-    children: React.ReactNode;
-    sx?: SxProps;
-}
+import InfoItem from '../components/InfoItem';
+import OutlinedBox from '../components/OutlinedBox';
 
 const Profile: React.FC = () => {
     const { user } = useAuth();
     const dispatch = useDispatch();
     const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const profile = useSelector((state: RootState) => state.profile);
     const [isEditing, setIsEditing] = useState(false);
 
@@ -62,41 +59,6 @@ const Profile: React.FC = () => {
         );
     }
 
-    const InfoItem = ({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) => (
-        <Box display="flex" alignItems="center" mb={2}>
-            <Box mr={2} color={theme.palette.primary.main}>
-                {icon}
-            </Box>
-            <Box>
-                <Typography variant="body2" color="secondary">
-                    {label}
-                </Typography>
-                <Typography variant="body1">{value}</Typography>
-            </Box>
-        </Box>
-    );
-
-    const OutlinedBox: React.FC<OutlinedBoxProps> = ({ children, sx }) => {
-        return (
-            <Paper
-                variant="outlined"
-                sx={{
-                    p: 3,
-                    borderRadius: 2,
-                    borderColor: theme => theme.palette.divider,
-                    boxShadow: 'none',
-                    backgroundColor: 'white',
-                    '&:hover': {
-                        boxShadow: theme => `0 0 0 1px ${theme.palette.primary.main}`,
-                    },
-                    ...sx,
-                }}
-            >
-                {children}
-            </Paper>
-        );
-    };
-
     return (
         <Container maxWidth="xl">
             {isEditing ? (
@@ -109,10 +71,10 @@ const Profile: React.FC = () => {
                                 <Avatar
                                     src={profile.data?.profilePhoto}
                                     alt={`${profile.data?.firstName} ${profile.data?.lastName}`}
-                                    sx={{ width: 120, height: 120, mb: 2 }}
+                                    sx={{ width: { xs: 80, sm: 120 }, height: { xs: 80, sm: 120 }, mb: 2 }}
                                 />
-                                <Typography variant="h5">{`${profile.data?.firstName} ${profile.data?.lastName}`}</Typography>
-                                <Typography variant="body2" color="secondary">
+                                <Typography variant="h5" align="center">{`${profile.data?.firstName} ${profile.data?.lastName}`}</Typography>
+                                <Typography variant="body2" color="secondary" align="center">
                                     {profile.data.portsArray.map((port: any) => port.title).join(', ')}
                                 </Typography>
                             </Box>
@@ -133,22 +95,23 @@ const Profile: React.FC = () => {
                             <Typography variant="h6" gutterBottom>
                                 Personal Information
                             </Typography>
-                            <Grid container spacing={3} pt={2}>
+                            <Grid container spacing={2} pt={2}>
                                 <Grid item xs={12} sm={6}>
-                                    <InfoItem icon={<EmailIcon />} label="Email" value={user.email || 'Not provided'} />
+                                    <InfoItem icon={<EmailIcon />} label="Email" value={user.email || 'Not provided'} isMobile={isMobile} />
                                 </Grid>
                                 <Grid item xs={12} sm={6}>
-                                    <InfoItem icon={<PhoneIcon />} label="Phone" value={profile.data?.phone || 'Not provided'} />
+                                    <InfoItem icon={<PhoneIcon />} label="Phone" value={profile.data?.phone || 'Not provided'} isMobile={isMobile} />
                                 </Grid>
                                 <Grid item xs={12} sm={6}>
                                     <InfoItem
                                         icon={<LocationOnIcon />}
                                         label="Port & Country"
                                         value={profile.data.portsArray.map((port: any) => `${port.title}, ${port.city.country.title}`).join(', ')}
+                                        isMobile={isMobile}
                                     />
                                 </Grid>
                                 <Grid item xs={12} sm={6}>
-                                    <InfoItem icon={<FingerprintIcon />} label="UID" value={user.uid} />
+                                    <InfoItem icon={<FingerprintIcon />} label="UID" value={user.uid} isMobile={isMobile} />
                                 </Grid>
                             </Grid>
                         </OutlinedBox>
@@ -156,15 +119,15 @@ const Profile: React.FC = () => {
                             <Typography variant="h6" gutterBottom>
                                 Account Details
                             </Typography>
-                            <Grid container spacing={3} pt={2}>
+                            <Grid container spacing={2} pt={2}>
                                 <Grid item xs={12} sm={6}>
-                                    <InfoItem icon={<WorkIcon />} label="Current ShipSupp Plan" value={profile.data?.currentPlan || 'Not available'} />
+                                    <InfoItem icon={<WorkIcon />} label="Current ShipSupp Plan" value={profile.data?.currentPlan || 'Not available'} isMobile={isMobile} />
                                 </Grid>
                                 <Grid item xs={12} sm={6}>
-                                    <InfoItem icon={<DateRangeIcon />} label="Joined ShipSupp" value={profile.data?.registrationDate || 'Not available'} />
+                                    <InfoItem icon={<DateRangeIcon />} label="Joined ShipSupp" value={profile.data?.registrationDate || 'Not available'} isMobile={isMobile} />
                                 </Grid>
                                 <Grid item xs={12}>
-                                    <InfoItem icon={<WorkIcon />} label="Commercial Plan" value={profile.data?.commercialPlan || 'Not available'} />
+                                    <InfoItem icon={<WorkIcon />} label="Commercial Plan" value={profile.data?.commercialPlan || 'Not available'} isMobile={isMobile} />
                                 </Grid>
                             </Grid>
                         </OutlinedBox>
