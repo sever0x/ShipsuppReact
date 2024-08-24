@@ -15,19 +15,20 @@ interface CategoryDropdownProps {
     categories: Category[];
     onCategorySelect: (categoryId: string, categoryTitle: string) => void;
     selectedCategory: { id: string; title: string } | null;
+    label?: string;
 }
 
-const CategoryDropdown: React.FC<CategoryDropdownProps> = ({ categories, onCategorySelect, selectedCategory }) => {
+const CategoryDropdown: React.FC<CategoryDropdownProps> = ({ categories, onCategorySelect, selectedCategory, label }) => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-    const [displayedCategory, setDisplayedCategory] = useState<string>('Select category');
+    const [displayedCategory, setDisplayedCategory] = useState<string>(label || 'Select category');
 
     useEffect(() => {
         if (selectedCategory) {
             setDisplayedCategory(selectedCategory.title);
         } else {
-            setDisplayedCategory('Select category');
+            setDisplayedCategory(label || 'Select category');
         }
-    }, [selectedCategory]);
+    }, [selectedCategory, label]);
 
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);

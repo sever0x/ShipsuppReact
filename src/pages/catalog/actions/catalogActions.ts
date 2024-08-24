@@ -156,12 +156,12 @@ export const deleteGood = (good: Good) => async (dispatch: Dispatch) => {
         }
 
         // Delete images from Firebase Storage
-        if (good.images) {
-            await Promise.all(Object.keys(good.images).map(async (key) => {
-                const imageRef = storageRef(firebaseStorage, `goods/${portId}/${userId}/${good.id}/${key}`);
-                await deleteObject(imageRef);
-            }));
-        }
+        // if (good.images) {
+        //     await Promise.all(Object.keys(good.images).map(async (key) => {
+        //         const imageRef = storageRef(firebaseStorage, `goods/${portId}/${userId}/${good.id}/${key}`);
+        //         await deleteObject(imageRef);
+        //     }));
+        // }
 
         // Delete good from Firebase Realtime Database
         const goodRef = ref(database, `goods/${portId}/${userId}/${good.id}`);
