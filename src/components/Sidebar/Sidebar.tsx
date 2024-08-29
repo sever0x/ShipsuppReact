@@ -20,6 +20,7 @@ import ListItemIcon from 'components/ListItemIcon';
 import ListItemText from 'components/ListItemText';
 import Collapse from '@mui/material/Collapse';
 import useAuth from 'misc/hooks/useAuth';
+import {Theme, useMediaQuery} from "@mui/material";
 
 interface MenuItem {
     text: string;
@@ -32,6 +33,7 @@ const Sidebar: React.FC = () => {
     const location = useLocation();
     const [settingsOpen, setSettingsOpen] = useState(false);
     const { logout } = useAuth();
+    const isMobile = useMediaQuery((theme: Theme) => theme.breakpoints.down('md'));
 
     const menuItems: MenuItem[] = [
         { text: 'Catalog', icon: <CatalogIcon />, path: `${pageURLs[pages.catalog]}` },
@@ -143,7 +145,7 @@ const Sidebar: React.FC = () => {
             }}
         >
             <Box sx={{
-                height: 64,
+                height: isMobile ? 48 : 64,
                 display: 'flex',
                 position: 'relative',
             }}>
@@ -153,11 +155,11 @@ const Sidebar: React.FC = () => {
                     transition: 'opacity 0.2s, transform 0.2s',
                     opacity: 1,
                     transform: 'translateX(0)',
-                    pb: 4,
+                    pb: isMobile ? 2 : 4,
                     pl: 2,
                 }}>
-                    <img src={'static/images/logo/minilogo.svg'} alt="Logo" style={{ width: '48px', height: '48px' }} />
-                    <Typography bold={true} noWrap component="div" sx={{ color: '#231F20', fontSize: 24 }}>
+                    <img src={'static/images/logo/minilogo.svg'} alt="Logo" style={{ width: isMobile ? '36px' : '48px', height: isMobile ? '36px' : '48px' }} />
+                    <Typography bold={true} noWrap component="div" sx={{ color: '#231F20', fontSize: isMobile ? 20 : 24 }}>
                         ShipSupp
                     </Typography>
                 </Box>
@@ -176,7 +178,7 @@ const Sidebar: React.FC = () => {
                         onClick={handleSettingsClick}
                         sx={{
                             px: 2,
-                            py: 1,
+                            py: isMobile ? 0.5 : 1,
                             '&:hover': {
                                 backgroundColor: 'transparent',
                             },
@@ -229,7 +231,7 @@ const Sidebar: React.FC = () => {
                     </ListItemButton>
                 </ListItem>
                 <Collapse in={settingsOpen} timeout="auto" unmountOnExit>
-                    <List component="div" disablePadding sx={{ maxHeight: 200, overflow: 'auto' }}>
+                    <List component="div" disablePadding sx={{ maxHeight: isMobile ? 150 : 200, overflow: 'auto' }}>
                         {settingsItems.map((item) => renderMenuItem(item, true))}
                     </List>
                 </Collapse>
@@ -242,7 +244,7 @@ const Sidebar: React.FC = () => {
                         onClick={handleLogout}
                         sx={{
                             px: 2,
-                            py: 1,
+                            py: isMobile ? 0.5 : 1,
                             '&:hover': {
                                 backgroundColor: 'transparent',
                             },
@@ -271,7 +273,7 @@ const Sidebar: React.FC = () => {
                         onClick={() => navigate(`/${pages.support}`)}
                         sx={{
                             px: 2,
-                            py: 1,
+                            py: isMobile ? 0.5 : 1,
                             '&:hover': {
                                 backgroundColor: 'transparent',
                             },
