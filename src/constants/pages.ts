@@ -5,5 +5,8 @@ export const profile: string = "profile";
 export const catalog: string = "catalog";
 export const orders: string = "orders";
 export const chats: string = "chats";
+export const settings: string = "settings";
+export const permissions: string = "permissions";
+export const support: string = "support";
 
 export const notFound = '404';
