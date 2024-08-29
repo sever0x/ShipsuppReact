@@ -8,6 +8,10 @@ const result = {
     [pages.catalog]: `/${pages.catalog}`,
     [pages.orders]: `/${pages.orders}`,
     [pages.chats]: `/${pages.chats}`,
+    [pages.permissions]: `/${pages.settings}/${pages.permissions}`,
+
+    // services
+    [pages.support]: `/${pages.support}`,
 
     [pages.notFound]: `/${pages.notFound}`,
 };
