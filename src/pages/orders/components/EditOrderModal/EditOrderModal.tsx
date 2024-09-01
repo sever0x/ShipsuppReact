@@ -137,8 +137,10 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order })
     const { loadingDetails, orderDetails, error } = useSelector((state: RootState) => state.orders);
 
     const handleStatusChange = (newStatus: string) => {
-        dispatch(updateOrderStatus(order.id, newStatus) as any);
-        onClose();
+        if (order.id) {
+            dispatch(updateOrderStatus(order.id, newStatus) as any);
+            onClose();
+        }
     };
 
     const handleOpenChatWithBuyer = (order: Order | null) => {
@@ -299,7 +301,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order })
                                         <Select
                                             labelId="status-select-label"
                                             value=""
-                                            onChange={(e) => handleStatusChange(e.target.value as string)}
+                                            onChange={(e) => handleStatusChange(e.target.value)}
                                             label="New Status"
                                         >
                                             {statusOrder.slice(currentStatusIndex + 1).map((status) => (
