@@ -1,27 +1,30 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    Button,
-    Typography,
     Box,
-    Chip,
+    Button,
+    Dialog,
+    DialogContent,
+    DialogTitle,
+    FormControl,
     IconButton,
-    styled, CircularProgress, Skeleton, FormControl, InputLabel, Select
+    InputLabel,
+    Select,
+    Skeleton,
+    styled,
+    Typography
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { updateOrderStatus } from '../../actions/orderActions';
-import { RootState } from 'app/reducers';
+import {updateOrderStatus} from '../../actions/orderActions';
+import {RootState} from 'app/reducers';
 import {switchToChatOrCreateNew} from "pages/chats/actions/chatActions";
 import {Order} from "pages/orders/types/Order";
-import userAuth from "../../../../app/actions/userAuth";
 import useAuth from "../../../../misc/hooks/useAuth";
 import {useNavigate} from "react-router-dom";
 import {Chat} from "@mui/icons-material";
 import MenuItem from 'components/MenuItem';
 import OrderStatus from '../OrderStatus';
+import CancelOrderModal from '../CancelOrderModal';
 
 interface EditOrderModalProps {
     open: boolean;
@@ -35,7 +38,6 @@ const statusOrder = [
     'SENT',
     'ARRIVED',
     'COMPLETED',
-    'CANCEL_BY_SELLER'
 ];
 
 const statusLabels: { [key: string]: string } = {
@@ -44,7 +46,6 @@ const statusLabels: { [key: string]: string } = {
     'SENT': 'Sent',
     'ARRIVED': 'Delivered',
     'COMPLETED': 'Complete',
-    'CANCEL_BY_SELLER': 'Cancel Order'
 };
 //
 // const statusColors: { [key: string]: "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" } = {
@@ -119,7 +120,8 @@ const HistoryItem = styled(Box)(({ theme }) => ({
     },
 }));
 
-const StyledSelect = styled(Select)({
+const StyledSelect = styled(Select)(({ theme }) => ({
+    width: '100%',
     '& .MuiSelect-select': {
         borderRadius: '8px',
         backgroundColor: '#FFFFFF',
@@ -128,17 +130,25 @@ const StyledSelect = styled(Select)({
     '& .MuiOutlinedInput-notchedOutline': {
         border: 'none',
     },
-});
+}));
 
 const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order }) => {
     const dispatch = useDispatch();
     const { user } = useAuth();
     const navigate = useNavigate();
     const { loadingDetails, orderDetails, error } = useSelector((state: RootState) => state.orders);
+    const [cancelModalOpen, setCancelModalOpen] = useState(false);
 
     const handleStatusChange = (newStatus: string) => {
         if (order.id) {
             dispatch(updateOrderStatus(order.id, newStatus) as any);
+            onClose();
+        }
+    };
+
+    const handleCancelOrder = (reason: string) => {
+        if (order.id) {
+            dispatch(updateOrderStatus(order.id, 'CANCEL_BY_SELLER', reason) as any);
             onClose();
         }
     };
@@ -150,10 +160,18 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order })
         }
     }
 
+    const formatDate = (dateString: unknown): string => {
+        if (typeof dateString === 'string' || typeof dateString === 'number') {
+            return new Date(dateString).toLocaleString();
+        }
+        return 'Invalid Date';
+    };
+
     const currentStatusIndex = statusOrder.indexOf(order.status);
 
     const isOrderCancelled = order.status === 'CANCEL_BY_SELLER';
     const isOrderCompleted = order.status === 'COMPLETED';
+    const canChangeStatus = !isOrderCancelled && !isOrderCompleted;
 
     const getBuyerInfo = () => {
         if (orderDetails?.buyer) {
@@ -171,8 +189,12 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order })
 
     const displayOrder = orderDetails || order;
 
-    const sortedStatusChanges = Object.entries(order.datesOfStatusChange as Record<string, string>)
-        .sort(([, dateA], [, dateB]) => new Date(dateA).getTime() - new Date(dateB).getTime());
+    const sortedStatusHistory = Object.entries(displayOrder.datesOfStatusChange)
+        .sort(([, dateA], [, dateB]) => {
+            const timeA = new Date(dateA as string).getTime();
+            const timeB = new Date(dateB as string).getTime();
+            return timeA - timeB;
+        });
 
     const renderSkeleton = () => (
         <Box>
@@ -224,126 +246,138 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order })
     }
 
     return (
-        <StyledDialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-            <DialogTitle>
-                #{displayOrder.orderNumber}
-                <IconButton
-                    aria-label="close"
-                    onClick={onClose}
-                    sx={{
-                        position: 'absolute',
-                        right: 8,
-                        top: 8,
-                        color: (theme) => theme.palette.grey[500],
-                    }}
-                >
-                    <CloseIcon />
-                </IconButton>
-            </DialogTitle>
-            <DialogContent>
-                <ContentWrapper>
-                    <InfoColumn>
-                        <InfoRow>
-                            <Typography variant="body1">Current status:</Typography>
-                            <OrderStatus status={displayOrder.status} />
-                        </InfoRow>
-                        <InfoRow>
-                            <Typography variant="body1">Article:</Typography>
-                            <Typography variant="body1">{displayOrder.good.article || '-'}</Typography>
-                        </InfoRow>
-                        <InfoRow>
-                            <Typography variant="body1">Title:</Typography>
-                            <Typography variant="body1">{displayOrder.good.title || '-'}</Typography>
-                        </InfoRow>
-                        <InfoRow>
-                            <Typography variant="body1">Quantity:</Typography>
-                            <Typography variant="body1">{displayOrder.quantity}</Typography>
-                        </InfoRow>
-                        <InfoRow>
-                            <Typography variant="body1">Price per one:</Typography>
-                            <Typography variant="body1">{displayOrder.priceInOrder}</Typography>
-                        </InfoRow>
-                        <InfoRow>
-                            <Typography variant="body1">Total price:</Typography>
-                            <Typography variant="body1">{displayOrder.quantity * displayOrder.priceInOrder}</Typography>
-                        </InfoRow>
-                        <InfoRow>
-                            <Typography variant="body1">Buyer:</Typography>
-                            <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                                <Typography variant="body1">{getBuyerInfo()}</Typography>
-                                <IconButton onClick={() => handleOpenChatWithBuyer(orderDetails)}>
-                                    <Chat fontSize='small' />
-                                </IconButton>
-                            </div>
-                        </InfoRow>
-                        <InfoRow>
-                            <Typography variant="body1">Buyer ID:</Typography>
-                            <Typography variant="body1">{displayOrder.buyer.id}</Typography>
-                        </InfoRow>
-                        <InfoRow>
-                            <Typography variant="body1">Ship ID:</Typography>
-                            <Typography variant="body1">{displayOrder.buyer.vesselMMSI || 'N/A'}</Typography>
-                        </InfoRow>
-                        <InfoRow>
-                            <Typography variant="body1">Port:</Typography>
-                            <Typography variant="body1">{getPortInfo()}</Typography>
-                        </InfoRow>
+        <>
+            <StyledDialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+                <DialogTitle>
+                    #{displayOrder.orderNumber}
+                    <IconButton
+                        aria-label="close"
+                        onClick={onClose}
+                        sx={{
+                            position: 'absolute',
+                            right: 8,
+                            top: 8,
+                            color: (theme) => theme.palette.grey[500],
+                        }}
+                    >
+                        <CloseIcon />
+                    </IconButton>
+                </DialogTitle>
+                <DialogContent>
+                    <ContentWrapper>
+                        <InfoColumn>
+                            <InfoRow>
+                                <Typography variant="body1">Current status:</Typography>
+                                <OrderStatus status={displayOrder.status} />
+                            </InfoRow>
+                            <InfoRow>
+                                <Typography variant="body1">Article:</Typography>
+                                <Typography variant="body1">{displayOrder.good.article || '-'}</Typography>
+                            </InfoRow>
+                            <InfoRow>
+                                <Typography variant="body1">Title:</Typography>
+                                <Typography variant="body1">{displayOrder.good.title || '-'}</Typography>
+                            </InfoRow>
+                            <InfoRow>
+                                <Typography variant="body1">Quantity:</Typography>
+                                <Typography variant="body1">{displayOrder.quantity}</Typography>
+                            </InfoRow>
+                            <InfoRow>
+                                <Typography variant="body1">Price per one:</Typography>
+                                <Typography variant="body1">{displayOrder.priceInOrder}</Typography>
+                            </InfoRow>
+                            <InfoRow>
+                                <Typography variant="body1">Total price:</Typography>
+                                <Typography variant="body1">{displayOrder.quantity * displayOrder.priceInOrder}</Typography>
+                            </InfoRow>
+                            <InfoRow>
+                                <Typography variant="body1">Buyer:</Typography>
+                                <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                                    <Typography variant="body1">{getBuyerInfo()}</Typography>
+                                    <IconButton onClick={() => handleOpenChatWithBuyer(orderDetails)}>
+                                        <Chat fontSize='small' />
+                                    </IconButton>
+                                </div>
+                            </InfoRow>
+                            <InfoRow>
+                                <Typography variant="body1">Buyer ID:</Typography>
+                                <Typography variant="body1">{displayOrder.buyer.id}</Typography>
+                            </InfoRow>
+                            <InfoRow>
+                                <Typography variant="body1">Ship ID:</Typography>
+                                <Typography variant="body1">{displayOrder.buyer.vesselMMSI || 'N/A'}</Typography>
+                            </InfoRow>
+                            <InfoRow>
+                                <Typography variant="body1">Port:</Typography>
+                                <Typography variant="body1">{getPortInfo()}</Typography>
+                            </InfoRow>
 
-                        <Box mt={2}>
-                            <Typography variant="subtitle1">Set new order status:</Typography>
-                            <Typography variant="caption" color="error.main">
-                                *be careful, you cannot change the status back
-                            </Typography>
-                            <Box mt={1}>
-                                {!isOrderCancelled && !isOrderCompleted && (
-                                    <FormControl fullWidth>
-                                        <InputLabel id="status-select-label">New Status</InputLabel>
-                                        <Select
-                                            labelId="status-select-label"
-                                            value=""
-                                            onChange={(e) => handleStatusChange(e.target.value)}
-                                            label="New Status"
+                            {isOrderCancelled && (
+                                <InfoRow>
+                                    <Typography variant="body1">Cancellation Reason:</Typography>
+                                    <Typography variant="body1">{displayOrder.cancellationReason}</Typography>
+                                </InfoRow>
+                            )}
+
+                            {canChangeStatus && (
+                                <Box mt={2}>
+                                    <Typography variant="subtitle1">Set new order status:</Typography>
+                                    <Typography variant="caption" color="error.main">
+                                        *be careful, you cannot change the status back
+                                    </Typography>
+                                    <Box mt={1}>
+                                        <FormControl fullWidth>
+                                            <InputLabel id="status-select-label">New Status</InputLabel>
+                                            <StyledSelect
+                                                labelId="status-select-label"
+                                                value=""
+                                                onChange={(e) => handleStatusChange(e.target.value as string)}
+                                                label="New Status"
+                                            >
+                                                {statusOrder.slice(currentStatusIndex + 1).map((status) => (
+                                                    <MenuItem key={status} value={status}>
+                                                        <OrderStatus status={status} showIcon={false} />
+                                                    </MenuItem>
+                                                ))}
+                                            </StyledSelect>
+                                        </FormControl>
+                                        <Button
+                                            onClick={() => setCancelModalOpen(true)}
+                                            variant="contained"
+                                            color="customRed"
+                                            sx={{ mt: 1 }}
+                                            fullWidth
                                         >
-                                            {statusOrder.slice(currentStatusIndex + 1).map((status) => (
-                                                <MenuItem key={status} value={status}>
-                                                    {statusLabels[status]}
-                                                </MenuItem>
-                                            ))}
-                                        </Select>
-                                    </FormControl>
-                                )}
-                                {!isOrderCancelled && !isOrderCompleted && (
-                                    <Button
-                                        onClick={() => handleStatusChange('CANCEL_BY_SELLER')}
-                                        variant="contained"
-                                        color="customRed"
-                                        sx={{ mt: 1 }}
-                                        fullWidth
-                                    >
-                                        Cancel order
-                                    </Button>
-                                )}
-                            </Box>
-                        </Box>
-                    </InfoColumn>
-                    <HistoryColumn>
-                        <Typography variant="h6" gutterBottom>Order History</Typography>
-                        {sortedStatusChanges.map(([status, date]) => (
-                            <HistoryItem key={status}>
-                                <Box>
-                                    <Typography variant="body2" fontWeight="bold">
-                                        {statusMessages[status]}
-                                    </Typography>
-                                    <Typography variant="caption" color="textSecondary" sx={{ display: 'block', mt: 0.5 }}>
-                                        {new Date(date).toLocaleString()}
-                                    </Typography>
+                                            Cancel order
+                                        </Button>
+                                    </Box>
                                 </Box>
-                            </HistoryItem>
-                        ))}
-                    </HistoryColumn>
-                </ContentWrapper>
-            </DialogContent>
-        </StyledDialog>
+                            )}
+                        </InfoColumn>
+                        <HistoryColumn>
+                            <Typography variant="h6" gutterBottom>Order History</Typography>
+                            {sortedStatusHistory.map(([status, date]) => (
+                                <HistoryItem key={status}>
+                                    <Box>
+                                        <Typography variant="body2" fontWeight="bold">
+                                            {statusMessages[status]}
+                                        </Typography>
+                                        <Typography variant="caption" color="textSecondary" sx={{ display: 'block', mt: 0.5 }}>
+                                            {formatDate(date)}
+                                        </Typography>
+                                    </Box>
+                                </HistoryItem>
+                            ))}
+                        </HistoryColumn>
+                    </ContentWrapper>
+                </DialogContent>
+            </StyledDialog>
+            <CancelOrderModal
+                open={cancelModalOpen}
+                onClose={() => setCancelModalOpen(false)}
+                onConfirm={handleCancelOrder}
+            />
+        </>
     );
 };
 

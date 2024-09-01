@@ -97,7 +97,7 @@ export const fetchOrderDetails = (orderId: string) => async (dispatch: Dispatch)
     }
 };
 
-export const updateOrderStatus = (orderId: string, newStatus: string) => async (dispatch: Dispatch) => {
+export const updateOrderStatus = (orderId: string, newStatus: string, cancellationReason?: string) => async (dispatch: Dispatch) => {
     dispatch({ type: UPDATE_ORDER_STATUS_REQUEST });
 
     try {
@@ -109,12 +109,17 @@ export const updateOrderStatus = (orderId: string, newStatus: string) => async (
         const token = await getIdToken(user);
 
         let endpoint = '';
+        const data: any = {
+            userId: user.uid,
+            orderId: orderId
+        };
+
         switch (newStatus) {
             case 'APPROVE_BY_SELLER':
                 endpoint = 'approveOrder';
                 break;
             case 'SENT':
-                endpoint = 'sentOrder';
+                endpoint = 'sendOrder';
                 break;
             case 'ARRIVED':
                 endpoint = 'arriveOrder';
@@ -124,15 +129,15 @@ export const updateOrderStatus = (orderId: string, newStatus: string) => async (
                 break;
             case 'CANCEL_BY_SELLER':
                 endpoint = 'cancelOrder';
+                if (cancellationReason) {
+                    data.cancellationReason = cancellationReason;
+                }
                 break;
             default:
                 throw new Error(`Invalid status: ${newStatus}`);
         }
 
-        const response = await axios.post(`${BACKEND_SERVICE}/${endpoint}`, {
-            userId: user.uid,
-            orderId: orderId
-        }, {
+        const response = await axios.post(`${BACKEND_SERVICE}/${endpoint}`, data, {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/x-www-form-urlencoded'
