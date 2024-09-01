@@ -151,8 +151,8 @@ const Orders: React.FC = () => {
                                         <OrderStatus status={order.status} size="small" />
                                     </TableCell>
                                     <TableCell>{order.quantity}</TableCell>
-                                    <TableCell>{order.priceInOrder}</TableCell>
-                                    <TableCell>{order.quantity * order.priceInOrder}</TableCell>
+                                    <TableCell>{order.good.price}</TableCell>
+                                    <TableCell>{order.quantity * order.good.price}</TableCell>
                                     <TableCell>{order.currencyInOrder}</TableCell>
                                     <TableCell>
                                         <IconButton onClick={() => handleEditOrder(order)}>
