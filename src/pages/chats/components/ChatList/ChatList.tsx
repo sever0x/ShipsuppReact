@@ -28,7 +28,6 @@ const ChatList: React.FC<ChatListProps> = React.memo(({ chats, onSelectChat, sel
         }
     };
 
-
     const renderedChats = useMemo(() => {
         return chats.map((chat) => {
             const otherUser = Object.values(chat.membersData).find(user => user.id !== currentUserId);
@@ -54,7 +53,7 @@ const ChatList: React.FC<ChatListProps> = React.memo(({ chats, onSelectChat, sel
                     <ListItemText
                         primary={
                             <Typography component="div" sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                <span>{`${otherUser?.firstName} ${otherUser?.lastName}`}</span>
+                                <Typography component="span" fontWeight="600">{`${otherUser?.firstName} ${otherUser?.lastName}`}</Typography>
                                 <Typography variant="caption" color="textSecondary">
                                     {formatLastMessageDate(chat.lastMessage?.date)}
                                 </Typography>
