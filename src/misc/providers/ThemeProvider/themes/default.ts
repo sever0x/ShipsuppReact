@@ -69,6 +69,13 @@ const muiTheme = createTheme({
             500: '#ACB6B7', // Medium grayish cyan
             600: '#97A4A5', // Dark grayish cyan
         },
+        // Add a custom red color
+        customRed: {
+            main: '#FF4D4F', // A bright red color
+            dark: '#CC3E40', // A darker shade for hover effects
+            light: '#FF7A7C', // A lighter shade if needed
+            contrastText: '#FFFFFF', // White text for contrast
+        },
     },
     shape: {
         borderRadius: 4,
@@ -80,6 +87,18 @@ const muiTheme = createTheme({
                     borderRadius: '4px',
                 },
             },
+            variants: [
+                {
+                    props: { color: 'customRed' },
+                    style: {
+                        backgroundColor: '#FF4D4F',
+                        color: '#FFFFFF',
+                        '&:hover': {
+                            backgroundColor: '#CC3E40',
+                        },
+                    },
+                },
+            ],
         },
         MuiTextField: {
             styleOverrides: {
@@ -90,7 +109,57 @@ const muiTheme = createTheme({
                 },
             },
         },
+        MuiChip: {
+            variants: [
+                {
+                    props: { color: 'customRed' },
+                    style: {
+                        backgroundColor: '#FF4D4F',
+                        color: '#FFFFFF',
+                        '&:hover': {
+                            backgroundColor: '#CC3E40',
+                        },
+                    },
+                },
+            ],
+        },
     },
 });
+
+declare module '@mui/material/styles' {
+    interface Palette {
+        customRed: Palette['primary'];
+    }
+    interface PaletteOptions {
+        customRed?: PaletteOptions['primary'];
+    }
+}
+
+declare module '@mui/material/Button' {
+    interface ButtonPropsColorOverrides {
+        customRed: true;
+    }
+}
+
+declare module '@mui/material/styles' {
+    interface Palette {
+        customRed: Palette['primary'];
+    }
+    interface PaletteOptions {
+        customRed?: PaletteOptions['primary'];
+    }
+}
+
+declare module '@mui/material/Button' {
+    interface ButtonPropsColorOverrides {
+        customRed: true;
+    }
+}
+
+declare module '@mui/material/Chip' {
+    interface ChipPropsColorOverrides {
+        customRed: true;
+    }
+}
 
 export default muiTheme;

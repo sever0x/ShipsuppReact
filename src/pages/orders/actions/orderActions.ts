@@ -101,25 +101,51 @@ export const updateOrderStatus = (orderId: string, newStatus: string) => async (
     dispatch({ type: UPDATE_ORDER_STATUS_REQUEST });
 
     try {
-        const orderRef = ref(database, `orders/${orderId}`);
-        const snapshot = await get(orderRef);
-        if (snapshot.exists()) {
-            const order = snapshot.val();
-            const updatedOrder = {
-                ...order,
-                status: newStatus,
-                datesOfStatusChange: {
-                    ...order.datesOfStatusChange,
-                    [newStatus]: new Date().toISOString()
-                }
-            };
-            await update(orderRef, updatedOrder);
+        const user = auth.currentUser;
+        if (!user) {
+            throw new Error("User not authenticated");
+        }
+
+        const token = await getIdToken(user);
+
+        let endpoint = '';
+        switch (newStatus) {
+            case 'APPROVE_BY_SELLER':
+                endpoint = 'approveOrder';
+                break;
+            case 'SENT':
+                endpoint = 'sentOrder';
+                break;
+            case 'ARRIVED':
+                endpoint = 'arriveOrder';
+                break;
+            case 'COMPLETED':
+                endpoint = 'completeOrder';
+                break;
+            case 'CANCEL_BY_SELLER':
+                endpoint = 'cancelOrder';
+                break;
+            default:
+                throw new Error(`Invalid status: ${newStatus}`);
+        }
+
+        const response = await axios.post(`${BACKEND_SERVICE}/${endpoint}`, {
+            userId: user.uid,
+            orderId: orderId
+        }, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        });
+
+        if (response.data.error === null && response.data.message === 'success') {
             dispatch({
                 type: UPDATE_ORDER_STATUS_SUCCESS,
-                payload: updatedOrder
+                payload: response.data.data
             });
         } else {
-            throw new Error('Order not found');
+            throw new Error(response.data.message || 'Failed to update order status');
         }
     } catch (error) {
         dispatch({

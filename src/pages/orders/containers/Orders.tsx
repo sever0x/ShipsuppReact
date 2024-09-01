@@ -22,6 +22,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import EditIcon from '@mui/icons-material/Edit';
 import IconButton from "../../../components/IconButton";
 import {Order} from "pages/orders/types/Order";
+import OrderStatus from '../components/OrderStatus';
 
 const statusColors: { [key: string]: "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" } = {
     'APPROVE_BY_BUYER': 'info',
@@ -147,15 +148,11 @@ const Orders: React.FC = () => {
                                         )}
                                     </TableCell>
                                     <TableCell>
-                                        <Chip
-                                            label={statusMessages[order.status]}
-                                            color={statusColors[order.status]}
-                                            size="small"
-                                        />
+                                        <OrderStatus status={order.status} size="small" />
                                     </TableCell>
                                     <TableCell>{order.quantity}</TableCell>
-                                    <TableCell>{order.priceInOrder}</TableCell>
-                                    <TableCell>{order.quantity * order.priceInOrder}</TableCell>
+                                    <TableCell>{order.good.price}</TableCell>
+                                    <TableCell>{order.quantity * order.good.price}</TableCell>
                                     <TableCell>{order.currencyInOrder}</TableCell>
                                     <TableCell>
                                         <IconButton onClick={() => handleEditOrder(order)}>
