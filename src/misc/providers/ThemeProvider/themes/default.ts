@@ -109,10 +109,23 @@ const muiTheme = createTheme({
                 },
             },
         },
+        MuiChip: {
+            variants: [
+                {
+                    props: { color: 'customRed' },
+                    style: {
+                        backgroundColor: '#FF4D4F',
+                        color: '#FFFFFF',
+                        '&:hover': {
+                            backgroundColor: '#CC3E40',
+                        },
+                    },
+                },
+            ],
+        },
     },
 });
 
-// Add customRed to the Theme type
 declare module '@mui/material/styles' {
     interface Palette {
         customRed: Palette['primary'];
@@ -122,9 +135,29 @@ declare module '@mui/material/styles' {
     }
 }
 
-// Add customRed as a valid color prop for buttons
 declare module '@mui/material/Button' {
     interface ButtonPropsColorOverrides {
+        customRed: true;
+    }
+}
+
+declare module '@mui/material/styles' {
+    interface Palette {
+        customRed: Palette['primary'];
+    }
+    interface PaletteOptions {
+        customRed?: PaletteOptions['primary'];
+    }
+}
+
+declare module '@mui/material/Button' {
+    interface ButtonPropsColorOverrides {
+        customRed: true;
+    }
+}
+
+declare module '@mui/material/Chip' {
+    interface ChipPropsColorOverrides {
         customRed: true;
     }
 }

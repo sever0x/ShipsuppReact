@@ -21,6 +21,7 @@ import useAuth from "../../../../misc/hooks/useAuth";
 import {useNavigate} from "react-router-dom";
 import {Chat} from "@mui/icons-material";
 import MenuItem from 'components/MenuItem';
+import OrderStatus from '../OrderStatus';
 
 interface EditOrderModalProps {
     open: boolean;
@@ -45,16 +46,16 @@ const statusLabels: { [key: string]: string } = {
     'COMPLETED': 'Complete',
     'CANCEL_BY_SELLER': 'Cancel Order'
 };
-
-const statusColors: { [key: string]: "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" } = {
-    'APPROVE_BY_BUYER': 'info',
-    'APPROVE_BY_SELLER': 'primary',
-    'SENT': 'secondary',
-    'ARRIVED': 'warning',
-    'COMPLETED': 'success',
-    'CANCEL_BY_SELLER': 'error'
-};
-
+//
+// const statusColors: { [key: string]: "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" } = {
+//     'APPROVE_BY_BUYER': 'info',
+//     'APPROVE_BY_SELLER': 'primary',
+//     'SENT': 'secondary',
+//     'ARRIVED': 'warning',
+//     'COMPLETED': 'success',
+//     'CANCEL_BY_SELLER': 'error'
+// };
+//
 const statusMessages: { [key: string]: string } = {
     'APPROVE_BY_BUYER': 'Order created',
     'APPROVE_BY_SELLER': 'Order approved',
@@ -109,14 +110,25 @@ const HistoryItem = styled(Box)(({ theme }) => ({
     marginBottom: theme.spacing(1),
     '&::before': {
         content: '""',
-        width: '10px',
-        height: '10px',
+        width: '8px',
+        height: '8px',
         borderRadius: '50%',
         backgroundColor: theme.palette.primary.main,
         marginRight: theme.spacing(1),
         marginTop: '6px',
     },
 }));
+
+const StyledSelect = styled(Select)({
+    '& .MuiSelect-select': {
+        borderRadius: '8px',
+        backgroundColor: '#FFFFFF',
+        border: '1px solid #CCCCCC',
+    },
+    '& .MuiOutlinedInput-notchedOutline': {
+        border: 'none',
+    },
+});
 
 const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order }) => {
     const dispatch = useDispatch();
@@ -231,11 +243,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order })
                     <InfoColumn>
                         <InfoRow>
                             <Typography variant="body1">Current status:</Typography>
-                            <Chip
-                                label={statusMessages[displayOrder.status]}
-                                color={statusColors[displayOrder.status]}
-                                size="small"
-                            />
+                            <OrderStatus status={displayOrder.status} />
                         </InfoRow>
                         <InfoRow>
                             <Typography variant="body1">Article:</Typography>
@@ -281,7 +289,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order })
 
                         <Box mt={2}>
                             <Typography variant="subtitle1">Set new order status:</Typography>
-                            <Typography variant="caption" color="error">
+                            <Typography variant="caption" color="error.main">
                                 *be careful, you cannot change the status back
                             </Typography>
                             <Box mt={1}>
@@ -291,7 +299,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order })
                                         <Select
                                             labelId="status-select-label"
                                             value=""
-                                            onChange={(e) => handleStatusChange(e.target.value)}
+                                            onChange={(e) => handleStatusChange(e.target.value as string)}
                                             label="New Status"
                                         >
                                             {statusOrder.slice(currentStatusIndex + 1).map((status) => (
@@ -324,7 +332,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order })
                                     <Typography variant="body2" fontWeight="bold">
                                         {statusMessages[status]}
                                     </Typography>
-                                    <Typography variant="caption" color="textSecondary">
+                                    <Typography variant="caption" color="textSecondary" sx={{ display: 'block', mt: 0.5 }}>
                                         {new Date(date).toLocaleString()}
                                     </Typography>
                                 </Box>
