@@ -10,7 +10,7 @@ import {
     SUCCESS_SIGN_UP,
 } from '../constants/actionTypes';
 import {
-    createUserWithEmailAndPassword,
+    createUserWithEmailAndPassword, getIdToken,
     GoogleAuthProvider,
     signInWithEmailAndPassword,
     signInWithPopup,
@@ -23,6 +23,7 @@ import {ThunkAction} from "redux-thunk";
 import {RootState} from "../reducers";
 import {UnknownAction} from "redux";
 import {get, ref, set} from "firebase/database";
+import {DEV_MODE} from "../../constants/config";
 
 const serializeUser = (user: User | null) => {
     if (!user) return null;
@@ -46,6 +47,12 @@ const requestSignIn = () => ({
 });
 
 const successSignIn = (user: User) => {
+    if (DEV_MODE) {
+        getIdToken(user).then(token =>
+            console.log(`JWT Token: ${token}`)
+        );
+    }
+
     const safeUser = createSafeUserObject(user);
     storage.setItem('safeUser', JSON.stringify(safeUser));
     return {

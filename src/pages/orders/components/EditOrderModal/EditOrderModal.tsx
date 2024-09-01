@@ -9,7 +9,7 @@ import {
     Box,
     Chip,
     IconButton,
-    styled, CircularProgress, Skeleton
+    styled, CircularProgress, Skeleton, FormControl, InputLabel, Select
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { updateOrderStatus } from '../../actions/orderActions';
@@ -20,6 +20,7 @@ import userAuth from "../../../../app/actions/userAuth";
 import useAuth from "../../../../misc/hooks/useAuth";
 import {useNavigate} from "react-router-dom";
 import {Chat} from "@mui/icons-material";
+import MenuItem from 'components/MenuItem';
 
 interface EditOrderModalProps {
     open: boolean;
@@ -32,7 +33,8 @@ const statusOrder = [
     'APPROVE_BY_SELLER',
     'SENT',
     'ARRIVED',
-    'COMPLETED'
+    'COMPLETED',
+    'CANCEL_BY_SELLER'
 ];
 
 const statusLabels: { [key: string]: string } = {
@@ -40,7 +42,8 @@ const statusLabels: { [key: string]: string } = {
     'APPROVE_BY_SELLER': 'Approve',
     'SENT': 'Sent',
     'ARRIVED': 'Delivered',
-    'COMPLETED': 'Complete'
+    'COMPLETED': 'Complete',
+    'CANCEL_BY_SELLER': 'Cancel Order'
 };
 
 const statusColors: { [key: string]: "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" } = {
@@ -134,7 +137,6 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order })
     }
 
     const currentStatusIndex = statusOrder.indexOf(order.status);
-    const nextStatus = statusOrder[currentStatusIndex + 1];
 
     const isOrderCancelled = order.status === 'CANCEL_BY_SELLER';
     const isOrderCompleted = order.status === 'COMPLETED';
@@ -265,6 +267,14 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order })
                             </div>
                         </InfoRow>
                         <InfoRow>
+                            <Typography variant="body1">Buyer ID:</Typography>
+                            <Typography variant="body1">{displayOrder.buyer.id}</Typography>
+                        </InfoRow>
+                        <InfoRow>
+                            <Typography variant="body1">Ship ID:</Typography>
+                            <Typography variant="body1">{displayOrder.buyer.vesselMMSI || 'N/A'}</Typography>
+                        </InfoRow>
+                        <InfoRow>
                             <Typography variant="body1">Port:</Typography>
                             <Typography variant="body1">{getPortInfo()}</Typography>
                         </InfoRow>
@@ -275,23 +285,33 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order })
                                 *be careful, you cannot change the status back
                             </Typography>
                             <Box mt={1}>
-                                {!isOrderCancelled && !isOrderCompleted && nextStatus && (
-                                    <StatusButton
-                                        onClick={() => handleStatusChange(nextStatus)}
-                                        variant="contained"
-                                        color="primary"
-                                    >
-                                        {statusLabels[nextStatus]}
-                                    </StatusButton>
+                                {!isOrderCancelled && !isOrderCompleted && (
+                                    <FormControl fullWidth>
+                                        <InputLabel id="status-select-label">New Status</InputLabel>
+                                        <Select
+                                            labelId="status-select-label"
+                                            value=""
+                                            onChange={(e) => handleStatusChange(e.target.value)}
+                                            label="New Status"
+                                        >
+                                            {statusOrder.slice(currentStatusIndex + 1).map((status) => (
+                                                <MenuItem key={status} value={status}>
+                                                    {statusLabels[status]}
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
                                 )}
                                 {!isOrderCancelled && !isOrderCompleted && (
-                                    <StatusButton
+                                    <Button
                                         onClick={() => handleStatusChange('CANCEL_BY_SELLER')}
                                         variant="contained"
-                                        color="error"
+                                        color="customRed"
+                                        sx={{ mt: 1 }}
+                                        fullWidth
                                     >
                                         Cancel order
-                                    </StatusButton>
+                                    </Button>
                                 )}
                             </Box>
                         </Box>
