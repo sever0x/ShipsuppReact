@@ -1,14 +1,14 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Avatar, List, ListItem, ListItemAvatar, Typography, Skeleton } from '@mui/material';
+import { Avatar, Typography, Skeleton } from '@mui/material';
 import { Message } from 'pages/chats/types/Message';
 import { User } from "pages/chats/types/User";
 import TextField from 'components/TextField';
 import Box from 'components/Box';
 import IconButton from 'components/IconButton';
 import { Send } from '@mui/icons-material';
-import {useDispatch, useSelector} from "react-redux";
-import {RootState} from "../../../../app/reducers";
-import {markMessagesAsRead, resetUnreadCount, watchAndResetUnreadCount} from "pages/chats/actions/chatActions";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../../../app/reducers";
+import { markMessagesAsRead, resetUnreadCount, watchAndResetUnreadCount } from "pages/chats/actions/chatActions";
 
 interface ChatContentProps {
     messages: Message[];
@@ -19,12 +19,12 @@ interface ChatContentProps {
 }
 
 const ChatContent: React.FC<ChatContentProps> = React.memo(({
-    messages,
-    membersData,
-    currentUserId,
-    onSendMessage,
-    loading,
-}) => {
+                                                                messages,
+                                                                membersData,
+                                                                currentUserId,
+                                                                onSendMessage,
+                                                                loading,
+                                                            }) => {
     const dispatch = useDispatch();
     const selectedChatId = useSelector((state: RootState) => state.chat.selectedChatId);
     const [newMessage, setNewMessage] = useState('');
@@ -120,6 +120,8 @@ const ChatContent: React.FC<ChatContentProps> = React.memo(({
         );
     }
 
+    const otherUser = Object.values(membersData).find(user => user.id !== currentUserId);
+
     return (
         <Box sx={{
             display: 'flex',
@@ -127,6 +129,15 @@ const ChatContent: React.FC<ChatContentProps> = React.memo(({
             height: '100%',
             overflow: 'hidden'
         }}>
+            <Box sx={{
+                padding: 2,
+                borderBottom: '1px solid #e0e0e0',
+                display: 'flex',
+                alignItems: 'center'
+            }}>
+                <Avatar src={otherUser?.photoUrl} alt={`${otherUser?.firstName} ${otherUser?.lastName}`} sx={{ mr: 2 }} />
+                <Typography variant="h6">{`${otherUser?.firstName} ${otherUser?.lastName}`}</Typography>
+            </Box>
             <Box
                 sx={{
                     flexGrow: 1,
@@ -134,21 +145,19 @@ const ChatContent: React.FC<ChatContentProps> = React.memo(({
                     padding: 2,
                     display: 'flex',
                     flexDirection: 'column',
-                    paddingBottom: 0
                 }}
                 onScroll={handleScroll}
+                className="chat-content-list"
             >
                 {loading && messages.length === 0 ? (
                     Array.from({ length: 5 }).map((_, index) => (
-                        <ListItem key={index}>
-                            <ListItemAvatar>
-                                <Skeleton variant="circular" width={40} height={40} />
-                            </ListItemAvatar>
+                        <Box key={index} sx={{ display: 'flex', mb: 2 }}>
+                            <Skeleton variant="circular" width={40} height={40} sx={{ mr: 2 }} />
                             <Box sx={{ width: '70%' }}>
                                 <Skeleton variant="text" width="100%" />
                                 <Skeleton variant="text" width="60%" />
                             </Box>
-                        </ListItem>
+                        </Box>
                     ))
                 ) : (
                     messages.map((message) => {
@@ -175,9 +184,15 @@ const ChatContent: React.FC<ChatContentProps> = React.memo(({
                                         maxWidth: '70%',
                                         backgroundColor: isSender ? '#e3f2fd' : '#f5f5f5',
                                         borderRadius: 2,
-                                        padding: 2,
+                                        pt: 1,
+                                        pb: 1,
+                                        pr: 2,
+                                        pl: 2,
                                     }}
                                 >
+                                    <Typography variant="body2" sx={{ mb: 0.5, color: 'text.secondary' }}>
+                                        {isSender ? 'You' : `${user?.firstName} ${user?.lastName}`}
+                                    </Typography>
                                     <Typography variant="body1">{message.text}</Typography>
                                     <Typography variant="caption" sx={{ display: 'block', mt: 1, color: 'text.secondary' }}>
                                         {new Date(message.createTimestampGMT).toLocaleString()}
@@ -201,7 +216,6 @@ const ChatContent: React.FC<ChatContentProps> = React.memo(({
                 alignItems: 'center',
                 padding: 2,
                 borderTop: '1px solid #e0e0e0',
-                marginTop: 2
             }}>
                 <TextField
                     fullWidth
@@ -225,9 +239,4 @@ const ChatContent: React.FC<ChatContentProps> = React.memo(({
     );
 });
 
-const areEqual = (prevProps: ChatContentProps, nextProps: ChatContentProps) => {
-    return prevProps.messages === nextProps.messages &&
-        prevProps.loading === nextProps.loading;
-};
-
-export default React.memo(ChatContent, areEqual);
+export default React.memo(ChatContent);
