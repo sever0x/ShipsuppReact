@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Modal, Box, TextField, Button, Typography, Grid, IconButton, InputAdornment } from '@mui/material';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -34,6 +34,8 @@ const EditGoodModal: React.FC<EditGoodModalProps> = ({ open, onClose, good, onSa
     const [selectedCategory, setSelectedCategory] = useState<string>(good.categoryId || 'Select category');
     const [errors, setErrors] = useState<Errors>({});
 
+    const totalImageCount = Object.keys(editedGood.images || {}).length - deletedImageKeys.length + newImages.length;
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setEditedGood(prev => ({ ...prev, [name]: name === 'price' ? parseFloat(value) : value }));
@@ -48,7 +50,8 @@ const EditGoodModal: React.FC<EditGoodModalProps> = ({ open, onClose, good, onSa
         if (editedGood.price <= 0) newErrors.price = 'Price must be greater than 0';
         if (!editedGood.brand.trim()) newErrors.brand = 'Brand is required';
         if (!editedGood.description.trim()) newErrors.description = 'Description is required';
-        if (Object.keys(editedGood.images || {}).length - deletedImageKeys.length + newImages.length === 0) newErrors.images = 'At least one image is required';
+        if (totalImageCount === 0) newErrors.images = 'At least one image is required';
+        if (totalImageCount > 5) newErrors.images = 'Maximum 5 images allowed';
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -62,7 +65,7 @@ const EditGoodModal: React.FC<EditGoodModalProps> = ({ open, onClose, good, onSa
     };
 
     const handleImageUpload = (files: File[]) => {
-        const remainingSlots = 5 - Object.keys(editedGood.images || {}).length + deletedImageKeys.length - newImages.length;
+        const remainingSlots = 5 - totalImageCount;
         const filesToUpload = files.slice(0, remainingSlots);
         setNewImages(prev => [...prev, ...filesToUpload]);
         setErrors(prev => ({ ...prev, images: '' }));
@@ -70,12 +73,13 @@ const EditGoodModal: React.FC<EditGoodModalProps> = ({ open, onClose, good, onSa
 
     const onDrop = useCallback((acceptedFiles: File[]) => {
         handleImageUpload(acceptedFiles);
-    }, [editedGood.images, deletedImageKeys, newImages]);
+    }, [totalImageCount]);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
         accept: { 'image/*': [] },
-        maxFiles: 5 - Object.keys(editedGood.images || {}).length + deletedImageKeys.length - newImages.length,
+        maxFiles: 5 - totalImageCount,
+        disabled: totalImageCount >= 5,
     });
 
     const handleRemoveNewImage = (index: number) => {
@@ -104,6 +108,14 @@ const EditGoodModal: React.FC<EditGoodModalProps> = ({ open, onClose, good, onSa
         handleCategoryClose();
         setErrors(prev => ({ ...prev, category: '' }));
     };
+
+    useEffect(() => {
+        if (totalImageCount > 5) {
+            setErrors(prev => ({ ...prev, images: 'Maximum 5 images allowed' }));
+        } else {
+            setErrors(prev => ({ ...prev, images: '' }));
+        }
+    }, [totalImageCount]);
 
     return (
         <Modal open={open} onClose={onClose}>
@@ -232,8 +244,9 @@ const EditGoodModal: React.FC<EditGoodModalProps> = ({ open, onClose, good, onSa
                                 flexDirection: 'column',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                cursor: 'pointer',
+                                cursor: totalImageCount >= 5 ? 'not-allowed' : 'pointer',
                                 bgcolor: isDragActive ? 'rgba(0, 0, 0, 0.05)' : 'transparent',
+                                opacity: totalImageCount >= 5 ? 0.5 : 1,
                             }}
                         >
                             <input {...getInputProps()} />
@@ -241,10 +254,12 @@ const EditGoodModal: React.FC<EditGoodModalProps> = ({ open, onClose, good, onSa
                             <Typography variant="body1" align="center">
                                 {isDragActive
                                     ? "Drop the images here"
-                                    : "Drag 'n' drop some images here, or click to select images"}
+                                    : totalImageCount >= 5
+                                        ? "Maximum number of images reached"
+                                        : "Drag 'n' drop some images here, or click to select images"}
                             </Typography>
                             <Typography variant="caption" align="center" color="text.secondary">
-                                {`${Object.keys(editedGood.images || {}).length - deletedImageKeys.length + newImages.length}/5 images uploaded`}
+                                {`${totalImageCount}/5 images uploaded`}
                             </Typography>
                         </Box>
                         {errors.images && <Typography color="error">{errors.images}</Typography>}
