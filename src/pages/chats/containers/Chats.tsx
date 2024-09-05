@@ -1,17 +1,20 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from 'app/reducers';
+import React, {useCallback, useEffect} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
+import {RootState} from 'app/reducers';
 import {
     fetchChats,
-    fetchMessages, markMessagesAsRead, resetSelectedChatId, resetUnreadCount,
-    sendMessage, setSelectedChatId,
+    fetchMessages,
+    resetSelectedChatId,
+    resetUnreadCount,
+    sendMessage,
+    setSelectedChatId,
     setupMessageListener,
     setupRealtimeListeners
 } from "../actions/chatActions";
 import ChatList from '../components/ChatList';
 import ChatContent from '../components/ChatContent';
 import Box from 'components/Box';
-import { createSelector } from 'reselect';
+import {createSelector} from 'reselect';
 
 const selectChat = (state: RootState) => state.chat;
 const selectSelectedChatId = (state: RootState) => state.chat.selectedChatId;
@@ -98,11 +101,11 @@ const Chats: React.FC = () => {
             display: 'flex',
             height: '80vh',
             overflow: 'hidden',
-            width: '100%', // Убедитесь, что контейнер занимает всю доступную ширину
+            width: '100%',
         }}>
             <Box sx={{
-                width: '340px', // Фиксированная ширина для списка чатов
-                flexShrink: 0, // Предотвращает сжатие этого бокса
+                width: '340px',
+                flexShrink: 0,
                 borderRight: '1px solid #e0e0e0',
                 overflowY: 'auto',
                 height: '100%'
@@ -121,7 +124,7 @@ const Chats: React.FC = () => {
                 flexDirection: 'column',
                 height: '100%',
                 overflow: 'hidden',
-                width: 'calc(100% - 340px)', // Оставшаяся ширина после вычета ширины списка чатов
+                width: 'calc(100% - 340px)',
             }}>
                 <ChatContent
                     messages={currentChatMessages}
