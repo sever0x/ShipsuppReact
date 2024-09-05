@@ -38,7 +38,26 @@ export const fetchSellerOrders = (sellerId: string) => async (dispatch: Dispatch
         if (response.data.error === null && response.data.message === 'success') {
             const orders: Order[] = response.data.data;
 
-            const filteredOrders = orders.filter((order: Order) => !excludedStatuses.includes(order.status));
+            // #18 Fetch latest product information for each order
+            const updatedOrders = await Promise.all(orders.map(async (order) => {
+                const productResponse = await axios.get(`${BACKEND_SERVICE}/getGoodDetails?goodId=${order.goodId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                });
+                if (productResponse.data.error === null && productResponse.data.message === 'success') {
+                    return {
+                        ...order,
+                        good: {
+                            ...order.good,
+                            ...productResponse.data.data
+                        }
+                    };
+                }
+                return order;
+            }));
+
+            const filteredOrders = updatedOrders.filter((order: Order) => !excludedStatuses.includes(order.status));
 
             const sortedOrders = [...filteredOrders].sort((a: Order, b: Order) =>
                 new Date(b.createTimestampGMT).getTime() - new Date(a.createTimestampGMT).getTime()
