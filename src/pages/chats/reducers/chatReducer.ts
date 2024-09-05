@@ -15,6 +15,7 @@ import {
 } from '../constants/actionTypes';
 import {ChatState} from "pages/chats/types/state/ChatState";
 import {Chat} from "pages/chats/types/Chat";
+import {DEV_MODE} from "../../../constants/config";
 
 const initialState: ChatState = {
     chats: [],
@@ -105,9 +106,12 @@ const chatReducer = (state = initialState, action: any): ChatState => {
                 }
             };
         case SET_SELECTED_CHAT_ID:
+            if (DEV_MODE) {
+                console.log('chatReducer.ts: SET_SELECTED_CHAT_ID', action.payload);
+            }
             return {
                 ...state,
-                selectedChatId: action.payload,
+                selectedChatId: action.payload || state.selectedChatId,
                 messages: action.payload ? state.messages : {}
             };
         case MARK_MESSAGES_AS_READ:

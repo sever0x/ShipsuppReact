@@ -1,7 +1,7 @@
-import React, { useMemo } from 'react';
-import { Avatar, Badge, List, ListItem, ListItemAvatar, ListItemText, Skeleton, Typography } from '@mui/material';
-import { Chat } from "pages/chats/types/Chat";
-import { format, isValid } from 'date-fns';
+import React, {useMemo} from 'react';
+import {Avatar, Badge, List, ListItem, ListItemAvatar, ListItemText, Skeleton, Typography} from '@mui/material';
+import {Chat} from "pages/chats/types/Chat";
+import {format} from 'date-fns';
 
 interface ChatListProps {
     chats: Chat[];
@@ -52,9 +52,35 @@ const ChatList: React.FC<ChatListProps> = React.memo(({ chats, onSelectChat, sel
                     </ListItemAvatar>
                     <ListItemText
                         primary={
-                            <Typography component="div" sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                <Typography component="span" fontWeight="600">{`${otherUser?.firstName} ${otherUser?.lastName}`}</Typography>
-                                <Typography variant="caption" color="textSecondary">
+                            <Typography
+                                component="div"
+                                sx={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    width: '100%',
+                                }}
+                            >
+                                <Typography
+                                    component="span"
+                                    fontWeight="600"
+                                    sx={{
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap',
+                                        maxWidth: 'calc(100% - 70px)',
+                                    }}
+                                >
+                                    {`${otherUser?.firstName} ${otherUser?.lastName}`}
+                                </Typography>
+                                <Typography
+                                    variant="caption"
+                                    color="textSecondary"
+                                    sx={{
+                                        flexShrink: 0,
+                                        marginLeft: '8px',
+                                    }}
+                                >
                                     {formatLastMessageDate(chat.lastMessage?.date)}
                                 </Typography>
                             </Typography>
@@ -64,7 +90,12 @@ const ChatList: React.FC<ChatListProps> = React.memo(({ chats, onSelectChat, sel
                                 component="span"
                                 variant="body2"
                                 color="textSecondary"
-                                noWrap
+                                sx={{
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
+                                    display: 'block',
+                                }}
                             >
                                 {chat.lastMessage?.text ?? ''}
                             </Typography>
@@ -94,7 +125,11 @@ const ChatList: React.FC<ChatListProps> = React.memo(({ chats, onSelectChat, sel
     }
 
     return (
-        <List sx={{ padding: 0 }}>
+        <List sx={{
+            padding: 0,
+            overflowX: 'hidden',
+            width: '100%',
+        }}>
             {renderedChats}
         </List>
     );

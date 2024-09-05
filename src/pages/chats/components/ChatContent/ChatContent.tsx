@@ -1,14 +1,15 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Avatar, Typography, Skeleton } from '@mui/material';
-import { Message } from 'pages/chats/types/Message';
-import { User } from "pages/chats/types/User";
+import React, {useCallback, useEffect, useRef, useState} from 'react';
+import {Avatar, Skeleton, Typography} from '@mui/material';
+import {Message} from 'pages/chats/types/Message';
+import {User} from "pages/chats/types/User";
 import TextField from 'components/TextField';
 import Box from 'components/Box';
 import IconButton from 'components/IconButton';
-import { Send } from '@mui/icons-material';
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../../../app/reducers";
-import { markMessagesAsRead, resetUnreadCount, watchAndResetUnreadCount } from "pages/chats/actions/chatActions";
+import {Send} from '@mui/icons-material';
+import {useDispatch, useSelector} from "react-redux";
+import {RootState} from "../../../../app/reducers";
+import {markMessagesAsRead, resetUnreadCount, watchAndResetUnreadCount} from "pages/chats/actions/chatActions";
+import {DEV_MODE} from "../../../../constants/config";
 
 interface ChatContentProps {
     messages: Message[];
@@ -42,6 +43,9 @@ const ChatContent: React.FC<ChatContentProps> = React.memo(({
     }, []);
 
     useEffect(() => {
+        if (DEV_MODE) {
+            console.log('ChatContent.tsx: selectedChatId changed = ', selectedChatId);
+        }
         if (selectedChatId !== prevSelectedChatIdRef.current) {
             setIsInitialLoad(true);
             prevSelectedChatIdRef.current = selectedChatId;
@@ -127,7 +131,8 @@ const ChatContent: React.FC<ChatContentProps> = React.memo(({
             display: 'flex',
             flexDirection: 'column',
             height: '100%',
-            overflow: 'hidden'
+            overflow: 'hidden',
+            maxWidth: '100%',
         }}>
             <Box sx={{
                 padding: 2,
@@ -188,12 +193,14 @@ const ChatContent: React.FC<ChatContentProps> = React.memo(({
                                         pb: 1,
                                         pr: 2,
                                         pl: 2,
+                                        wordWrap: 'break-word',
+                                        overflowWrap: 'break-word',
                                     }}
                                 >
                                     <Typography variant="body2" sx={{ mb: 0.5, color: 'text.secondary' }}>
                                         {isSender ? 'You' : `${user?.firstName} ${user?.lastName}`}
                                     </Typography>
-                                    <Typography variant="body1">{message.text}</Typography>
+                                    <Typography variant="body1" sx={{ wordBreak: 'break-word' }}>{message.text}</Typography>
                                     <Typography variant="caption" sx={{ display: 'block', mt: 1, color: 'text.secondary' }}>
                                         {new Date(message.createTimestampGMT).toLocaleString()}
                                     </Typography>
