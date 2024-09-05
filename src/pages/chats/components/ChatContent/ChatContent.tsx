@@ -127,7 +127,8 @@ const ChatContent: React.FC<ChatContentProps> = React.memo(({
             display: 'flex',
             flexDirection: 'column',
             height: '100%',
-            overflow: 'hidden'
+            overflow: 'hidden',
+            maxWidth: '100%',
         }}>
             <Box sx={{
                 padding: 2,
@@ -188,12 +189,14 @@ const ChatContent: React.FC<ChatContentProps> = React.memo(({
                                         pb: 1,
                                         pr: 2,
                                         pl: 2,
+                                        wordWrap: 'break-word',
+                                        overflowWrap: 'break-word',
                                     }}
                                 >
                                     <Typography variant="body2" sx={{ mb: 0.5, color: 'text.secondary' }}>
                                         {isSender ? 'You' : `${user?.firstName} ${user?.lastName}`}
                                     </Typography>
-                                    <Typography variant="body1">{message.text}</Typography>
+                                    <Typography variant="body1" sx={{ wordBreak: 'break-word' }}>{message.text}</Typography>
                                     <Typography variant="caption" sx={{ display: 'block', mt: 1, color: 'text.secondary' }}>
                                         {new Date(message.createTimestampGMT).toLocaleString()}
                                     </Typography>

@@ -97,10 +97,12 @@ const Chats: React.FC = () => {
         <Box sx={{
             display: 'flex',
             height: '80vh',
-            overflow: 'hidden'
+            overflow: 'hidden',
+            width: '100%', // Убедитесь, что контейнер занимает всю доступную ширину
         }}>
             <Box sx={{
-                width: '340px',
+                width: '340px', // Фиксированная ширина для списка чатов
+                flexShrink: 0, // Предотвращает сжатие этого бокса
                 borderRight: '1px solid #e0e0e0',
                 overflowY: 'auto',
                 height: '100%'
@@ -118,7 +120,8 @@ const Chats: React.FC = () => {
                 display: 'flex',
                 flexDirection: 'column',
                 height: '100%',
-                overflow: 'hidden'
+                overflow: 'hidden',
+                width: 'calc(100% - 340px)', // Оставшаяся ширина после вычета ширины списка чатов
             }}>
                 <ChatContent
                     messages={currentChatMessages}
