@@ -1,7 +1,7 @@
-import React, {useCallback, useMemo} from 'react';
-import { Avatar, Badge, List, ListItem, ListItemAvatar, ListItemText, Skeleton, Typography } from '@mui/material';
-import { Chat } from "pages/chats/types/Chat";
-import { format, isValid } from 'date-fns';
+import React, {useMemo} from 'react';
+import {Avatar, Badge, List, ListItem, ListItemAvatar, ListItemText, Skeleton, Typography} from '@mui/material';
+import {Chat} from "pages/chats/types/Chat";
+import {format} from 'date-fns';
 
 interface ChatListProps {
     chats: Chat[];
