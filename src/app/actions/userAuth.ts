@@ -47,14 +47,19 @@ const requestSignIn = () => ({
 });
 
 const successSignIn = (user: User) => {
+    const safeUser = {
+        uid: user.uid,
+        email: user.email,
+        emailVerified: user.emailVerified,
+        displayName: user.displayName,
+    };
+
+    storage.setItem('safeUser', JSON.stringify(safeUser));
+
     if (DEV_MODE) {
-        getIdToken(user).then(token =>
-            console.log(`JWT Token: ${token}`)
-        );
+        console.log(`User signed in: ${safeUser.email}`);
     }
 
-    const safeUser = createSafeUserObject(user);
-    storage.setItem('safeUser', JSON.stringify(safeUser));
     return {
         type: SUCCESS_SIGN_IN,
         payload: safeUser,
@@ -116,19 +121,7 @@ const fetchGoogleSignIn = (): ThunkAction<Promise<void>, RootState, unknown, Unk
                 notifications: {},
                 phone: user.phoneNumber ?? '',
                 profilePhoto: user.photoURL ?? '',
-                port: {
-                    city: {
-                        country: {
-                            id: "ua",
-                            phoneCode: "",
-                            title: "Ukraine"
-                        },
-                        id: "odessa",
-                        title: "Odessa"
-                    },
-                    id: "ua_port_odessa",
-                    title: "Port of Odessa"
-                },
+                portsArray: [],
                 vesselIMO: "",
                 vesselMMSI: ""
             };
