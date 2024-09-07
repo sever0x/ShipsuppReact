@@ -1,8 +1,8 @@
-import {ThunkAction} from 'redux-thunk';
-import {RootState} from '../reducers';
-import {UnknownAction} from 'redux';
+import { ThunkAction } from 'redux-thunk';
+import { RootState } from '../reducers';
+import { UnknownAction } from 'redux';
 import actions from "../../app/actions/userAuth";
-import {fetchUserProfile} from "pages/profile/actions/profileActions";
+import { fetchUserProfile } from "pages/profile/actions/profileActions";
 
 export const signInAndLoadProfile = (email: string, password: string): ThunkAction<Promise<void>, RootState, unknown, UnknownAction> =>
     async (dispatch) => {
@@ -25,7 +25,14 @@ export const googleSignInAndLoadProfile = (): ThunkAction<Promise<void>, RootSta
 export const signUpAndLoadProfile = (
     email: string,
     password: string,
-    additionalInfo: { firstName: string, lastName: string, phone: string }
+    additionalInfo: {
+        firstName: string,
+        lastName: string,
+        phone: string,
+        vesselIMO: string,
+        vesselMMSI: string,
+        portsArray: any[]
+    }
 ): ThunkAction<Promise<void>, RootState, unknown, UnknownAction> =>
     async (dispatch) => {
         await dispatch(actions.fetchRegister(email, password, additionalInfo) as any);
