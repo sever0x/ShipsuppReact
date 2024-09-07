@@ -99,7 +99,7 @@ const authStateChange = (user: User | null) => ({
 
 const googleProvider = new GoogleAuthProvider();
 
-const fetchGoogleSignIn = (): ThunkAction<Promise<void>, RootState, unknown, UnknownAction> => async (dispatch: any) => {
+const fetchGoogleSignIn = (): ThunkAction<Promise<{ isNewUser: boolean, email: string, firstName: string, lastName: string }>, RootState, unknown, UnknownAction> => async (dispatch: any) => {
     dispatch(requestSignIn());
     try {
         const result = await signInWithPopup(auth, googleProvider);
@@ -108,12 +108,20 @@ const fetchGoogleSignIn = (): ThunkAction<Promise<void>, RootState, unknown, Unk
         const userRef = ref(database, `users/${user.uid}`);
         const snapshot = await get(userRef);
 
+        let isNewUser = false;
+        let firstName: string;
+        let lastName: string;
+
         if (!snapshot.exists()) {
+            isNewUser = true;
+            firstName = user.displayName ? user.displayName.split(' ')[0] : '';
+            lastName = user.displayName ? user.displayName.split(' ').slice(1).join(' ') : '';
+
             const userProfile = {
                 id: user.uid,
                 email: user.email,
-                firstName: user.displayName ? user.displayName.split(' ')[0] : '',
-                lastName: user.displayName ? user.displayName.split(' ').slice(1).join(' ') : '',
+                firstName,
+                lastName,
                 accessType: 'GRANTED',
                 date: new Date().toLocaleString(),
                 role: 'SELLER',
@@ -127,11 +135,17 @@ const fetchGoogleSignIn = (): ThunkAction<Promise<void>, RootState, unknown, Unk
             };
 
             await set(userRef, userProfile);
+        } else {
+            const userData = snapshot.val();
+            firstName = userData.firstName;
+            lastName = userData.lastName;
         }
 
         dispatch(successSignIn(user));
+        return { isNewUser, email: user.email || '', firstName, lastName };
     } catch (error) {
         dispatch(errorSignIn(error));
+        throw error;
     }
 };
 
