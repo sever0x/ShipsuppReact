@@ -9,7 +9,6 @@ import {
     Grid,
     useMediaQuery,
     useTheme,
-    Chip, Accordion, AccordionSummary, AccordionDetails
 } from '@mui/material';
 import useAuth from 'misc/hooks/useAuth';
 import { fetchUserProfile } from '../actions/profileActions';
@@ -25,7 +24,7 @@ import DateRangeIcon from '@mui/icons-material/DateRange';
 import Typography from 'components/Typography';
 import InfoItem from '../components/InfoItem';
 import OutlinedBox from '../components/OutlinedBox';
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import StyledPortsAccordion from '../components/StyledPortsAccordion';
 
 export interface Port {
     id: string;
@@ -83,8 +82,8 @@ const Profile: React.FC = () => {
         );
     }
 
-    const renderPorts = () => {
-        const groupedPorts: GroupedPorts = profile.data.portsArray.reduce((acc: GroupedPorts, port: Port) => {
+    const groupPorts = (): GroupedPorts => {
+        return profile.data.portsArray.reduce((acc: GroupedPorts, port: Port) => {
             const countryId = port.city.country.id;
             if (!acc[countryId]) {
                 acc[countryId] = {
@@ -95,37 +94,6 @@ const Profile: React.FC = () => {
             acc[countryId].ports.push(port);
             return acc;
         }, {});
-
-        return (
-            <Box>
-                {Object.entries(groupedPorts).map(([countryId, { country, ports }]) => (
-                    <Accordion key={countryId}>
-                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                            <Box display="flex" alignItems="center">
-                                <img
-                                    src={`https://flagcdn.com/w20/${country.id.toLowerCase()}.png`}
-                                    alt={`${country.title} flag`}
-                                    style={{ marginRight: '8px', width: '20px' }}
-                                />
-                                <Typography>{country.title}</Typography>
-                            </Box>
-                        </AccordionSummary>
-                        <AccordionDetails>
-                            <Box display="flex" flexWrap="wrap" gap={1}>
-                                {ports.map((port: Port) => (
-                                    <Chip
-                                        key={port.id}
-                                        icon={<LocationOnIcon />}
-                                        label={`${port.title}, ${port.city.title}`}
-                                        variant="outlined"
-                                    />
-                                ))}
-                            </Box>
-                        </AccordionDetails>
-                    </Accordion>
-                ))}
-            </Box>
-        );
     };
 
     return (
@@ -172,7 +140,7 @@ const Profile: React.FC = () => {
                                     <InfoItem
                                         icon={<LocationOnIcon />}
                                         label="Ports"
-                                        value={renderPorts()}
+                                        value={<StyledPortsAccordion groupedPorts={groupPorts()} />}
                                         isMobile={isMobile}
                                     />
                                 </Grid>
