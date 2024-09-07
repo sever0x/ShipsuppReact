@@ -9,6 +9,7 @@ import {
     Grid,
     useMediaQuery,
     useTheme,
+    Chip, Accordion, AccordionSummary, AccordionDetails
 } from '@mui/material';
 import useAuth from 'misc/hooks/useAuth';
 import { fetchUserProfile } from '../actions/profileActions';
@@ -24,6 +25,29 @@ import DateRangeIcon from '@mui/icons-material/DateRange';
 import Typography from 'components/Typography';
 import InfoItem from '../components/InfoItem';
 import OutlinedBox from '../components/OutlinedBox';
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+
+export interface Port {
+    id: string;
+    title: string;
+    city: {
+        title: string;
+        country: {
+            id: string;
+            title: string;
+        };
+    };
+}
+
+interface GroupedPorts {
+    [countryId: string]: {
+        country: {
+            id: string;
+            title: string;
+        };
+        ports: Port[];
+    };
+}
 
 const Profile: React.FC = () => {
     const { user } = useAuth();
@@ -59,6 +83,51 @@ const Profile: React.FC = () => {
         );
     }
 
+    const renderPorts = () => {
+        const groupedPorts: GroupedPorts = profile.data.portsArray.reduce((acc: GroupedPorts, port: Port) => {
+            const countryId = port.city.country.id;
+            if (!acc[countryId]) {
+                acc[countryId] = {
+                    country: port.city.country,
+                    ports: []
+                };
+            }
+            acc[countryId].ports.push(port);
+            return acc;
+        }, {});
+
+        return (
+            <Box>
+                {Object.entries(groupedPorts).map(([countryId, { country, ports }]) => (
+                    <Accordion key={countryId}>
+                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                            <Box display="flex" alignItems="center">
+                                <img
+                                    src={`https://flagcdn.com/w20/${country.id.toLowerCase()}.png`}
+                                    alt={`${country.title} flag`}
+                                    style={{ marginRight: '8px', width: '20px' }}
+                                />
+                                <Typography>{country.title}</Typography>
+                            </Box>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                            <Box display="flex" flexWrap="wrap" gap={1}>
+                                {ports.map((port: Port) => (
+                                    <Chip
+                                        key={port.id}
+                                        icon={<LocationOnIcon />}
+                                        label={`${port.title}, ${port.city.title}`}
+                                        variant="outlined"
+                                    />
+                                ))}
+                            </Box>
+                        </AccordionDetails>
+                    </Accordion>
+                ))}
+            </Box>
+        );
+    };
+
     return (
         <Container maxWidth="xl">
             {isEditing ? (
@@ -74,9 +143,6 @@ const Profile: React.FC = () => {
                                     sx={{ width: { xs: 80, sm: 120 }, height: { xs: 80, sm: 120 }, mb: 2 }}
                                 />
                                 <Typography variant="h5" align="center">{`${profile.data?.firstName} ${profile.data?.lastName}`}</Typography>
-                                <Typography variant="body2" color="secondary" align="center">
-                                    {profile.data.portsArray.map((port: any) => port.title).join(', ')}
-                                </Typography>
                             </Box>
                             <Button
                                 fullWidth
@@ -102,11 +168,11 @@ const Profile: React.FC = () => {
                                 <Grid item xs={12} sm={6}>
                                     <InfoItem icon={<PhoneIcon />} label="Phone" value={profile.data?.phone || 'Not provided'} isMobile={isMobile} />
                                 </Grid>
-                                <Grid item xs={12} sm={6}>
+                                <Grid item xs={12}>
                                     <InfoItem
                                         icon={<LocationOnIcon />}
-                                        label="Port & Country"
-                                        value={profile.data.portsArray.map((port: any) => `${port.title}, ${port.city.country.title}`).join(', ')}
+                                        label="Ports"
+                                        value={renderPorts()}
                                         isMobile={isMobile}
                                     />
                                 </Grid>
