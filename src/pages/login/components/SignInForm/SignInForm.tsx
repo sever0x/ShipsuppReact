@@ -6,10 +6,10 @@ import Typography from "components/Typography";
 import EmailField from 'components/EmailField';
 import PasswordField from 'components/PasswordField';
 import SubmitButton from 'components/SubmitButton';
-import GoogleSignInButton from 'components/GoogleSignInButton';
 import {Link} from "@mui/material";
 import pageURLs from 'constants/pagesURLs';
 import * as pages from 'constants/pages';
+import GoogleSignIn from 'components/GoogleSignIn';
 
 const getClasses = createUseStyles(() => ({
     textContainer: {
@@ -33,7 +33,7 @@ const getClasses = createUseStyles(() => ({
 
 const SignInForm: React.FC = () => {
     const classes = getClasses();
-    const {login, googleSignIn, error} = useAuth();
+    const { login, error } = useAuth();
     const navigate = useNavigate();
 
     const [email, setEmail] = useState('');
@@ -45,23 +45,17 @@ const SignInForm: React.FC = () => {
         navigate('/catalog');
     };
 
-    const handleGoogleSignIn = async () => {
-        await googleSignIn();
-        navigate('/catalog');
-    };
-
     return (
         <form onSubmit={handleSubmit}>
             <div className={classes.textContainer}>
                 <Typography sx={{fontSize: '2.25rem', fontWeight: 'bold'}}>
-                    Sign In.
+                    Sign In
                 </Typography>
                 <Typography sx={{paddingTop: '16px'}}>
                     Don't have an account? <Link href={`${pageURLs[pages.register]}`} sx={{
                     color: 'inherit',
                     textDecorationColor: 'inherit'
-                }}
-                >
+                }}>
                     Register
                 </Link>
                 </Typography>
@@ -73,7 +67,7 @@ const SignInForm: React.FC = () => {
             {error && <Typography color="error">{error.message}</Typography>}
             <div className={classes.buttonsContainer}>
                 <SubmitButton text="Sign In"/>
-                <GoogleSignInButton onClick={handleGoogleSignIn} text="Sign In with Google"/>
+                <GoogleSignIn />
             </div>
         </form>
     );

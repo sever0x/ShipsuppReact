@@ -1,9 +1,9 @@
 import React, {useEffect, useState} from 'react';
-import {useNavigate} from 'react-router-dom';
+import {useLocation, useNavigate} from 'react-router-dom';
 import {createUseStyles} from 'react-jss';
 import useAuth from 'misc/hooks/useAuth';
 import Typography from 'components/Typography';
-import {FormControl, InputLabel, Link, Select} from "@mui/material";
+import {Link} from "@mui/material";
 import pageURLs from 'constants/pagesURLs';
 import * as pages from 'constants/pages';
 import actions from "../../../../misc/actions/portsActions";
@@ -14,13 +14,11 @@ import SubmitButton from 'components/SubmitButton';
 import GoogleSignInButton from 'components/GoogleSignInButton';
 import {useSelector} from "react-redux";
 import {RootState} from 'app/reducers';
-import MenuItem from 'components/MenuItem';
 import {useAppDispatch} from 'misc/hooks/useAppDispatch';
 import PortSelector from 'components/PortSelector';
-import SelectedPorts from 'components/SelectedPorts';
+import SelectedPortsModal from 'components/SelectedPorts';
 import Button from 'components/Button';
 import {Visibility} from "@mui/icons-material";
-import SelectedPortsModal from "components/SelectedPorts";
 
 const getClasses = createUseStyles(() => ({
     textContainer: {
@@ -55,19 +53,28 @@ const getClasses = createUseStyles(() => ({
     },
 }));
 
+interface LocationState {
+    step?: number;
+    email?: string;
+    firstName?: string;
+    lastName?: string;
+}
+
 const RegisterForm: React.FC = () => {
     const classes = getClasses();
     const { register, googleSignIn, updateProfile, user, error } = useAuth();
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
     const ports = useSelector((state: RootState) => state.ports.data);
+    const location = useLocation();
+    const state = location.state as LocationState;
 
-    const [step, setStep] = useState(1);
-    const [email, setEmail] = useState('');
+    const [step, setStep] = useState(state?.step || 1);
+    const [email, setEmail] = useState(state?.email || '');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [firstName, setFirstName] = useState('');
-    const [lastName, setLastName] = useState('');
+    const [firstName, setFirstName] = useState(state?.firstName || '');
+    const [lastName, setLastName] = useState(state?.lastName || '');
     const [phone, setPhone] = useState('');
     const [vesselIMO, setVesselIMO] = useState('');
     const [vesselMMSI, setVesselMMSI] = useState('');
@@ -80,20 +87,18 @@ const RegisterForm: React.FC = () => {
     }, [dispatch]);
 
     useEffect(() => {
-        if (user && isGoogleSignIn) {
-            setEmail(user.email || '');
-            if (user.displayName) {
-                const nameParts = user.displayName.split(' ');
-                setFirstName(nameParts[0] || '');
-                setLastName(nameParts.slice(1).join(' ') || '');
-            }
-            setStep(3);  // Move to port selection step for Google users
+        if (state?.step) {
+            setStep(state.step);
+            setEmail(state.email || '');
+            setFirstName(state.firstName || '');
+            setLastName(state.lastName || '');
+            setIsGoogleSignIn(true);
         }
-    }, [user, isGoogleSignIn]);
+    }, [state]);
 
     const handleNextStep = (event: React.FormEvent) => {
         event.preventDefault();
-        if (password !== confirmPassword) {
+        if (step === 1 && password !== confirmPassword) {
             alert("Passwords do not match!");
             return;
         }
@@ -129,6 +134,23 @@ const RegisterForm: React.FC = () => {
         }
     };
 
+    const handleGoogleSignUp = async () => {
+        try {
+            const result = await googleSignIn();
+            if (result.isNewUser) {
+                setStep(3);
+                setEmail(result.email);
+                setFirstName(result.firstName);
+                setLastName(result.lastName);
+                setIsGoogleSignIn(true);
+            } else {
+                navigate('/catalog');
+            }
+        } catch (error) {
+            console.error("Google sign up error:", error);
+        }
+    };
+
     const handlePortSelect = (portId: string) => {
         setSelectedPorts(prev => {
             if (prev.includes(portId)) {
@@ -141,17 +163,6 @@ const RegisterForm: React.FC = () => {
 
     const handlePortRemove = (portId: string) => {
         setSelectedPorts(prev => prev.filter(id => id !== portId));
-    };
-
-    const handleGoogleSignIn = async () => {
-        setIsGoogleSignIn(true);
-        try {
-            await googleSignIn();
-            // The user object will be updated in the Redux store,
-            // triggering the useEffect above
-        } catch (error) {
-            console.error("Google sign-in error:", error);
-        }
     };
 
     const renderStep = () => {
@@ -250,8 +261,8 @@ const RegisterForm: React.FC = () => {
                 {error && <Typography color="error">{error.message}</Typography>}
                 <div className={classes.buttonsContainer}>
                     <SubmitButton text={step === 3 ? "Sign Up" : "Next"} />
-                    {step === 1 && (
-                        <GoogleSignInButton onClick={handleGoogleSignIn} text="Sign Up with Google" />
+                    {step === 1 && !isGoogleSignIn && (
+                        <GoogleSignInButton onClick={handleGoogleSignUp} text="Sign Up with Google" />
                     )}
                 </div>
             </form>
