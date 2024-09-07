@@ -4,6 +4,7 @@ import profile from 'pages/profile/reducers/profileReducer';
 import catalog from 'pages/catalog/reducers/catalogReducer';
 import orders from 'pages/orders/reducers/orderReducer';
 import chat from 'pages/chats/reducers/chatReducer';
+import ports from '../../misc/reducers/portsReducer';
 
 const rootReducer = combineReducers({
     userAuth,
@@ -11,6 +12,7 @@ const rootReducer = combineReducers({
     catalog,
     orders,
     chat,
+    ports,
 });
 
 export type RootState = {
@@ -19,6 +21,7 @@ export type RootState = {
     catalog: ReturnType<typeof catalog>;
     orders: ReturnType<typeof orders>;
     chat: ReturnType<typeof chat>;
+    ports: ReturnType<typeof ports>;
 };
 
 export default rootReducer;

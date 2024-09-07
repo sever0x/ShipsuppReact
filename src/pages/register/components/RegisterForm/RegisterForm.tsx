@@ -1,16 +1,21 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { createUseStyles } from 'react-jss';
+import React, {useEffect, useState} from 'react';
+import {useNavigate} from 'react-router-dom';
+import {createUseStyles} from 'react-jss';
 import useAuth from 'misc/hooks/useAuth';
 import Typography from 'components/Typography';
-import { Link } from "@mui/material";
+import {FormControl, InputLabel, Link, Select} from "@mui/material";
 import pageURLs from 'constants/pagesURLs';
 import * as pages from 'constants/pages';
+import actions from "../../../../misc/actions/portsActions";
 import EmailField from 'components/EmailField';
 import PasswordField from 'components/PasswordField';
 import TextField from 'components/TextField';
 import SubmitButton from 'components/SubmitButton';
 import GoogleSignInButton from 'components/GoogleSignInButton';
+import {useSelector} from "react-redux";
+import {RootState} from 'app/reducers';
+import MenuItem from 'components/MenuItem';
+import {useAppDispatch} from 'misc/hooks/useAppDispatch';
 
 const getClasses = createUseStyles(() => ({
     textContainer: {
@@ -30,12 +35,18 @@ const getClasses = createUseStyles(() => ({
         gap: '1rem',
         paddingTop: '48px',
     },
+    selectContainer: {
+        marginTop: '1rem',
+        marginBottom: '1rem',
+    },
 }));
 
 const RegisterForm: React.FC = () => {
     const classes = getClasses();
     const { register, googleSignIn, error } = useAuth();
     const navigate = useNavigate();
+    const dispatch = useAppDispatch();
+    const ports = useSelector((state: RootState) => state.ports.data);
 
     const [step, setStep] = useState(1);
     const [email, setEmail] = useState('');
@@ -46,6 +57,11 @@ const RegisterForm: React.FC = () => {
     const [phone, setPhone] = useState('');
     const [vesselIMO, setVesselIMO] = useState('');
     const [vesselMMSI, setVesselMMSI] = useState('');
+    const [selectedPorts, setSelectedPorts] = useState<string[]>([]);
+
+    useEffect(() => {
+        dispatch(actions.fetchPorts());
+    }, [dispatch]);
 
     const handleNextStep = (event: React.FormEvent) => {
         event.preventDefault();
@@ -59,7 +75,15 @@ const RegisterForm: React.FC = () => {
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
         try {
-            await register(email, password, { firstName, lastName, phone, vesselIMO, vesselMMSI });
+            const portsArray = selectedPorts.map(portId => ports[portId]).filter(Boolean);
+            await register(email, password, {
+                firstName,
+                lastName,
+                phone,
+                vesselIMO,
+                vesselMMSI,
+                portsArray
+            });
             navigate('/catalog');
         } catch (error) {
             console.error("Registration error:", error);
@@ -121,6 +145,22 @@ const RegisterForm: React.FC = () => {
                             value={vesselMMSI}
                             onChange={(e) => setVesselMMSI(e.target.value)}
                         />
+                        <FormControl fullWidth className={classes.selectContainer}>
+                            <InputLabel id="ports-select-label">Ports</InputLabel>
+                            <Select
+                                labelId="ports-select-label"
+                                multiple
+                                value={selectedPorts}
+                                onChange={(e) => setSelectedPorts(e.target.value as string[])}
+                                required
+                            >
+                                {Object.entries(ports).map(([id, port]: [string, any]) => (
+                                    <MenuItem key={id} value={id}>
+                                        {port.city.country.title} - {port.city.title} - {port.title}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
                     </>
                 );
             default:
