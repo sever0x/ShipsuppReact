@@ -18,7 +18,7 @@ const useAuth = () => {
         loading,
         error,
         login: (email: string, password: string) => dispatch(signInAndLoadProfile(email, password)),
-        register: (email: string, password: string, additionalInfo: { firstName: string, lastName: string, phone: string }) =>
+        register: (email: string, password: string, additionalInfo: { firstName: string, lastName: string, phone: string, vesselIMO: string, vesselMMSI: string }) =>
             dispatch(signUpAndLoadProfile(email, password, additionalInfo)),
         logout: () => dispatch(actions.fetchLogout()),
         googleSignIn: () => dispatch(googleSignInAndLoadProfile()),

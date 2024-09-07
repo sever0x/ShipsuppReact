@@ -25,7 +25,7 @@ export const googleSignInAndLoadProfile = (): ThunkAction<Promise<void>, RootSta
 export const signUpAndLoadProfile = (
     email: string,
     password: string,
-    additionalInfo: { firstName: string, lastName: string, phone: string }
+    additionalInfo: { firstName: string, lastName: string, phone: string, vesselIMO: string, vesselMMSI: string }
 ): ThunkAction<Promise<void>, RootState, unknown, UnknownAction> =>
     async (dispatch) => {
         await dispatch(actions.fetchRegister(email, password, additionalInfo) as any);

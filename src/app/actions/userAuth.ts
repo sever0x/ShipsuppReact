@@ -154,7 +154,7 @@ const fetchLogin = (email: string, password: string) => async (dispatch: any) =>
     }
 };
 
-const fetchRegister = (email: string, password: string, additionalInfo: { firstName: string, lastName: string, phone: string }) => async (dispatch: any) => {
+const fetchRegister = (email: string, password: string, additionalInfo: { firstName: string, lastName: string, phone: string, vesselIMO: string, vesselMMSI: string }) => async (dispatch: any) => {
     dispatch(requestSignUp());
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -172,6 +172,8 @@ const fetchRegister = (email: string, password: string, additionalInfo: { firstN
             notifications: {},
             phone: additionalInfo.phone,
             profilePhoto: '',
+            vesselIMO: additionalInfo.vesselIMO,
+            vesselMMSI: additionalInfo.vesselMMSI,
             port: {
                 city: {
                     country: {
@@ -185,8 +187,6 @@ const fetchRegister = (email: string, password: string, additionalInfo: { firstN
                 id: "ua_port_odessa",
                 title: "Port of Odessa"
             },
-            vesselIMO: "",
-            vesselMMSI: ""
         };
 
         const userRef = ref(database, `users/${user.uid}`);

@@ -44,6 +44,8 @@ const RegisterForm: React.FC = () => {
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [phone, setPhone] = useState('');
+    const [vesselIMO, setVesselIMO] = useState('');
+    const [vesselMMSI, setVesselMMSI] = useState('');
 
     const handleNextStep = (event: React.FormEvent) => {
         event.preventDefault();
@@ -51,13 +53,13 @@ const RegisterForm: React.FC = () => {
             alert("Passwords do not match!");
             return;
         }
-        setStep(2);
+        setStep(step + 1);
     };
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
         try {
-            await register(email, password, { firstName, lastName, phone });
+            await register(email, password, { firstName, lastName, phone, vesselIMO, vesselMMSI });
             navigate('/catalog');
         } catch (error) {
             console.error("Registration error:", error);
@@ -69,21 +71,10 @@ const RegisterForm: React.FC = () => {
         navigate('/catalog');
     };
 
-    return (
-        <form onSubmit={step === 1 ? handleNextStep : handleSubmit}>
-            <div className={classes.textContainer}>
-                <Typography sx={{ fontSize: '2.25rem', fontWeight: 'bold' }}>
-                    Sign Up
-                </Typography>
-                <Typography sx={{ paddingTop: '16px' }}>
-                    Already have an account? <Link href={`${pageURLs[pages.login]}`} sx={{
-                    color: 'inherit',
-                    textDecorationColor: 'inherit'
-                }}>Sign In</Link>
-                </Typography>
-            </div>
-            <div className={classes.fieldsContainer}>
-                {step === 1 ? (
+    const renderStep = () => {
+        switch (step) {
+            case 1:
+                return (
                     <>
                         <EmailField email={email} setEmail={setEmail} />
                         <PasswordField password={password} setPassword={setPassword} />
@@ -93,7 +84,9 @@ const RegisterForm: React.FC = () => {
                             placeholder="Confirm Password"
                         />
                     </>
-                ) : (
+                );
+            case 2:
+                return (
                     <>
                         <TextField
                             label="First Name"
@@ -114,11 +107,46 @@ const RegisterForm: React.FC = () => {
                             required
                         />
                     </>
-                )}
+                );
+            case 3:
+                return (
+                    <>
+                        <TextField
+                            label="Vessel IMO"
+                            value={vesselIMO}
+                            onChange={(e) => setVesselIMO(e.target.value)}
+                        />
+                        <TextField
+                            label="Vessel MMSI"
+                            value={vesselMMSI}
+                            onChange={(e) => setVesselMMSI(e.target.value)}
+                        />
+                    </>
+                );
+            default:
+                return null;
+        }
+    };
+
+    return (
+        <form onSubmit={step === 3 ? handleSubmit : handleNextStep}>
+            <div className={classes.textContainer}>
+                <Typography sx={{ fontSize: '2.25rem', fontWeight: 'bold' }}>
+                    Sign Up
+                </Typography>
+                <Typography sx={{ paddingTop: '16px' }}>
+                    Already have an account? <Link href={`${pageURLs[pages.login]}`} sx={{
+                    color: 'inherit',
+                    textDecorationColor: 'inherit'
+                }}>Sign In</Link>
+                </Typography>
+            </div>
+            <div className={classes.fieldsContainer}>
+                {renderStep()}
             </div>
             {error && <Typography color="error">{error.message}</Typography>}
             <div className={classes.buttonsContainer}>
-                <SubmitButton text={step === 1 ? "Next" : "Sign Up"} />
+                <SubmitButton text={step === 3 ? "Sign Up" : "Next"} />
                 {step === 1 && (
                     <GoogleSignInButton onClick={handleGoogleSignIn} text="Sign Up with Google" />
                 )}
