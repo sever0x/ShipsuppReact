@@ -1,20 +1,20 @@
-import { Dispatch } from 'redux';
-import { ref, get, update } from 'firebase/database';
-import { ref as storageRef, uploadBytes, getDownloadURL, deleteObject, getMetadata } from 'firebase/storage';
-import { database, storage as firebaseStorage } from 'app/config/firebaseConfig';
+import {Dispatch} from 'redux';
+import {get, ref, update} from 'firebase/database';
+import {deleteObject, getDownloadURL, getMetadata, ref as storageRef, uploadBytes} from 'firebase/storage';
+import {database, storage as firebaseStorage} from 'app/config/firebaseConfig';
 import {
+    FETCH_PROFILE_FAILURE,
     FETCH_PROFILE_REQUEST,
     FETCH_PROFILE_SUCCESS,
-    FETCH_PROFILE_FAILURE,
+    UPDATE_PROFILE_FAILURE,
+    UPDATE_PROFILE_PHOTO_FAILURE,
     UPDATE_PROFILE_PHOTO_REQUEST,
     UPDATE_PROFILE_PHOTO_SUCCESS,
-    UPDATE_PROFILE_PHOTO_FAILURE,
     UPDATE_PROFILE_REQUEST,
-    UPDATE_PROFILE_SUCCESS,
-    UPDATE_PROFILE_FAILURE
+    UPDATE_PROFILE_SUCCESS
 } from '../constants/actionTypes';
 import storage from 'misc/storage';
-import { v4 as uuidv4 } from 'uuid';
+import {v4 as uuidv4} from 'uuid';
 import {calculateRetryDelay, RETRY_CONFIG} from 'app/config/retryConfig';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -30,10 +30,7 @@ export const fetchUserProfile = (uid: string) => async (dispatch: Dispatch) => {
             const snapshot = await get(userRef);
 
             if (snapshot.exists()) {
-                const userData = snapshot.val();
-                // Convert ports object to array for easier handling in components
-                userData.portsArray = Object.values(userData.ports || {});
-                return userData;
+                return snapshot.val();
             } else if (retryCount < RETRY_CONFIG.maxRetries) {
                 console.log(`Profile not found, retrying... (Attempt ${retryCount + 1}/${RETRY_CONFIG.maxRetries})`);
                 retryCount++;

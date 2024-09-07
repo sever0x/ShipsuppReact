@@ -1,32 +1,57 @@
-import React, {useState} from 'react';
-import {useDispatch, useSelector} from 'react-redux';
-import {Box, Button, Container, Grid, useMediaQuery, useTheme,} from '@mui/material';
-import {Cancel, Save} from '@mui/icons-material';
+import React, {useEffect, useState} from 'react';
+import {useSelector} from 'react-redux';
+import {Box, Button, Container, Grid, useMediaQuery, useTheme} from '@mui/material';
+import {Cancel, Save, Visibility} from '@mui/icons-material';
 import {RootState} from '../../../../app/reducers';
 import {updateProfile, updateProfilePhoto} from '../../actions/profileActions';
 import Typography from 'components/Typography';
 import OutlinedBox from '../OutlinedBox';
 import PersonalInformationForm from '../PersonalInformationForm';
 import PhotoUpload from '../PhotoUpload';
+import PortSelector from 'components/PortSelector';
+import SelectedPortsModal from 'components/SelectedPorts';
+import actions from "../../../../misc/actions/portsActions";
+import {useAppDispatch} from "../../../../misc/hooks/useAppDispatch";
 
 interface EditProfileProps {
     onCancel: () => void;
 }
 
 const EditProfile: React.FC<EditProfileProps> = ({ onCancel }) => {
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
     const theme = useTheme();
     const profile = useSelector((state: RootState) => state.profile.data);
+    const ports = useSelector((state: RootState) => state.ports.data);
     const [formData, setFormData] = useState(profile);
     const [isUploading, setIsUploading] = useState(false);
+    const [selectedPorts, setSelectedPorts] = useState(profile.portsArray.map((port: any) => port.id));
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    useEffect(() => {
+        dispatch(actions.fetchPorts());
+    }, [dispatch]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    const handlePortSelect = (portId: string) => {
+        setSelectedPorts((prev: string[]) => {
+            if (prev.includes(portId)) {
+                return prev.filter(id => id !== portId);
+            } else {
+                return [...prev, portId];
+            }
+        });
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        dispatch(updateProfile(profile.id, formData) as any);
+        const updatedFormData = {
+            ...formData,
+            portsArray: selectedPorts.map((portId: string | number) => ports[portId]).filter(Boolean)
+        };
+        dispatch(updateProfile(profile.id, updatedFormData) as any);
         onCancel();
     };
 
@@ -43,6 +68,10 @@ const EditProfile: React.FC<EditProfileProps> = ({ onCancel }) => {
                 setIsUploading(false);
             }
         }
+    };
+
+    const handlePortRemove = (portId: string) => {
+        setSelectedPorts((prev: any[]) => prev.filter(id => id !== portId));
     };
 
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -94,10 +123,35 @@ const EditProfile: React.FC<EditProfileProps> = ({ onCancel }) => {
                         <OutlinedBox>
                             <Typography variant="h6" gutterBottom>Personal Information</Typography>
                             <PersonalInformationForm formData={formData} handleChange={handleChange} />
+                            <Box mt={2}>
+                                <PortSelector
+                                    ports={ports}
+                                    selectedPorts={selectedPorts}
+                                    onPortSelect={handlePortSelect}
+                                />
+                                {selectedPorts.length > 0 && (
+                                    <Button
+                                        startIcon={<Visibility />}
+                                        onClick={() => setIsModalOpen(true)}
+                                        variant="text"
+                                        size="small"
+                                        color="info"
+                                        sx={{ mt: 1 }}
+                                    >
+                                        View Selected Ports ({selectedPorts.length})
+                                    </Button>
+                                )}
+                            </Box>
                         </OutlinedBox>
                     </Grid>
                 </Grid>
             </form>
+            <SelectedPortsModal
+                open={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                selectedPorts={selectedPorts.map((id: string | number) => ports[id]).filter(Boolean)}
+                onRemove={handlePortRemove}
+            />
         </Container>
     );
 };

@@ -5,7 +5,7 @@ import Typography from 'components/Typography';
 interface InfoItemProps {
     icon: React.ReactNode;
     label: string;
-    value: string;
+    value: string | React.ReactNode;
     isMobile: boolean;
 }
 
@@ -28,9 +28,13 @@ const InfoItem: React.FC<InfoItemProps> = ({ icon, label, value, isMobile }) => 
                 <Typography variant="body2" color="secondary" sx={{ width: '100%' }}>
                     {label}
                 </Typography>
-                <Typography variant="body1" sx={{ width: '100%' }}>
-                    {value}
-                </Typography>
+                {typeof value === 'string' ? (
+                    <Typography variant="body1" sx={{ width: '100%' }}>
+                        {value}
+                    </Typography>
+                ) : (
+                    value
+                )}
             </Box>
         </Box>
     );
