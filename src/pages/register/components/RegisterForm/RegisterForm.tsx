@@ -16,6 +16,11 @@ import {useSelector} from "react-redux";
 import {RootState} from 'app/reducers';
 import MenuItem from 'components/MenuItem';
 import {useAppDispatch} from 'misc/hooks/useAppDispatch';
+import PortSelector from 'components/PortSelector';
+import SelectedPorts from 'components/SelectedPorts';
+import Button from 'components/Button';
+import {Visibility} from "@mui/icons-material";
+import SelectedPortsModal from "components/SelectedPorts";
 
 const getClasses = createUseStyles(() => ({
     textContainer: {
@@ -39,6 +44,15 @@ const getClasses = createUseStyles(() => ({
         marginTop: '1rem',
         marginBottom: '1rem',
     },
+    portSelectorContainer: {
+        marginTop: '1rem',
+        marginBottom: '1rem',
+    },
+    viewSelectedButton: {
+        marginTop: '0.5rem',
+        display: 'flex',
+        justifyContent: 'flex-end',
+    },
 }));
 
 const RegisterForm: React.FC = () => {
@@ -58,6 +72,8 @@ const RegisterForm: React.FC = () => {
     const [vesselIMO, setVesselIMO] = useState('');
     const [vesselMMSI, setVesselMMSI] = useState('');
     const [selectedPorts, setSelectedPorts] = useState<string[]>([]);
+
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
         dispatch(actions.fetchPorts());
@@ -88,6 +104,20 @@ const RegisterForm: React.FC = () => {
         } catch (error) {
             console.error("Registration error:", error);
         }
+    };
+
+    const handlePortSelect = (portId: string) => {
+        setSelectedPorts(prev => {
+            if (prev.includes(portId)) {
+                return prev.filter(id => id !== portId);
+            } else {
+                return [...prev, portId];
+            }
+        });
+    };
+
+    const handlePortRemove = (portId: string) => {
+        setSelectedPorts(prev => prev.filter(id => id !== portId));
     };
 
     const handleGoogleSignIn = async () => {
@@ -145,22 +175,25 @@ const RegisterForm: React.FC = () => {
                             value={vesselMMSI}
                             onChange={(e) => setVesselMMSI(e.target.value)}
                         />
-                        <FormControl fullWidth className={classes.selectContainer}>
-                            <InputLabel id="ports-select-label">Ports</InputLabel>
-                            <Select
-                                labelId="ports-select-label"
-                                multiple
-                                value={selectedPorts}
-                                onChange={(e) => setSelectedPorts(e.target.value as string[])}
-                                required
-                            >
-                                {Object.entries(ports).map(([id, port]: [string, any]) => (
-                                    <MenuItem key={id} value={id}>
-                                        {port.city.country.title} - {port.city.title} - {port.title}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
+                        <div className={classes.portSelectorContainer}>
+                            <PortSelector
+                                ports={ports}
+                                selectedPorts={selectedPorts}
+                                onPortSelect={handlePortSelect}
+                            />
+                            {selectedPorts.length > 0 && (
+                                <div className={classes.viewSelectedButton}>
+                                    <Button
+                                        startIcon={<Visibility />}
+                                        onClick={() => setIsModalOpen(true)}
+                                        variant="text"
+                                        size="small"
+                                    >
+                                        View Selected Ports ({selectedPorts.length})
+                                    </Button>
+                                </div>
+                            )}
+                        </div>
                     </>
                 );
             default:
@@ -169,29 +202,37 @@ const RegisterForm: React.FC = () => {
     };
 
     return (
-        <form onSubmit={step === 3 ? handleSubmit : handleNextStep}>
-            <div className={classes.textContainer}>
-                <Typography sx={{ fontSize: '2.25rem', fontWeight: 'bold' }}>
-                    Sign Up
-                </Typography>
-                <Typography sx={{ paddingTop: '16px' }}>
-                    Already have an account? <Link href={`${pageURLs[pages.login]}`} sx={{
-                    color: 'inherit',
-                    textDecorationColor: 'inherit'
-                }}>Sign In</Link>
-                </Typography>
-            </div>
-            <div className={classes.fieldsContainer}>
-                {renderStep()}
-            </div>
-            {error && <Typography color="error">{error.message}</Typography>}
-            <div className={classes.buttonsContainer}>
-                <SubmitButton text={step === 3 ? "Sign Up" : "Next"} />
-                {step === 1 && (
-                    <GoogleSignInButton onClick={handleGoogleSignIn} text="Sign Up with Google" />
-                )}
-            </div>
-        </form>
+        <>
+            <form onSubmit={step === 3 ? handleSubmit : handleNextStep}>
+                <div className={classes.textContainer}>
+                    <Typography sx={{ fontSize: '2.25rem', fontWeight: 'bold' }}>
+                        Sign Up
+                    </Typography>
+                    <Typography sx={{ paddingTop: '16px' }}>
+                        Already have an account? <Link href={`${pageURLs[pages.login]}`} sx={{
+                        color: 'inherit',
+                        textDecorationColor: 'inherit'
+                    }}>Sign In</Link>
+                    </Typography>
+                </div>
+                <div className={classes.fieldsContainer}>
+                    {renderStep()}
+                </div>
+                {error && <Typography color="error">{error.message}</Typography>}
+                <div className={classes.buttonsContainer}>
+                    <SubmitButton text={step === 3 ? "Sign Up" : "Next"} />
+                    {step === 1 && (
+                        <GoogleSignInButton onClick={handleGoogleSignIn} text="Sign Up with Google" />
+                    )}
+                </div>
+            </form>
+            <SelectedPortsModal
+                open={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                selectedPorts={selectedPorts.map(id => ports[id]).filter(Boolean)}
+                onRemove={handlePortRemove}
+            />
+        </>
     );
 };
 
