@@ -56,7 +56,7 @@ const muiTheme = createTheme({
             main: '#5F4A9F', // Light purple
         },
         info: {
-            main: '#EFFBF9', // Very light cyan
+            main: '#97A4A5', // Very light cyan
         },
         success: {
             main: '#194241', // Dark teal

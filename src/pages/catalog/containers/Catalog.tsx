@@ -38,6 +38,8 @@ import Typography from 'components/Typography';
 import Box from 'components/Box';
 import Button from 'components/Button';
 import IconButton from 'components/IconButton';
+import storage from 'misc/storage';
+import PortSelector from 'components/PortSelector';
 
 const Catalog: React.FC = () => {
     const dispatch = useDispatch();
@@ -48,12 +50,23 @@ const Catalog: React.FC = () => {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState<{ id: string; title: string } | null>(null);
+    const [selectedPort, setSelectedPort] = useState<string | null>(null);
     const [selectedGoods, setSelectedGoods] = useState<Good[]>([]);
+    const [userPorts, setUserPorts] = useState<{ [key: string]: any }>({});
 
     useEffect(() => {
         const loadData = async () => {
-            await dispatch(fetchCategories() as any);
-            await dispatch(fetchGoods() as any);
+            const userData = JSON.parse(storage.getItem(storage.keys.USER_DATA) ?? '{}');
+            if (userData.portsArray && userData.portsArray.length > 0) {
+                setUserPorts(userData.portsArray);
+                const defaultPortId = userData.portsArray[0].id;
+                setSelectedPort(defaultPortId);
+                await dispatch(fetchCategories() as any);
+                await dispatch(fetchGoods(undefined, defaultPortId) as any);
+            } else {
+                await dispatch(fetchCategories() as any);
+                await dispatch(fetchGoods() as any);
+            }
             setIsInitialLoad(false);
         };
 
@@ -76,7 +89,12 @@ const Catalog: React.FC = () => {
 
     const handleCategorySelect = (categoryId: string, categoryTitle: string) => {
         setSelectedCategory({ id: categoryId, title: categoryTitle });
-        dispatch(fetchGoods(categoryId) as any);
+        dispatch(fetchGoods(categoryId, selectedPort) as any);
+    };
+
+    const handlePortSelect = (portId: string) => {
+        setSelectedPort(portId);
+        dispatch(fetchGoods(selectedCategory?.id, portId) as any);
     };
 
     const handleEditClick = (good: Good) => {
@@ -267,10 +285,13 @@ const Catalog: React.FC = () => {
                 textAlign: 'center'
             }}>
                 <Typography variant="h6" gutterBottom>
-                    You don't have any goods yet.
+                    No goods available in this port
                 </Typography>
                 <Typography variant="body1" gutterBottom>
-                    Click the "Add New Good" button to start adding your products.
+                    There are currently no items in your catalog for the selected port.
+                </Typography>
+                <Typography variant="body2" gutterBottom>
+                    Click the "Add New Item" button to start adding products to this port.
                 </Typography>
                 <Button
                     variant="contained"
@@ -279,7 +300,7 @@ const Catalog: React.FC = () => {
                     onClick={() => setIsAddModalOpen(true)}
                     sx={{ mt: 2 }}
                 >
-                    Add New Good
+                    Add New Item
                 </Button>
             </Box>
         );
@@ -332,6 +353,13 @@ const Catalog: React.FC = () => {
                         </>
                     ) : (
                         <>
+                            <PortSelector
+                                ports={userPorts}
+                                selectedPorts={selectedPort ? [selectedPort] : []}
+                                onPortSelect={handlePortSelect}
+                                multiSelect={false}
+                                label="Select port"
+                            />
                             <CategoryDropdown
                                 categories={categories}
                                 onCategorySelect={handleCategorySelect}

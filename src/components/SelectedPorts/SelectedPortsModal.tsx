@@ -11,19 +11,8 @@ import {
     ListItemSecondaryAction,
     IconButton
 } from '@mui/material';
-import { Close, Delete } from '@mui/icons-material';
-
-interface Port {
-    id: string;
-    title: string;
-    city: {
-        country: {
-            id: string;
-            title: string;
-        };
-        title: string;
-    };
-}
+import { Close, Delete, Public } from '@mui/icons-material';
+import { Port } from 'misc/types/Port';
 
 interface SelectedPortsModalProps {
     open: boolean;
