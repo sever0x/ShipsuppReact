@@ -1,32 +1,43 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ListItemText, ListItemIcon, Collapse, Checkbox } from '@mui/material';
-import { ExpandMore, ChevronRight, LocationOn } from '@mui/icons-material';
+import { ExpandMore, ChevronRight, Public } from '@mui/icons-material';
 import MenuItem from 'components/MenuItem';
 import Menu from 'components/Menu';
 import Box from 'components/Box';
 import Typography from 'components/Typography';
-
-interface Port {
-    id: string;
-    title: string;
-    city: {
-        country: {
-            id: string;
-            title: string;
-        };
-        title: string;
-    };
-}
+import { Port } from 'misc/types/Port';
 
 interface PortSelectorProps {
     ports: { [key: string]: Port };
     selectedPorts: string[];
     onPortSelect: (portId: string) => void;
+    multiSelect?: boolean;
+    label?: string;
 }
 
-const PortSelector: React.FC<PortSelectorProps> = ({ ports, selectedPorts, onPortSelect }) => {
+const PortSelector: React.FC<PortSelectorProps> = ({
+   ports,
+   selectedPorts,
+   onPortSelect,
+   multiSelect = true,
+   label = 'Select ports'
+}) => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [openCountries, setOpenCountries] = useState<{ [key: string]: boolean }>({});
+    const [displayedLabel, setDisplayedLabel] = useState(label);
+
+    useEffect(() => {
+        if (selectedPorts.length > 0) {
+            if (multiSelect) {
+                setDisplayedLabel(`${selectedPorts.length} port${selectedPorts.length > 1 ? 's' : ''} selected`);
+            } else {
+                const selectedPort = Object.values(ports).find(port => port.id === selectedPorts[0]);
+                setDisplayedLabel(selectedPort ? `${selectedPort.city.title} - ${selectedPort.title}` : label);
+            }
+        } else {
+            setDisplayedLabel(label);
+        }
+    }, [selectedPorts, ports, multiSelect, label]);
 
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
@@ -38,6 +49,13 @@ const PortSelector: React.FC<PortSelectorProps> = ({ ports, selectedPorts, onPor
 
     const handleCountryClick = (countryId: string) => {
         setOpenCountries(prev => ({ ...prev, [countryId]: !prev[countryId] }));
+    };
+
+    const handlePortSelect = (portId: string) => {
+        onPortSelect(portId);
+        if (!multiSelect) {
+            handleClose();
+        }
     };
 
     const groupedPorts = Object.values(ports).reduce((acc, port) => {
@@ -63,11 +81,15 @@ const PortSelector: React.FC<PortSelectorProps> = ({ ports, selectedPorts, onPor
                     onClick={() => handleCountryClick(country.id)}
                 >
                     <ListItemIcon>
-                        <img
-                            src={`https://flagcdn.com/w20/${country.id.toLowerCase()}.png`}
-                            alt={`${country.title} flag`}
-                            style={{ width: '20px', marginRight: '8px' }}
-                        />
+                        {country.id.toLowerCase() === 'all' ? (
+                            <Public style={{ width: '20px', marginRight: '8px' }} />
+                        ) : (
+                            <img
+                                src={`https://flagcdn.com/w20/${country.id.toLowerCase()}.png`}
+                                alt={`${country.title} flag`}
+                                style={{ width: '20px', marginRight: '8px' }}
+                            />
+                        )}
                     </ListItemIcon>
                     <ListItemText primary={country.title} />
                     {hasSubports && (
@@ -84,18 +106,19 @@ const PortSelector: React.FC<PortSelectorProps> = ({ ports, selectedPorts, onPor
                         {country.ports.map((port) => (
                             <MenuItem
                                 key={port.id}
-                                onClick={() => onPortSelect(port.id)}
+                                onClick={() => handlePortSelect(port.id)}
                                 sx={{
                                     paddingLeft: '32px',
                                     display: 'flex',
                                     alignItems: 'center',
                                 }}
                             >
-                                <Checkbox
-                                    checked={selectedPorts.includes(port.id)}
-                                    sx={{ padding: '4px' }}
-                                />
-                                {/*<LocationOn sx={{ marginRight: '8px', color: 'primary.main' }} />*/}
+                                {multiSelect && (
+                                    <Checkbox
+                                        checked={selectedPorts.includes(port.id)}
+                                        sx={{ padding: '4px' }}
+                                    />
+                                )}
                                 <ListItemText
                                     primary={`${port.city.title} - ${port.title}`}
                                     primaryTypographyProps={{
@@ -130,11 +153,7 @@ const PortSelector: React.FC<PortSelectorProps> = ({ ports, selectedPorts, onPor
                 }}
                 justifyContent='space-between'
             >
-                <Typography>
-                    {selectedPorts.length > 0
-                        ? `${selectedPorts.length} port${selectedPorts.length > 1 ? 's' : ''} selected`
-                        : 'Select ports'}
-                </Typography>
+                <Typography>{displayedLabel}</Typography>
                 <ExpandMore sx={{ ml: 1 }} />
             </Box>
             <Menu

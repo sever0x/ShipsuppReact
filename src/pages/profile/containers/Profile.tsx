@@ -25,18 +25,7 @@ import Typography from 'components/Typography';
 import InfoItem from '../components/InfoItem';
 import OutlinedBox from '../components/OutlinedBox';
 import StyledPortsAccordion from '../components/StyledPortsAccordion';
-
-export interface Port {
-    id: string;
-    title: string;
-    city: {
-        title: string;
-        country: {
-            id: string;
-            title: string;
-        };
-    };
-}
+import { Port } from 'misc/types/Port';
 
 interface GroupedPorts {
     [countryId: string]: {

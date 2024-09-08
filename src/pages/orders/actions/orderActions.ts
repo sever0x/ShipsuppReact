@@ -29,21 +29,27 @@ export const fetchSellerOrders = (sellerId: string) => async (dispatch: Dispatch
         }
 
         const token = await getIdToken(user);
-        const response = await axios.get(`${BACKEND_SERVICE}/getOrders?userId=${sellerId}`, {
+        const response = await axios.get(`${BACKEND_SERVICE}/getOrders`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             },
+            params: {
+                userId: sellerId
+            }
         });
 
         if (response.data.error === null && response.data.message === 'success') {
-            const orders: Order[] = response.data.data;
+            let orders: Order[] = response.data.data;
 
-            // #18 Fetch latest product information for each order
+            // Fetch latest product information for each order
             const updatedOrders = await Promise.all(orders.map(async (order) => {
-                const productResponse = await axios.get(`${BACKEND_SERVICE}/getGoodDetails?goodId=${order.goodId}`, {
+                const productResponse = await axios.get(`${BACKEND_SERVICE}/getGoodDetails`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     },
+                    params: {
+                        goodId: order.goodId
+                    }
                 });
                 if (productResponse.data.error === null && productResponse.data.message === 'success') {
                     return {

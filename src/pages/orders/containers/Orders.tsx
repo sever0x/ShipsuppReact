@@ -13,6 +13,7 @@ import {
     TableHead,
     TableRow,
     TextField,
+    Tooltip,
     Typography
 } from '@mui/material';
 import {fetchOrderDetails, fetchSellerOrders} from '../actions/orderActions';
@@ -23,24 +24,10 @@ import EditIcon from '@mui/icons-material/Edit';
 import IconButton from "../../../components/IconButton";
 import {Order} from "pages/orders/types/Order";
 import OrderStatus from '../components/OrderStatus';
-
-const statusColors: { [key: string]: "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" } = {
-    'APPROVE_BY_BUYER': 'info',
-    'APPROVE_BY_SELLER': 'primary',
-    'SENT': 'secondary',
-    'DELIVERED': 'warning',
-    'COMPLETED': 'success',
-    'CANCEL_BY_SELLER': 'error'
-};
-
-const statusMessages: { [key: string]: string } = {
-    'APPROVE_BY_BUYER': 'Order created',
-    'APPROVE_BY_SELLER': 'Order approved',
-    'SENT': 'Sent',
-    'ARRIVED': 'Delivered',
-    'COMPLETED': 'Completed',
-    'CANCEL_BY_SELLER': 'Cancelled by seller'
-};
+import storage from 'misc/storage';
+import PortSelector from 'components/PortSelector';
+import {FilterList} from "@mui/icons-material";
+import { Port } from 'misc/types/Port';
 
 const Orders: React.FC = () => {
     const dispatch = useDispatch();
@@ -48,12 +35,25 @@ const Orders: React.FC = () => {
     const user = useSelector((state: RootState) => state.userAuth.user);
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [selectedPort, setSelectedPort] = useState<string | null>(null);
+    const [userPorts, setUserPorts] = useState<{ [key: string]: Port }>({});
+
+    useEffect(() => {
+        const userData = JSON.parse(storage.getItem(storage.keys.USER_DATA) ?? '{}');
+        if (userData.portsArray) {
+            setUserPorts(userData.portsArray);
+        }
+    }, []);
 
     useEffect(() => {
         if (user?.uid) {
             dispatch(fetchSellerOrders(user.uid) as any);
         }
     }, [dispatch, user]);
+
+    const handlePortSelect = (portId: string) => {
+        setSelectedPort(portId === 'all' ? null : portId);
+    };
 
     const handleEditOrder = (order: Order) => {
         setSelectedOrder(order);
@@ -64,8 +64,9 @@ const Orders: React.FC = () => {
         setSelectedOrder(null);
     };
 
-    const filteredOrders = orders.filter((order: any) =>
-        order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase())
+    const filteredOrders = orders.filter((order: Order) =>
+        order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) &&
+        (!selectedPort || order.portId === selectedPort)
     );
 
     const renderSkeleton = (index: number) => (
@@ -195,6 +196,26 @@ const Orders: React.FC = () => {
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
                 <Typography variant="h4" sx={{ flex: 1 }}>Your Orders</Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', flex: 2 }}>
+                    <PortSelector
+                        ports={{
+                            all: {
+                                id: 'all',
+                                title: 'All Ports',
+                                city: {
+                                    country: {
+                                        id: 'all',
+                                        title: 'All Countries'
+                                    },
+                                    title: 'All Cities'
+                                }
+                            },
+                            ...userPorts
+                        }}
+                        selectedPorts={selectedPort ? [selectedPort] : ['all']}
+                        onPortSelect={handlePortSelect}
+                        multiSelect={false}
+                        label="Select port"
+                    />
                     <TextField
                         placeholder="Search for orders..."
                         variant="outlined"
