@@ -1,22 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { ListItemText, ListItemIcon, Collapse, Checkbox } from '@mui/material';
-import { ExpandMore, ChevronRight } from '@mui/icons-material';
+import { ExpandMore, ChevronRight, Public } from '@mui/icons-material';
 import MenuItem from 'components/MenuItem';
 import Menu from 'components/Menu';
 import Box from 'components/Box';
 import Typography from 'components/Typography';
-
-interface Port {
-    id: string;
-    title: string;
-    city: {
-        country: {
-            id: string;
-            title: string;
-        };
-        title: string;
-    };
-}
+import { Port } from 'misc/types/Port';
 
 interface PortSelectorProps {
     ports: { [key: string]: Port };
@@ -92,11 +81,15 @@ const PortSelector: React.FC<PortSelectorProps> = ({
                     onClick={() => handleCountryClick(country.id)}
                 >
                     <ListItemIcon>
-                        <img
-                            src={`https://flagcdn.com/w20/${country.id.toLowerCase()}.png`}
-                            alt={`${country.title} flag`}
-                            style={{ width: '20px', marginRight: '8px' }}
-                        />
+                        {country.id.toLowerCase() === 'all' ? (
+                            <Public style={{ width: '20px', marginRight: '8px' }} />
+                        ) : (
+                            <img
+                                src={`https://flagcdn.com/w20/${country.id.toLowerCase()}.png`}
+                                alt={`${country.title} flag`}
+                                style={{ width: '20px', marginRight: '8px' }}
+                            />
+                        )}
                     </ListItemIcon>
                     <ListItemText primary={country.title} />
                     {hasSubports && (
