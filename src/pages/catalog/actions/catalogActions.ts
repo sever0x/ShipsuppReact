@@ -6,6 +6,7 @@ import storage from "misc/storage";
 import {database, storage as firebaseStorage} from 'app/config/firebaseConfig';
 import {Good} from "pages/catalog/types/Good";
 import {v4 as uuidv4} from 'uuid';
+import {DEV_MODE} from "../../../constants/config";
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -34,47 +35,54 @@ export const fetchCategories = () => async (dispatch: Dispatch) => {
     }
 };
 
-export const fetchGoods = (categoryId?: string) => async (dispatch: Dispatch) => {
+export const fetchGoods = (categoryId?: string, portId?: string | null) => async (dispatch: Dispatch) => {
+    if (DEV_MODE) {
+        console.log(`fetchGoods: selected portId = ${portId}`);
+    }
+
     dispatch({ type: actionTypes.FETCH_GOODS_REQUEST });
 
     try {
         const userData = JSON.parse(storage.getItem(storage.keys.USER_DATA) ?? '{}');
-        const portId = TEMP_PORT_ID; // fixme hardcode
         const userId = userData.id;
 
         if (!userId) {
             throw new Error('User ID not found');
         }
 
-        const goodsRef = ref(database, `goods/${portId}`);
-        const snapshot = await get(goodsRef);
+        if (portId) {
+            const goodsRef = ref(database, `goods/${portId}`);
+            const snapshot = await get(goodsRef);
 
-        if (snapshot.exists()) {
-            const allGoods = snapshot.val() as Record<string, Record<string, Good>>;
-            const filteredGoods = Object.values(allGoods)
-                .flatMap(userGoods =>
-                    Object.values(userGoods)
-                        .filter((good: Good) => {
-                            let match = true;
-                            if (categoryId) {
-                                match = match && good.categoryId === categoryId;
-                            }
-                            if (userId) {
-                                match = match && good.ownerId === userId;
-                            }
-                            return match;
-                        })
-                );
+            if (snapshot.exists()) {
+                const allGoods = snapshot.val() as Record<string, Record<string, Good>>;
+                const filteredGoods = Object.values(allGoods)
+                    .flatMap(portGoods =>
+                        Object.values(portGoods)
+                            .filter((good: Good) => {
+                                let match = true;
+                                if (categoryId) {
+                                    match = match && good.categoryId === categoryId;
+                                }
+                                if (userId) {
+                                    match = match && good.ownerId === userId;
+                                }
+                                return match;
+                            })
+                    );
 
-            dispatch({
-                type: actionTypes.FETCH_GOODS_SUCCESS,
-                payload: filteredGoods
-            });
+                dispatch({
+                    type: actionTypes.FETCH_GOODS_SUCCESS,
+                    payload: filteredGoods
+                });
+            } else {
+                dispatch({
+                    type: actionTypes.FETCH_GOODS_SUCCESS,
+                    payload: []
+                });
+            }
         } else {
-            dispatch({
-                type: actionTypes.FETCH_GOODS_SUCCESS,
-                payload: []
-            });
+            throw new Error('Port ID is null');
         }
     } catch (error) {
         dispatch({
