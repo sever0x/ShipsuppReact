@@ -10,7 +10,8 @@ import {
     SUCCESS_SIGN_UP,
 } from '../constants/actionTypes';
 import {
-    createUserWithEmailAndPassword, getIdToken,
+    createUserWithEmailAndPassword,
+    getIdToken,
     GoogleAuthProvider,
     signInWithEmailAndPassword,
     signInWithPopup,
@@ -23,7 +24,7 @@ import {ThunkAction} from "redux-thunk";
 import {RootState} from "../reducers";
 import {UnknownAction} from "redux";
 import {get, ref, set} from "firebase/database";
-import {DEV_MODE} from "../../constants/config";
+import logger from 'app/utility/logger';
 
 const serializeUser = (user: User | null) => {
     if (!user) return null;
@@ -34,13 +35,6 @@ const serializeUser = (user: User | null) => {
         photoURL: user.photoURL,
     };
 };
-
-const createSafeUserObject = (user: User) => ({
-    uid: user.uid,
-    email: user.email,
-    emailVerified: user.emailVerified,
-    displayName: user.displayName,
-});
 
 const requestSignIn = () => ({
     type: REQUEST_SIGN_IN,
@@ -56,8 +50,13 @@ const successSignIn = (user: User) => {
 
     storage.setItem('safeUser', JSON.stringify(safeUser));
 
-    if (DEV_MODE) {
-        console.log(`User signed in: ${safeUser.email}`);
+    try {
+        logger.info(`User signed in: ${safeUser.email}`);
+        getIdToken(user).then((token) => {
+            logger.info(`JWT Token: ${token}`);
+        });
+    } catch (error) {
+        logger.error('Error getting JWT token:', error);
     }
 
     return {

@@ -7,6 +7,7 @@ import {database, storage as firebaseStorage} from 'app/config/firebaseConfig';
 import {Good} from "pages/catalog/types/Good";
 import {v4 as uuidv4} from 'uuid';
 import {DEV_MODE} from "../../../constants/config";
+import logger from 'app/utility/logger';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -43,9 +44,7 @@ export const fetchGoods = (categoryId?: string, portId?: string | null) => async
         let attempts = 0;
         const maxAttempts = 10; // Adjust as needed
         while (portId === null && attempts < maxAttempts) {
-            if (DEV_MODE) {
-                console.log(`Waiting for portId... Attempt ${attempts + 1}`);
-            }
+            logger.info(`Waiting for portId... Attempt ${attempts + 1}`);
             await delay(1000); // Wait for 1 second before trying again
             attempts++;
             // Re-fetch portId from storage or wherever it's being set
@@ -57,9 +56,7 @@ export const fetchGoods = (categoryId?: string, portId?: string | null) => async
             throw new Error('Port ID is still null after maximum attempts');
         }
 
-        if (DEV_MODE) {
-            console.log(`fetchGoods: selected portId = ${portId}`);
-        }
+        logger.info(`fetchGoods: selected portId = ${portId}`);
 
         const userData = JSON.parse(storage.getItem(storage.keys.USER_DATA) ?? '{}');
         const userId = userData.id;
@@ -88,17 +85,21 @@ export const fetchGoods = (categoryId?: string, portId?: string | null) => async
                         })
                 );
 
+            logger.info(`Fetched ${filteredGoods.length} goods`);
+
             dispatch({
                 type: actionTypes.FETCH_GOODS_SUCCESS,
                 payload: filteredGoods
             });
         } else {
+            logger.warn('No goods found for the given port');
             dispatch({
                 type: actionTypes.FETCH_GOODS_SUCCESS,
                 payload: []
             });
         }
     } catch (error) {
+        logger.error('Error fetching goods:', error);
         dispatch({
             type: actionTypes.FETCH_GOODS_FAILURE,
             payload: error instanceof Error ? error.message : 'An unknown error occurred'
