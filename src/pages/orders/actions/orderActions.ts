@@ -38,7 +38,7 @@ export const fetchSellerOrders = (sellerId: string) => async (dispatch: Dispatch
             }
         });
 
-        if (response.data.error === null && response.data.message === 'success') {
+        if (response.data.error === null && response.data.message === 'success' && response.data.data !== null) {
             let orders: Order[] = response.data.data;
 
             // Fetch latest product information for each order

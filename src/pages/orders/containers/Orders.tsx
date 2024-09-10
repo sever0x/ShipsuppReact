@@ -1,8 +1,7 @@
-import React, {useEffect, useState} from 'react';
-import {useDispatch, useSelector} from 'react-redux';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import {
     Box,
-    Chip,
     Container,
     Paper,
     Skeleton,
@@ -13,20 +12,18 @@ import {
     TableHead,
     TableRow,
     TextField,
-    Tooltip,
     Typography
 } from '@mui/material';
-import {fetchOrderDetails, fetchSellerOrders} from '../actions/orderActions';
-import {RootState} from 'app/reducers';
+import { fetchOrderDetails, fetchSellerOrders } from '../actions/orderActions';
+import { RootState } from 'app/reducers';
 import EditOrderModal from '../components/EditOrderModal';
 import SearchIcon from '@mui/icons-material/Search';
 import EditIcon from '@mui/icons-material/Edit';
 import IconButton from "../../../components/IconButton";
-import {Order} from "pages/orders/types/Order";
+import { Order } from "pages/orders/types/Order";
 import OrderStatus from '../components/OrderStatus';
 import storage from 'misc/storage';
 import PortSelector from 'components/PortSelector';
-import {FilterList} from "@mui/icons-material";
 import { Port } from 'misc/types/Port';
 
 const Orders: React.FC = () => {
@@ -64,10 +61,10 @@ const Orders: React.FC = () => {
         setSelectedOrder(null);
     };
 
-    const filteredOrders = orders.filter((order: Order) =>
+    const filteredOrders = orders ? orders.filter((order: Order) =>
         order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) &&
         (!selectedPort || order.portId === selectedPort)
-    );
+    ) : [];
 
     const renderSkeleton = (index: number) => (
         <TableRow key={`skeleton-${index}`}>
@@ -110,6 +107,26 @@ const Orders: React.FC = () => {
                         </TableBody>
                     </Table>
                 </TableContainer>
+            );
+        }
+
+        if (!orders || orders.length === 0) {
+            return (
+                <Box sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    height: '50vh',
+                    textAlign: 'center'
+                }}>
+                    <Typography variant="h6" gutterBottom>
+                        You don't have any orders yet.
+                    </Typography>
+                    <Typography variant="body1" gutterBottom>
+                        Orders will appear here once customers start purchasing your goods.
+                    </Typography>
+                </Box>
             );
         }
 
@@ -178,10 +195,10 @@ const Orders: React.FC = () => {
                 textAlign: 'center'
             }}>
                 <Typography variant="h6" gutterBottom>
-                    You don't have any orders yet.
+                    No orders match your search criteria.
                 </Typography>
                 <Typography variant="body1" gutterBottom>
-                    Orders will appear here once customers start purchasing your goods.
+                    Try adjusting your search or filter settings.
                 </Typography>
             </Box>
         );
