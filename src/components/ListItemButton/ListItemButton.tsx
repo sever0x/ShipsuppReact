@@ -1,5 +1,5 @@
 import React from 'react';
-import { ListItemButton as MuiListItemButton, ListItemButtonProps as MuiListItemButtonProps } from '@mui/material';
+import {ListItemButton as MuiListItemButton, ListItemButtonProps as MuiListItemButtonProps} from '@mui/material';
 
 interface CustomListItemButtonProps extends MuiListItemButtonProps {
     activeColor?: string;

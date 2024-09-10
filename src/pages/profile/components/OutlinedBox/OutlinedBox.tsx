@@ -1,5 +1,5 @@
 import React from 'react';
-import { Paper, SxProps } from '@mui/material';
+import {Paper, SxProps} from '@mui/material';
 
 interface OutlinedBoxProps {
     children: React.ReactNode;

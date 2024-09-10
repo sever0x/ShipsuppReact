@@ -1,6 +1,6 @@
 import React from 'react';
-import { InputAdornment } from '@mui/material';
-import { Email } from '@mui/icons-material';
+import {InputAdornment} from '@mui/material';
+import {Email} from '@mui/icons-material';
 import TextField from "../TextField";
 
 interface EmailFieldProps {

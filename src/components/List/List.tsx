@@ -1,5 +1,5 @@
 import React from 'react';
-import { List as MuiList, ListProps as MuiListProps } from '@mui/material';
+import {List as MuiList, ListProps as MuiListProps} from '@mui/material';
 
 interface CustomListProps extends MuiListProps {
     spacing?: number | null;

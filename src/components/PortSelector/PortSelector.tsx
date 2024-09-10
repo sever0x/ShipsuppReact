@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { ListItemText, ListItemIcon, Collapse, Checkbox } from '@mui/material';
-import { ExpandMore, ChevronRight, Public } from '@mui/icons-material';
+import React, {useEffect, useState} from 'react';
+import {Checkbox, Collapse, ListItemIcon, ListItemText} from '@mui/material';
+import {ChevronRight, ExpandMore, Public} from '@mui/icons-material';
 import MenuItem from 'components/MenuItem';
 import Menu from 'components/Menu';
 import Box from 'components/Box';
 import Typography from 'components/Typography';
-import { Port } from 'misc/types/Port';
+import {Port} from 'misc/types/Port';
 
 interface PortSelectorProps {
     ports: { [key: string]: Port };

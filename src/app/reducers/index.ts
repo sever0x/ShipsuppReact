@@ -1,5 +1,5 @@
-import { combineReducers } from 'redux';
-import userAuth, { AuthState } from './userAuth';
+import {combineReducers} from 'redux';
+import userAuth, {AuthState} from './userAuth';
 import profile from 'pages/profile/reducers/profileReducer';
 import catalog from 'pages/catalog/reducers/catalogReducer';
 import orders from 'pages/orders/reducers/orderReducer';

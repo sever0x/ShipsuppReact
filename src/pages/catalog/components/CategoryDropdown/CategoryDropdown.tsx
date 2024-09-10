@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { ExpandMore } from '@mui/icons-material';
+import React, {useEffect, useState} from 'react';
+import {ExpandMore} from '@mui/icons-material';
 import Box from 'components/Box';
 import Typography from 'components/Typography';
 import CategorySelector from '../CategorySelector';

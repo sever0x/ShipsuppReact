@@ -1,4 +1,4 @@
-import {configureStore, ThunkAction, Action, Reducer} from '@reduxjs/toolkit';
+import {Action, configureStore, Reducer, ThunkAction} from '@reduxjs/toolkit';
 import {thunk} from "redux-thunk";
 
 export function setupStore<S = any>(

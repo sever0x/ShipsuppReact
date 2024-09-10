@@ -1,5 +1,5 @@
 import React from 'react';
-import { ListItemIcon as MuiListItemIcon, ListItemIconProps as MuiListItemIconProps } from '@mui/material';
+import {ListItemIcon as MuiListItemIcon, ListItemIconProps as MuiListItemIconProps} from '@mui/material';
 
 interface CustomListItemIconProps extends MuiListItemIconProps {
     size?: 'small' | 'medium' | 'large';

@@ -1,6 +1,6 @@
 import React from 'react';
-import { Avatar, Box, CircularProgress, IconButton, useTheme } from '@mui/material';
-import { CloudUpload } from '@mui/icons-material';
+import {Avatar, Box, CircularProgress, IconButton, useTheme} from '@mui/material';
+import {CloudUpload} from '@mui/icons-material';
 import Typography from 'components/Typography';
 
 interface PhotoUploadProps {

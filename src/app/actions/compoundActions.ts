@@ -1,8 +1,8 @@
-import { ThunkAction } from 'redux-thunk';
-import { RootState } from '../reducers';
-import { UnknownAction } from 'redux';
+import {ThunkAction} from 'redux-thunk';
+import {RootState} from '../reducers';
+import {UnknownAction} from 'redux';
 import actions from "../../app/actions/userAuth";
-import { fetchUserProfile } from "pages/profile/actions/profileActions";
+import {fetchUserProfile} from "pages/profile/actions/profileActions";
 
 export const signInAndLoadProfile = (email: string, password: string): ThunkAction<Promise<void>, RootState, unknown, UnknownAction> =>
     async (dispatch) => {

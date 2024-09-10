@@ -1,5 +1,5 @@
-import { Chat } from "../Chat";
-import { Message } from "../Message";
+import {Chat} from "../Chat";
+import {Message} from "../Message";
 
 export interface ChatState {
     chats: Chat[];

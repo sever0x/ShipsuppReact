@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box as MuiBox, BoxProps as MuiBoxProps } from '@mui/material';
+import {Box as MuiBox, BoxProps as MuiBoxProps} from '@mui/material';
 
 interface CustomBoxProps extends MuiBoxProps {
     padded?: boolean;

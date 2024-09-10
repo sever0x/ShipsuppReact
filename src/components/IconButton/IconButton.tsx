@@ -1,5 +1,5 @@
 import React from 'react';
-import { IconButton as MuiIconButton, IconButtonProps as MuiIconButtonProps } from '@mui/material';
+import {IconButton as MuiIconButton, IconButtonProps as MuiIconButtonProps} from '@mui/material';
 
 interface CustomIconButtonProps extends Omit<MuiIconButtonProps, 'color'> {
     size?: 'small' | 'medium' | 'large';

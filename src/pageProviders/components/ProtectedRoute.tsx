@@ -1,7 +1,7 @@
-import React, { ReactNode } from 'react';
-import { Navigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { RootState } from "../../app/reducers";
+import React, {ReactNode} from 'react';
+import {Navigate} from 'react-router-dom';
+import {useSelector} from 'react-redux';
+import {RootState} from "../../app/reducers";
 import pageURLs from 'constants/pagesURLs';
 import * as pages from 'constants/pages';
 import {CircularProgress} from "@mui/material";

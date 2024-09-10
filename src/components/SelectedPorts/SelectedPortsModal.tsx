@@ -1,18 +1,18 @@
 import React from 'react';
 import {
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
     Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    IconButton,
     List,
     ListItem,
-    ListItemText,
     ListItemSecondaryAction,
-    IconButton
+    ListItemText
 } from '@mui/material';
-import { Close, Delete, Public } from '@mui/icons-material';
-import { Port } from 'misc/types/Port';
+import {Close, Delete} from '@mui/icons-material';
+import {Port} from 'misc/types/Port';
 
 interface SelectedPortsModalProps {
     open: boolean;

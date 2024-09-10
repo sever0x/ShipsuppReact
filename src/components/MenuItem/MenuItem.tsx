@@ -1,5 +1,5 @@
 import React from 'react';
-import { MenuItem as MuiMenuItem, MenuItemProps as MuiMenuItemProps } from '@mui/material';
+import {MenuItem as MuiMenuItem, MenuItemProps as MuiMenuItemProps} from '@mui/material';
 
 interface CustomMenuItemProps extends MuiMenuItemProps {
     active?: boolean;

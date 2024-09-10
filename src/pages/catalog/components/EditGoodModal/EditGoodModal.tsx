@@ -1,11 +1,11 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { Modal, Box, TextField, Button, Typography, Grid, IconButton, InputAdornment } from '@mui/material';
+import React, {useCallback, useEffect, useState} from 'react';
+import {Box, Button, Grid, IconButton, InputAdornment, Modal, TextField, Typography} from '@mui/material';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { ExpandMore } from '@mui/icons-material';
-import { Good } from '../../types/Good';
+import {ExpandMore} from '@mui/icons-material';
+import {Good} from '../../types/Good';
 import CategorySelector from "pages/catalog/components/CategorySelector";
-import { useDropzone } from "react-dropzone";
+import {useDropzone} from "react-dropzone";
 
 interface Category {
     id: string;

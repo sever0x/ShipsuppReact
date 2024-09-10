@@ -1,4 +1,4 @@
-import { FETCH_PORTS_SUCCESS, FETCH_PORTS_ERROR } from '../constants/actionTypes';
+import {FETCH_PORTS_ERROR, FETCH_PORTS_SUCCESS} from '../constants/actionTypes';
 
 interface PortsState {
     data: any;

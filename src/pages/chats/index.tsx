@@ -1,5 +1,5 @@
 import React from 'react';
-import { Typography, Container } from '@mui/material';
+import {Container, Typography} from '@mui/material';
 import Chats from "pages/chats/containers/Chats";
 
 const ChatsPage: React.FC = () => {

@@ -1,16 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import {
-    addGood,
-    deleteGood,
-    fetchCategories,
-    fetchGoods,
-    updateGood
-} from '../actions/catalogActions';
+import React, {useEffect, useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
+import {addGood, deleteGood, fetchCategories, fetchGoods, updateGood} from '../actions/catalogActions';
 import CategoryDropdown from '../components/CategoryDropdown';
 import EditGoodModal from '../components/EditGoodModal';
 import AddGoodModal from '../components/AddGoodModal';
-import { RootState } from "app/reducers";
+import {RootState} from "app/reducers";
 import {
     Checkbox,
     Container,
@@ -33,7 +27,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
-import { Good } from '../types/Good';
+import {Good} from '../types/Good';
 import Typography from 'components/Typography';
 import Box from 'components/Box';
 import Button from 'components/Button';

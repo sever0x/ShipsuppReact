@@ -6,7 +6,6 @@ import storage from "misc/storage";
 import {database, storage as firebaseStorage} from 'app/config/firebaseConfig';
 import {Good} from "pages/catalog/types/Good";
 import {v4 as uuidv4} from 'uuid';
-import {DEV_MODE} from "../../../constants/config";
 import logger from 'app/utility/logger';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Avatar, Skeleton } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import React, {useEffect, useState} from 'react';
+import {Avatar, Skeleton} from '@mui/material';
+import {useNavigate} from 'react-router-dom';
 import useAuth from 'misc/hooks/useAuth';
 import pageURLs from 'constants/pagesURLs';
 import * as pages from 'constants/pages';

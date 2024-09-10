@@ -1,9 +1,8 @@
 import React from 'react';
-import { Accordion, AccordionSummary, AccordionDetails, Box, Chip, Typography } from '@mui/material';
+import {Accordion, AccordionDetails, AccordionSummary, Box, Chip, Typography} from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
-import PublicIcon from '@mui/icons-material/Public';
-import { Port } from 'misc/types/Port';
+import {Port} from 'misc/types/Port';
 
 interface Country {
     id: string;

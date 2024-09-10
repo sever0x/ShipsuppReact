@@ -1,15 +1,7 @@
-import React, { useState } from 'react';
-import {
-    AppBar,
-    CssBaseline,
-    Drawer,
-    Toolbar,
-    IconButton,
-    useMediaQuery,
-    Theme
-} from '@mui/material';
+import React, {useState} from 'react';
+import {AppBar, CssBaseline, Drawer, IconButton, Theme, Toolbar, useMediaQuery} from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import { Outlet } from 'react-router-dom';
+import {Outlet} from 'react-router-dom';
 import Sidebar from 'components/Sidebar';
 import Box from 'components/Box';
 import ProfileMenu from 'components/ProfileMenu';

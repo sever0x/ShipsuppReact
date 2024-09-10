@@ -1,5 +1,5 @@
 import React from 'react';
-import { Chip, ChipProps, Box, Tooltip } from '@mui/material';
+import {Box, Chip, ChipProps, Tooltip} from '@mui/material';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import InventoryIcon from '@mui/icons-material/Inventory';

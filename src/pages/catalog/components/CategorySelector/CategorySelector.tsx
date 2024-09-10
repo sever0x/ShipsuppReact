@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { ListItemText, ListItemIcon, Collapse } from '@mui/material';
-import { ExpandMore, ChevronRight } from '@mui/icons-material';
+import React, {useState} from 'react';
+import {Collapse, ListItemIcon, ListItemText} from '@mui/material';
+import {ChevronRight, ExpandMore} from '@mui/icons-material';
 import MenuItem from 'components/MenuItem';
 import Menu from 'components/Menu';
 

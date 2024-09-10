@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useEffect, useState} from 'react';
 import CatalogIcon from '@mui/icons-material/Category';
 import OrdersIcon from '@mui/icons-material/ShoppingCart';
 import ChatsIcon from '@mui/icons-material/Chat';
@@ -8,7 +8,7 @@ import LogoutIcon from '@mui/icons-material/ExitToApp';
 import SupportIcon from '@mui/icons-material/Help';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import { useLocation, useNavigate } from 'react-router-dom';
+import {useLocation, useNavigate} from 'react-router-dom';
 import pageURLs from 'constants/pagesURLs';
 import * as pages from 'constants/pages';
 import Typography from 'components/Typography';

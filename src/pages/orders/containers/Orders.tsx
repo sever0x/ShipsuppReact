@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, {useEffect, useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
 import {
     Box,
     Container,
@@ -14,17 +14,17 @@ import {
     TextField,
     Typography
 } from '@mui/material';
-import { fetchOrderDetails, fetchSellerOrders } from '../actions/orderActions';
-import { RootState } from 'app/reducers';
+import {fetchOrderDetails, fetchSellerOrders} from '../actions/orderActions';
+import {RootState} from 'app/reducers';
 import EditOrderModal from '../components/EditOrderModal';
 import SearchIcon from '@mui/icons-material/Search';
 import EditIcon from '@mui/icons-material/Edit';
 import IconButton from "../../../components/IconButton";
-import { Order } from "pages/orders/types/Order";
+import {Order} from "pages/orders/types/Order";
 import OrderStatus from '../components/OrderStatus';
 import storage from 'misc/storage';
 import PortSelector from 'components/PortSelector';
-import { Port } from 'misc/types/Port';
+import {Port} from 'misc/types/Port';
 
 const Orders: React.FC = () => {
     const dispatch = useDispatch();

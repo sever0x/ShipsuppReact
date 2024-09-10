@@ -1,5 +1,5 @@
 import React from 'react';
-import { Stack as MuiStack, StackProps, SxProps, Theme } from "@mui/material";
+import {Stack as MuiStack, StackProps, SxProps, Theme} from "@mui/material";
 
 interface CustomStackProps extends StackProps {
     fullHeight?: boolean;

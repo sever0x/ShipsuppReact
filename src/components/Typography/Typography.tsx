@@ -1,5 +1,5 @@
 import React from 'react';
-import { Typography as MuiTypography, SxProps, Theme, TypographyProps } from "@mui/material";
+import {SxProps, Theme, Typography as MuiTypography, TypographyProps} from "@mui/material";
 
 interface CustomTypographyProps extends TypographyProps {
     bold?: boolean;

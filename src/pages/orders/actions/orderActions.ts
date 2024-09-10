@@ -1,6 +1,5 @@
 import {Dispatch} from 'redux';
-import {get, ref, update} from 'firebase/database';
-import {auth, database} from 'app/config/firebaseConfig';
+import {auth} from 'app/config/firebaseConfig';
 import {
     FETCH_ORDER_DETAILS_FAILURE,
     FETCH_ORDER_DETAILS_REQUEST,

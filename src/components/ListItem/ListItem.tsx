@@ -1,5 +1,5 @@
 import React from 'react';
-import { ListItem as MuiListItem, ListItemProps as MuiListItemProps } from '@mui/material';
+import {ListItem as MuiListItem, ListItemProps as MuiListItemProps} from '@mui/material';
 
 interface CustomListItemProps extends MuiListItemProps {
     hoverable?: boolean;

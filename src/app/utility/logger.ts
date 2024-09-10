@@ -1,4 +1,4 @@
-import { DEV_MODE } from "constants/config";
+import {DEV_MODE} from "constants/config";
 
 type LogLevel = 'log' | 'info' | 'warn' | 'error';
 

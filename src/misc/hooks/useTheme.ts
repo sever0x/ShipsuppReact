@@ -1,7 +1,5 @@
-import { useContext, useMemo } from 'react';
-import {
-    ThemeContext,
-} from '../providers/ThemeProvider';
+import {useContext, useMemo} from 'react';
+import {ThemeContext,} from '../providers/ThemeProvider';
 
 const useTheme = () => {
     const {

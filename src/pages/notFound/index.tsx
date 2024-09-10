@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import {useNavigate} from 'react-router-dom';
 import pageURLs from 'constants/pagesURLs';
 import Box from 'components/Box';
 import Typography from 'components/Typography';

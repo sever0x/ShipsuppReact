@@ -1,18 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import {
-    Avatar,
-    Box,
-    Button,
-    CircularProgress,
-    Container,
-    Grid,
-    useMediaQuery,
-    useTheme,
-} from '@mui/material';
+import React, {useEffect, useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
+import {Avatar, Box, Button, CircularProgress, Container, Grid, useMediaQuery, useTheme,} from '@mui/material';
 import useAuth from 'misc/hooks/useAuth';
-import { fetchUserProfile } from '../actions/profileActions';
-import { RootState } from 'app/reducers';
+import {fetchUserProfile} from '../actions/profileActions';
+import {RootState} from 'app/reducers';
 import EditProfile from '../components/EditProfile';
 import EditIcon from '@mui/icons-material/Edit';
 import EmailIcon from '@mui/icons-material/Email';
@@ -25,7 +16,7 @@ import Typography from 'components/Typography';
 import InfoItem from '../components/InfoItem';
 import OutlinedBox from '../components/OutlinedBox';
 import StyledPortsAccordion from '../components/StyledPortsAccordion';
-import { Port } from 'misc/types/Port';
+import {Port} from 'misc/types/Port';
 
 interface GroupedPorts {
     [countryId: string]: {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { createUseStyles } from 'react-jss';
+import {createUseStyles} from 'react-jss';
 import useTheme from 'misc/hooks/useTheme';
 import Stack from "components/Stack";
 import Logo from 'components/Logo';

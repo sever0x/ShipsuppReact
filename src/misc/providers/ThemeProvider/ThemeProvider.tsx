@@ -1,12 +1,7 @@
-import React, {
-    createContext,
-    useCallback,
-    useMemo,
-    useState,
-} from 'react';
+import React, {createContext, useCallback, useMemo, useState,} from 'react';
 
 import defaultTheme from './themes/default';
-import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
+import {ThemeProvider as MuiThemeProvider} from '@mui/material/styles';
 
 const themeNames = {
     default: 'default',
