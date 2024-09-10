@@ -36,13 +36,31 @@ export const fetchCategories = () => async (dispatch: Dispatch) => {
 };
 
 export const fetchGoods = (categoryId?: string, portId?: string | null) => async (dispatch: Dispatch) => {
-    if (DEV_MODE) {
-        console.log(`fetchGoods: selected portId = ${portId}`);
-    }
-
     dispatch({ type: actionTypes.FETCH_GOODS_REQUEST });
 
     try {
+        // Wait for portId to become non-null
+        let attempts = 0;
+        const maxAttempts = 10; // Adjust as needed
+        while (portId === null && attempts < maxAttempts) {
+            if (DEV_MODE) {
+                console.log(`Waiting for portId... Attempt ${attempts + 1}`);
+            }
+            await delay(1000); // Wait for 1 second before trying again
+            attempts++;
+            // Re-fetch portId from storage or wherever it's being set
+            const userData = JSON.parse(storage.getItem(storage.keys.USER_DATA) ?? '{}');
+            portId = userData.selectedPortId; // Adjust this line based on how portId is stored
+        }
+
+        if (portId === null) {
+            throw new Error('Port ID is still null after maximum attempts');
+        }
+
+        if (DEV_MODE) {
+            console.log(`fetchGoods: selected portId = ${portId}`);
+        }
+
         const userData = JSON.parse(storage.getItem(storage.keys.USER_DATA) ?? '{}');
         const userId = userData.id;
 
@@ -50,39 +68,35 @@ export const fetchGoods = (categoryId?: string, portId?: string | null) => async
             throw new Error('User ID not found');
         }
 
-        if (portId) {
-            const goodsRef = ref(database, `goods/${portId}`);
-            const snapshot = await get(goodsRef);
+        const goodsRef = ref(database, `goods/${portId}`);
+        const snapshot = await get(goodsRef);
 
-            if (snapshot.exists()) {
-                const allGoods = snapshot.val() as Record<string, Record<string, Good>>;
-                const filteredGoods = Object.values(allGoods)
-                    .flatMap(portGoods =>
-                        Object.values(portGoods)
-                            .filter((good: Good) => {
-                                let match = true;
-                                if (categoryId) {
-                                    match = match && good.categoryId === categoryId;
-                                }
-                                if (userId) {
-                                    match = match && good.ownerId === userId;
-                                }
-                                return match;
-                            })
-                    );
+        if (snapshot.exists()) {
+            const allGoods = snapshot.val() as Record<string, Record<string, Good>>;
+            const filteredGoods = Object.values(allGoods)
+                .flatMap(portGoods =>
+                    Object.values(portGoods)
+                        .filter((good: Good) => {
+                            let match = true;
+                            if (categoryId) {
+                                match = match && good.categoryId === categoryId;
+                            }
+                            if (userId) {
+                                match = match && good.ownerId === userId;
+                            }
+                            return match;
+                        })
+                );
 
-                dispatch({
-                    type: actionTypes.FETCH_GOODS_SUCCESS,
-                    payload: filteredGoods
-                });
-            } else {
-                dispatch({
-                    type: actionTypes.FETCH_GOODS_SUCCESS,
-                    payload: []
-                });
-            }
+            dispatch({
+                type: actionTypes.FETCH_GOODS_SUCCESS,
+                payload: filteredGoods
+            });
         } else {
-            throw new Error('Port ID is null');
+            dispatch({
+                type: actionTypes.FETCH_GOODS_SUCCESS,
+                payload: []
+            });
         }
     } catch (error) {
         dispatch({

@@ -53,20 +53,24 @@ const Catalog: React.FC = () => {
     const [selectedPort, setSelectedPort] = useState<string | null>(null);
     const [selectedGoods, setSelectedGoods] = useState<Good[]>([]);
     const [userPorts, setUserPorts] = useState<{ [key: string]: any }>({});
+    const [isLoadingPort, setIsLoadingPort] = useState(true);
 
     useEffect(() => {
         const loadData = async () => {
-            const userData = JSON.parse(storage.getItem(storage.keys.USER_DATA) ?? '{}');
-            if (userData.portsArray && userData.portsArray.length > 0) {
-                setUserPorts(userData.portsArray);
-                const defaultPortId = userData.portsArray[0].id;
-                setSelectedPort(defaultPortId);
-                await dispatch(fetchCategories() as any);
-                await dispatch(fetchGoods(undefined, defaultPortId) as any);
-            } else {
-                await dispatch(fetchCategories() as any);
-                await dispatch(fetchGoods() as any);
+            await dispatch(fetchCategories() as any);
+            let portId = null;
+            while (portId === null) {
+                const userData = JSON.parse(storage.getItem(storage.keys.USER_DATA) ?? '{}');
+                if (userData.portsArray && userData.portsArray.length > 0) {
+                    setUserPorts(userData.portsArray);
+                    portId = userData.portsArray[0].id;
+                } else {
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
             }
+            setSelectedPort(portId);
+            setIsLoadingPort(false);
+            await dispatch(fetchGoods(undefined, portId) as any);
             setIsInitialLoad(false);
         };
 
@@ -162,7 +166,7 @@ const Catalog: React.FC = () => {
     );
 
     const renderTable = () => {
-        if (isInitialLoad || loading) {
+        if (isInitialLoad || loading || isLoadingPort) {
             return (
                 <TableContainer component={props => <Paper {...props} variant="outlined" sx={{ backgroundColor: 'transparent' }} />}>
                     <Table>
