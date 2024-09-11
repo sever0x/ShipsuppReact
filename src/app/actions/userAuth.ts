@@ -166,7 +166,19 @@ const fetchRegister = (email: string, password: string, additionalInfo: {
     phone: string,
     vesselIMO: string,
     vesselMMSI: string,
-    portsArray: any[]
+    portsArray: Array<{
+        city: {
+            country: {
+                id: string,
+                phoneCode: string,
+                title: string
+            },
+            id: string,
+            title: string
+        },
+        id: string,
+        title: string
+    }>
 }) => async (dispatch: any) => {
     dispatch(requestSignUp());
     try {

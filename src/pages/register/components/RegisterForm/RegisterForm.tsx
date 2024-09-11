@@ -16,9 +16,7 @@ import {useSelector} from "react-redux";
 import {RootState} from 'app/reducers';
 import {useAppDispatch} from 'misc/hooks/useAppDispatch';
 import PortSelector from 'components/PortSelector';
-import SelectedPortsModal from 'components/SelectedPorts';
 import Button from 'components/Button';
-import {Visibility} from "@mui/icons-material";
 
 const getClasses = createUseStyles(() => ({
     textContainer: {
@@ -38,18 +36,9 @@ const getClasses = createUseStyles(() => ({
         gap: '1rem',
         paddingTop: '48px',
     },
-    selectContainer: {
-        marginTop: '1rem',
-        marginBottom: '1rem',
-    },
     portSelectorContainer: {
         marginTop: '1rem',
         marginBottom: '1rem',
-    },
-    viewSelectedButton: {
-        marginTop: '0.5rem',
-        display: 'flex',
-        justifyContent: 'flex-end',
     },
 }));
 
@@ -78,8 +67,7 @@ const RegisterForm: React.FC = () => {
     const [phone, setPhone] = useState('');
     const [vesselIMO, setVesselIMO] = useState('');
     const [vesselMMSI, setVesselMMSI] = useState('');
-    const [selectedPorts, setSelectedPorts] = useState<string[]>([]);
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedPort, setSelectedPort] = useState<string>('');
     const [isGoogleSignIn, setIsGoogleSignIn] = useState(false);
 
     useEffect(() => {
@@ -108,7 +96,7 @@ const RegisterForm: React.FC = () => {
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
         try {
-            const portsArray = selectedPorts.map(portId => ports[portId]).filter(Boolean);
+            const selectedPortObject = ports[selectedPort];
             if (isGoogleSignIn && user) {
                 await updateProfile(user.uid, {
                     firstName,
@@ -116,7 +104,7 @@ const RegisterForm: React.FC = () => {
                     phone,
                     vesselIMO,
                     vesselMMSI,
-                    portsArray
+                    portsArray: selectedPortObject ? [selectedPortObject] : []
                 });
             } else {
                 await register(email, password, {
@@ -125,7 +113,7 @@ const RegisterForm: React.FC = () => {
                     phone,
                     vesselIMO,
                     vesselMMSI,
-                    portsArray
+                    portsArray: selectedPortObject ? [selectedPortObject] : []
                 });
             }
             navigate('/catalog');
@@ -152,17 +140,7 @@ const RegisterForm: React.FC = () => {
     };
 
     const handlePortSelect = (portId: string) => {
-        setSelectedPorts(prev => {
-            if (prev.includes(portId)) {
-                return prev.filter(id => id !== portId);
-            } else {
-                return [...prev, portId];
-            }
-        });
-    };
-
-    const handlePortRemove = (portId: string) => {
-        setSelectedPorts(prev => prev.filter(id => id !== portId));
+        setSelectedPort(portId);
     };
 
     const renderStep = () => {
@@ -205,34 +183,24 @@ const RegisterForm: React.FC = () => {
             case 3:
                 return (
                     <>
-                        <TextField
-                            label="Vessel IMO"
-                            value={vesselIMO}
-                            onChange={(e) => setVesselIMO(e.target.value)}
-                        />
-                        <TextField
-                            label="Vessel MMSI"
-                            value={vesselMMSI}
-                            onChange={(e) => setVesselMMSI(e.target.value)}
-                        />
+                        {/*<TextField*/}
+                        {/*    label="Vessel IMO"*/}
+                        {/*    value={vesselIMO}*/}
+                        {/*    onChange={(e) => setVesselIMO(e.target.value)}*/}
+                        {/*/>*/}
+                        {/*<TextField*/}
+                        {/*    label="Vessel MMSI"*/}
+                        {/*    value={vesselMMSI}*/}
+                        {/*    onChange={(e) => setVesselMMSI(e.target.value)}*/}
+                        {/*/>*/}
                         <div className={classes.portSelectorContainer}>
                             <PortSelector
                                 ports={ports}
-                                selectedPorts={selectedPorts}
+                                selectedPorts={selectedPort ? [selectedPort] : []}
                                 onPortSelect={handlePortSelect}
+                                multiSelect={false}
+                                label="Select a port"
                             />
-                            {selectedPorts.length > 0 && (
-                                <div className={classes.viewSelectedButton}>
-                                    <Button
-                                        startIcon={<Visibility />}
-                                        onClick={() => setIsModalOpen(true)}
-                                        variant="text"
-                                        size="small"
-                                    >
-                                        View Selected Ports ({selectedPorts.length})
-                                    </Button>
-                                </div>
-                            )}
                         </div>
                     </>
                 );
@@ -266,12 +234,6 @@ const RegisterForm: React.FC = () => {
                     )}
                 </div>
             </form>
-            <SelectedPortsModal
-                open={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                selectedPorts={selectedPorts.map(id => ports[id]).filter(Boolean)}
-                onRemove={handlePortRemove}
-            />
         </>
     );
 };
