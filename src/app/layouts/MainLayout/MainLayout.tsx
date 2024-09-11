@@ -1,10 +1,11 @@
-import React, {useState} from 'react';
-import {AppBar, CssBaseline, Drawer, IconButton, Theme, Toolbar, useMediaQuery} from '@mui/material';
+import React, { useState } from 'react';
+import { AppBar, CssBaseline, Drawer, IconButton, Theme, Toolbar, useMediaQuery } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import {Outlet} from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import Sidebar from 'components/Sidebar';
 import Box from 'components/Box';
 import ProfileMenu from 'components/ProfileMenu';
+import Typography from "../../../components/Typography";
 
 const drawerWidth = 297;
 
@@ -22,36 +23,60 @@ const MainLayout: React.FC = () => {
             <AppBar
                 position="fixed"
                 sx={{
-                    zIndex: (theme) => theme.zIndex.drawer - 1,
+                    zIndex: (theme) => theme.zIndex.drawer + 1,
                     backgroundColor: 'white',
                     boxShadow: 'none',
-                    width: { md: `calc(100% - ${drawerWidth}px)` },
-                    ml: { md: `${drawerWidth}px` },
+                    width: '100%',
                 }}
             >
-                <Toolbar sx={{
-                    justifyContent: 'flex-end',
-                    padding: { xs: '16px', md: '24px 64px !important' },
-                    minHeight: { xs: '64px', md: '88px !important' },
-                }}>
-                    {isMobile && (
+                <Toolbar
+                    sx={{
+                        justifyContent: 'space-between',
+                        padding: { xs: '16px', md: '24px 32px !important' },
+                        minHeight: { xs: '64px', md: '88px !important' },
+                        // backgroundImage: `url(static/images/appbar-bg.png)`,
+                    }}
+                >
+                    {isMobile ? (
                         <IconButton
                             color="inherit"
                             aria-label="open drawer"
                             edge="start"
                             onClick={handleDrawerToggle}
-                            sx={{ mr: 2, ml: 1, display: { md: 'none' } }}
+                            sx={{ mr: 2 }}
                         >
                             <MenuIcon />
                         </IconButton>
+                    ) : (
+                        <Box sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            transition: 'opacity 0.2s, transform 0.2s',
+                            opacity: 1,
+                            transform: 'translateX(0)',
+                            pl: 2,
+                        }}>
+                            <img src={'static/images/logo/minilogo.svg'} alt="Logo"
+                                 style={{width: isMobile ? '36px' : '48px', height: isMobile ? '36px' : '48px'}}/>
+                            <Typography bold={true} noWrap component="div"
+                                        sx={{color: '#231F20', fontSize: isMobile ? 20 : 24}}>
+                                ShipSupp
+                            </Typography>
+                        </Box>
                     )}
-                    <Box sx={{ flexGrow: 1 }} />
-                    <ProfileMenu />
+                    <ProfileMenu/>
                 </Toolbar>
             </AppBar>
             <Box
                 component="nav"
-                sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 } }}
+                sx={{
+                    width: { md: drawerWidth },
+                    flexShrink: { md: 0 },
+                    '& .MuiDrawer-paper': {
+                        width: drawerWidth,
+                        boxSizing: 'border-box',
+                    },
+                }}
             >
                 <Drawer
                     variant={isMobile ? 'temporary' : 'permanent'}
@@ -65,7 +90,7 @@ const MainLayout: React.FC = () => {
                             width: drawerWidth,
                             transition: 'width 0.2s',
                             overflowX: 'hidden',
-                            zIndex: 1300,
+                            zIndex: (theme) => theme.zIndex.drawer,
                             position: 'fixed',
                             height: '100%',
                             boxSizing: 'border-box',
