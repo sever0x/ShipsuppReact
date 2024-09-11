@@ -32,9 +32,10 @@ const MainLayout: React.FC = () => {
                 <Toolbar
                     sx={{
                         justifyContent: 'space-between',
-                        padding: { xs: '16px', md: '24px 32px !important' },
-                        minHeight: { xs: '64px', md: '88px !important' },
-                        // backgroundImage: `url(static/images/appbar-bg.png)`,
+                        padding: { xs: '16px', md: '16px 36px !important' },
+                        // minHeight: { xs: '64px', md: '88px !important' },
+                        backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)), url(static/images/appbar-bg.png)`,
+                        backgroundPosition: 'center',
                     }}
                 >
                     {isMobile ? (
