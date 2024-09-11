@@ -21,6 +21,14 @@ import ListItemText from 'components/ListItemText';
 import Collapse from '@mui/material/Collapse';
 import useAuth from 'misc/hooks/useAuth';
 import {Theme, useMediaQuery} from "@mui/material";
+import Button from 'components/Button';
+import AddIcon from "@mui/icons-material/Add";
+import AddGoodModal from "pages/catalog/components/AddGoodModal";
+import {Good} from "pages/catalog/types/Good";
+import {addGood} from "pages/catalog/actions/catalogActions";
+import {useSelector} from "react-redux";
+import {RootState} from "../../app/reducers";
+import {useAppDispatch} from "../../misc/hooks/useAppDispatch";
 
 interface MenuItem {
     text: string;
@@ -29,10 +37,13 @@ interface MenuItem {
 }
 
 const Sidebar: React.FC = () => {
+    const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const location = useLocation();
+    const { categories } = useSelector((state: RootState) => state.catalog);
     const [settingsOpen, setSettingsOpen] = useState(false);
-    const { logout } = useAuth();
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const {logout} = useAuth();
     const isMobile = useMediaQuery((theme: Theme) => theme.breakpoints.down('md'));
 
     const menuItems: MenuItem[] = [
@@ -63,6 +74,10 @@ const Sidebar: React.FC = () => {
     const handleLogout = async () => {
         await logout();
         navigate(pageURLs[pages.login]);
+    };
+
+    const handleAddGood = (newGood: Omit<Good, 'id'>, newImages: File[]) => {
+        dispatch(addGood(newGood, newImages) as any);
     };
 
     const renderMenuItem = (item: MenuItem, isSubmenu: boolean = false) => {
@@ -96,7 +111,8 @@ const Sidebar: React.FC = () => {
                             top: '0',
                             bottom: '0',
                             backgroundColor: showActive ? 'primary.main' : 'transparent',
-                            borderRadius: '8px',
+                            opacity: showActive ? 0.6 : 1,
+                            borderRadius: '18px',
                             transition: 'background-color 0.2s',
                         }}
                     />
@@ -136,169 +152,191 @@ const Sidebar: React.FC = () => {
     };
 
     return (
-        <Box
-            sx={{
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                overflow: 'hidden',
-            }}
-        >
-            <Box sx={{
-                height: isMobile ? 48 : 64,
-                display: 'flex',
-                position: 'relative',
-            }}>
-                <Box sx={{
+        <>
+            <Box
+                sx={{
+                    height: '100%',
                     display: 'flex',
-                    alignItems: 'center',
-                    transition: 'opacity 0.2s, transform 0.2s',
-                    opacity: 1,
-                    transform: 'translateX(0)',
-                    pb: isMobile ? 2 : 4,
-                    pl: 2,
+                    flexDirection: 'column',
+                    overflow: 'hidden',
+                }}
+            >
+                <Box sx={{
+                    height: isMobile ? 48 : 64,
+                    display: 'flex',
+                    position: 'relative',
                 }}>
-                    <img src={'static/images/logo/minilogo.svg'} alt="Logo" style={{ width: isMobile ? '36px' : '48px', height: isMobile ? '36px' : '48px' }} />
-                    <Typography bold={true} noWrap component="div" sx={{ color: '#231F20', fontSize: isMobile ? 20 : 24 }}>
-                        ShipSupp
-                    </Typography>
+                    <Box sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        transition: 'opacity 0.2s, transform 0.2s',
+                        opacity: 1,
+                        transform: 'translateX(0)',
+                        pb: isMobile ? 2 : 4,
+                        pl: 2,
+                    }}>
+                        <img src={'static/images/logo/minilogo.svg'} alt="Logo"
+                             style={{width: isMobile ? '36px' : '48px', height: isMobile ? '36px' : '48px'}}/>
+                        <Typography bold={true} noWrap component="div"
+                                    sx={{color: '#231F20', fontSize: isMobile ? 20 : 24}}>
+                            ShipSupp
+                        </Typography>
+                    </Box>
                 </Box>
-            </Box>
-            <List sx={{ flexGrow: 1, overflow: 'auto' }}>
-                {menuItems.map((item) => renderMenuItem(item))}
-
-                {/* Settings dropdown */}
-                <ListItem
-                    disablePadding
-                    sx={{
-                        position: 'relative',
-                    }}
-                >
-                    <ListItemButton
-                        onClick={handleSettingsClick}
-                        sx={{
-                            px: 2,
-                            py: isMobile ? 0.5 : 1,
-                            '&:hover': {
-                                backgroundColor: 'transparent',
-                            },
-                        }}
-                        disableRipple
+                <Box pt={2} pb={3} sx={{ display: 'flex', margin: '0 4px'}}>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        startIcon={<AddIcon/>}
+                        onClick={() => setIsAddModalOpen(true)}
+                        sx={{flex: 1, width: '100%'}}
                     >
-                        <Box
+                        New Item
+                    </Button>
+                </Box>
+                <List sx={{flexGrow: 1, overflow: 'auto'}}>
+                    {menuItems.map((item) => renderMenuItem(item))}
+
+                    {/* Settings dropdown */}
+                    <ListItem
+                        disablePadding
+                        sx={{
+                            position: 'relative',
+                        }}
+                    >
+                        <ListItemButton
+                            onClick={handleSettingsClick}
                             sx={{
-                                position: 'absolute',
-                                left: '4px',
-                                right: '4px',
-                                top: '0',
-                                bottom: '0',
-                                backgroundColor: isSettingsActive && !settingsOpen ? 'primary.main' : 'transparent',
-                                borderRadius: '8px',
-                                transition: 'background-color 0.2s',
+                                px: 2,
+                                py: isMobile ? 0.5 : 1,
+                                '&:hover': {
+                                    backgroundColor: 'transparent',
+                                },
                             }}
-                        />
-                        <Box
-                            sx={{
-                                width: '100%',
-                                display: 'flex',
-                                alignItems: 'center',
-                                position: 'relative',
-                                zIndex: 1,
-                                padding: '8px 16px',
-                            }}
+                            disableRipple
                         >
-                            <ListItemIcon
+                            <Box
                                 sx={{
-                                    minWidth: 40,
-                                    color: isSettingsActive && !settingsOpen ? 'text.primary' : 'inherit',
-                                }}
-                            >
-                                <SettingsIcon />
-                            </ListItemIcon>
-                            <ListItemText
-                                primary="Settings"
-                                sx={{
-                                    opacity: 1,
-                                    transition: 'opacity 0.2s',
-                                    '& .MuiListItemText-primary': {
-                                        color: isSettingsActive && !settingsOpen ? 'text.primary' : 'inherit',
-                                        fontWeight: isSettingsActive && !settingsOpen ? 'bold' : 'medium',
-                                    },
+                                    position: 'absolute',
+                                    left: '4px',
+                                    right: '4px',
+                                    top: '0',
+                                    bottom: '0',
+                                    backgroundColor: isSettingsActive && !settingsOpen ? 'primary.main' : 'transparent',
+                                    opacity: isSettingsActive && !settingsOpen ? 0.6 : 1,
+                                    borderRadius: '18px',
+                                    transition: 'background-color 0.2s',
                                 }}
                             />
-                            {settingsOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                        </Box>
-                    </ListItemButton>
-                </ListItem>
-                <Collapse in={settingsOpen} timeout="auto" unmountOnExit>
-                    <List component="div" disablePadding sx={{ maxHeight: isMobile ? 150 : 200, overflow: 'auto' }}>
-                        {settingsItems.map((item) => renderMenuItem(item, true))}
-                    </List>
-                </Collapse>
-            </List>
+                            <Box
+                                sx={{
+                                    width: '100%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    position: 'relative',
+                                    zIndex: 1,
+                                    padding: '8px 16px',
+                                }}
+                            >
+                                <ListItemIcon
+                                    sx={{
+                                        minWidth: 40,
+                                        color: isSettingsActive && !settingsOpen ? 'text.primary' : 'inherit',
+                                    }}
+                                >
+                                    <SettingsIcon/>
+                                </ListItemIcon>
+                                <ListItemText
+                                    primary="Settings"
+                                    sx={{
+                                        opacity: 1,
+                                        transition: 'opacity 0.2s',
+                                        '& .MuiListItemText-primary': {
+                                            color: isSettingsActive && !settingsOpen ? 'text.primary' : 'inherit',
+                                            fontWeight: isSettingsActive && !settingsOpen ? 'bold' : 'medium',
+                                        },
+                                    }}
+                                />
+                                {settingsOpen ? <ExpandLessIcon/> : <ExpandMoreIcon/>}
+                            </Box>
+                        </ListItemButton>
+                    </ListItem>
+                    <Collapse in={settingsOpen} timeout="auto" unmountOnExit>
+                        <List component="div" disablePadding sx={{maxHeight: isMobile ? 150 : 200, overflow: 'auto'}}>
+                            {settingsItems.map((item) => renderMenuItem(item, true))}
+                        </List>
+                    </Collapse>
+                </List>
 
-            {/* Bottom buttons */}
-            <Box sx={{ mt: 'auto' }}>
-                <ListItem disablePadding>
-                    <ListItemButton
-                        onClick={handleLogout}
-                        sx={{
-                            px: 2,
-                            py: isMobile ? 0.5 : 1,
-                            '&:hover': {
-                                backgroundColor: 'transparent',
-                            },
-                        }}
-                        disableRipple
-                    >
-                        <Box
+                {/* Bottom buttons */}
+                <Box sx={{mt: 'auto'}}>
+                    <ListItem disablePadding>
+                        <ListItemButton
+                            onClick={handleLogout}
                             sx={{
-                                width: '100%',
-                                display: 'flex',
-                                alignItems: 'center',
-                                position: 'relative',
-                                zIndex: 1,
-                                padding: '8px 16px',
+                                px: 2,
+                                py: isMobile ? 0.5 : 1,
+                                '&:hover': {
+                                    backgroundColor: 'transparent',
+                                },
                             }}
+                            disableRipple
                         >
-                            <ListItemIcon sx={{ minWidth: 40 }}>
-                                <LogoutIcon />
-                            </ListItemIcon>
-                            <ListItemText primary="Logout" />
-                        </Box>
-                    </ListItemButton>
-                </ListItem>
-                <ListItem disablePadding>
-                    <ListItemButton
-                        onClick={() => navigate(`/${pages.support}`)}
-                        sx={{
-                            px: 2,
-                            py: isMobile ? 0.5 : 1,
-                            '&:hover': {
-                                backgroundColor: 'transparent',
-                            },
-                        }}
-                        disableRipple
-                    >
-                        <Box
+                            <Box
+                                sx={{
+                                    width: '100%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    position: 'relative',
+                                    zIndex: 1,
+                                    padding: '8px 16px',
+                                }}
+                            >
+                                <ListItemIcon sx={{minWidth: 40}}>
+                                    <LogoutIcon/>
+                                </ListItemIcon>
+                                <ListItemText primary="Logout"/>
+                            </Box>
+                        </ListItemButton>
+                    </ListItem>
+                    <ListItem disablePadding>
+                        <ListItemButton
+                            onClick={() => navigate(`/${pages.support}`)}
                             sx={{
-                                width: '100%',
-                                display: 'flex',
-                                alignItems: 'center',
-                                position: 'relative',
-                                zIndex: 1,
-                                padding: '8px 16px',
+                                px: 2,
+                                py: isMobile ? 0.5 : 1,
+                                '&:hover': {
+                                    backgroundColor: 'transparent',
+                                },
                             }}
+                            disableRipple
                         >
-                            <ListItemIcon sx={{ minWidth: 40 }}>
-                                <SupportIcon />
-                            </ListItemIcon>
-                            <ListItemText primary="Support" />
-                        </Box>
-                    </ListItemButton>
-                </ListItem>
+                            <Box
+                                sx={{
+                                    width: '100%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    position: 'relative',
+                                    zIndex: 1,
+                                    padding: '8px 16px',
+                                }}
+                            >
+                                <ListItemIcon sx={{minWidth: 40}}>
+                                    <SupportIcon/>
+                                </ListItemIcon>
+                                <ListItemText primary="Support"/>
+                            </Box>
+                        </ListItemButton>
+                    </ListItem>
+                </Box>
             </Box>
-        </Box>
+            <AddGoodModal
+                open={isAddModalOpen}
+                onClose={() => setIsAddModalOpen(false)}
+                onAdd={handleAddGood}
+                categories={categories}
+            />
+        </>
     );
 };
 

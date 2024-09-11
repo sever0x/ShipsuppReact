@@ -22,14 +22,16 @@ const Button: React.FC<CustomButtonProps> = ({
             color={variant === 'text' ? 'inherit' : color}
             fullWidth={fullWidth}
             sx={{
-                borderRadius: rounded ? '16px' : '4px',
+                borderRadius: rounded ? '18px' : '4px',
                 textTransform: 'none',
                 padding: '10px 20px',
+                boxShadow: 'none',
                 '&:hover': variant !== 'text' ? {
                     backgroundColor: color === 'primary' ? '#5BFEC5' : undefined,
+                    boxShadow: 'none',
                 } : {},
                 ...(variant === 'text' && {
-                    color: '#97A4A5', // Using grey[600]
+                    color: '#97A4A5',
                     '&:hover': {
                         backgroundColor: 'transparent',
                     },

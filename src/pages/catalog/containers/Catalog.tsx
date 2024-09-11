@@ -41,7 +41,6 @@ const Catalog: React.FC = () => {
     const [isInitialLoad, setIsInitialLoad] = useState(true);
     const [editingGood, setEditingGood] = useState<Good | null>(null);
     const [deletingGood, setDeletingGood] = useState<Good | null>(null);
-    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState<{ id: string; title: string } | null>(null);
     const [selectedPort, setSelectedPort] = useState<string | null>(null);
@@ -291,15 +290,6 @@ const Catalog: React.FC = () => {
                 <Typography variant="body2" gutterBottom>
                     Click the "Add New Item" button to start adding products to this port.
                 </Typography>
-                <Button
-                    variant="contained"
-                    color="primary"
-                    startIcon={<AddIcon />}
-                    onClick={() => setIsAddModalOpen(true)}
-                    sx={{ mt: 2 }}
-                >
-                    Add New Item
-                </Button>
             </Box>
         );
     };
@@ -377,15 +367,6 @@ const Catalog: React.FC = () => {
                             />
                         </>
                     )}
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        startIcon={<AddIcon />}
-                        onClick={() => setIsAddModalOpen(true)}
-                        sx={{ ml: 2, flex: 1 }}
-                    >
-                        Add New Item
-                    </Button>
                 </Box>
             </Box>
             {renderTable()}
@@ -398,12 +379,6 @@ const Catalog: React.FC = () => {
                     categories={categories}
                 />
             )}
-            <AddGoodModal
-                open={isAddModalOpen}
-                onClose={() => setIsAddModalOpen(false)}
-                onAdd={handleAddGood}
-                categories={categories}
-            />
             <Dialog
                 open={!!deletingGood}
                 onClose={handleCloseDeleteDialog}
