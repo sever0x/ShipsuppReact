@@ -6,6 +6,7 @@ import Sidebar from 'components/Sidebar';
 import Box from 'components/Box';
 import ProfileMenu from 'components/ProfileMenu';
 import Typography from "../../../components/Typography";
+import GlobalSearch from 'components/GlobalSearch';
 
 const drawerWidth = 297;
 
@@ -33,7 +34,6 @@ const MainLayout: React.FC = () => {
                     sx={{
                         justifyContent: 'space-between',
                         padding: { xs: '16px', md: '16px 36px !important' },
-                        // minHeight: { xs: '64px', md: '88px !important' },
                         backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)), url(static/images/appbar-bg.png)`,
                         backgroundPosition: 'center',
                     }}
@@ -65,6 +65,7 @@ const MainLayout: React.FC = () => {
                             </Typography>
                         </Box>
                     )}
+                    <GlobalSearch />
                     <ProfileMenu/>
                 </Toolbar>
             </AppBar>

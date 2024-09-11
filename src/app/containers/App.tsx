@@ -15,52 +15,55 @@ import Register from "pages/register";
 import Orders from "pages/orders";
 import NotFound from "pages/notFound";
 import Chats from "pages/chats";
+import SearchProvider from 'misc/providers/SearchProvider';
 
 function App() {
     return (
         <AuthProvider>
             <ThemeProvider>
-                <CssBaseline />
-                <Router>
-                    <Routes>
-                        <Route element={<MainLayout />}>
-                            <Route path={`${pageURLs[pages.home]}`} element={
-                                <ProtectedRoute>
-                                    <Catalog />
-                                </ProtectedRoute>
-                            } />
-                            <Route path={`${pageURLs[pages.profile]}`} element={
-                                <ProtectedRoute>
-                                    <Profile />
-                                </ProtectedRoute>
-                            } />
-                            <Route path={`${pageURLs[pages.catalog]}`} element={
-                                <ProtectedRoute>
-                                    <Catalog />
-                                </ProtectedRoute>
-                            } />
-                            <Route path={`${pageURLs[pages.orders]}`} element={
-                                <ProtectedRoute>
-                                    <Orders />
-                                </ProtectedRoute>
-                            } />
-                            <Route path={`${pageURLs[pages.chats]}`} element={
-                                <ProtectedRoute>
-                                    <Chats />
-                                </ProtectedRoute>
-                            } />
-                            <Route path="*" element={<NotFound />} />
-                        </Route>
-                        <Route element={<AuthLayout />}>
-                            <Route path={`${pageURLs[pages.login]}`} element={
-                                <SignIn />
-                            } />
-                            <Route path={`${pageURLs[pages.register]}`} element={
-                                <Register />
-                            } />
-                        </Route>
-                    </Routes>
-                </Router>
+                <SearchProvider>
+                    <CssBaseline/>
+                    <Router>
+                        <Routes>
+                            <Route element={<MainLayout/>}>
+                                <Route path={`${pageURLs[pages.home]}`} element={
+                                    <ProtectedRoute>
+                                        <Catalog/>
+                                    </ProtectedRoute>
+                                }/>
+                                <Route path={`${pageURLs[pages.profile]}`} element={
+                                    <ProtectedRoute>
+                                        <Profile/>
+                                    </ProtectedRoute>
+                                }/>
+                                <Route path={`${pageURLs[pages.catalog]}`} element={
+                                    <ProtectedRoute>
+                                        <Catalog/>
+                                    </ProtectedRoute>
+                                }/>
+                                <Route path={`${pageURLs[pages.orders]}`} element={
+                                    <ProtectedRoute>
+                                        <Orders/>
+                                    </ProtectedRoute>
+                                }/>
+                                <Route path={`${pageURLs[pages.chats]}`} element={
+                                    <ProtectedRoute>
+                                        <Chats/>
+                                    </ProtectedRoute>
+                                }/>
+                                <Route path="*" element={<NotFound/>}/>
+                            </Route>
+                            <Route element={<AuthLayout/>}>
+                                <Route path={`${pageURLs[pages.login]}`} element={
+                                    <SignIn/>
+                                }/>
+                                <Route path={`${pageURLs[pages.register]}`} element={
+                                    <Register/>
+                                }/>
+                            </Route>
+                        </Routes>
+                    </Router>
+                </SearchProvider>
             </ThemeProvider>
         </AuthProvider>
     );

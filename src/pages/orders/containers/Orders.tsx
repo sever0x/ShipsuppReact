@@ -25,13 +25,14 @@ import OrderStatus from '../components/OrderStatus';
 import storage from 'misc/storage';
 import PortSelector from 'components/PortSelector';
 import {Port} from 'misc/types/Port';
+import { useSearch } from 'misc/providers/SearchProvider';
 
 const Orders: React.FC = () => {
     const dispatch = useDispatch();
+    const { searchTerm } = useSearch();
     const { loadingOrders, data: orders, error } = useSelector((state: RootState) => state.orders);
     const user = useSelector((state: RootState) => state.userAuth.user);
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-    const [searchTerm, setSearchTerm] = useState('');
     const [selectedPort, setSelectedPort] = useState<string | null>(null);
     const [userPorts, setUserPorts] = useState<{ [key: string]: Port }>({});
 
@@ -232,17 +233,6 @@ const Orders: React.FC = () => {
                         onPortSelect={handlePortSelect}
                         multiSelect={false}
                         label="Select port"
-                    />
-                    <TextField
-                        placeholder="Search for orders..."
-                        variant="outlined"
-                        size="small"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        InputProps={{
-                            startAdornment: <SearchIcon color="action" />,
-                        }}
-                        sx={{ flex: 1 }}
                     />
                 </Box>
             </Box>

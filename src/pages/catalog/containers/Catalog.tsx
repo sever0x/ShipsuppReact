@@ -34,14 +34,15 @@ import Button from 'components/Button';
 import IconButton from 'components/IconButton';
 import storage from 'misc/storage';
 import PortSelector from 'components/PortSelector';
+import { useSearch } from 'misc/providers/SearchProvider';
 
 const Catalog: React.FC = () => {
     const dispatch = useDispatch();
+    const { searchTerm } = useSearch();
     const { categories, goods, loading, error } = useSelector((state: RootState) => state.catalog);
     const [isInitialLoad, setIsInitialLoad] = useState(true);
     const [editingGood, setEditingGood] = useState<Good | null>(null);
     const [deletingGood, setDeletingGood] = useState<Good | null>(null);
-    const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState<{ id: string; title: string } | null>(null);
     const [selectedPort, setSelectedPort] = useState<string | null>(null);
     const [selectedGoods, setSelectedGoods] = useState<Good[]>([]);
@@ -353,17 +354,6 @@ const Catalog: React.FC = () => {
                                 onCategorySelect={handleCategorySelect}
                                 selectedCategory={selectedCategory}
                                 label="Select category"
-                            />
-                            <TextField
-                                placeholder="Search for goods..."
-                                variant="outlined"
-                                size="small"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                InputProps={{
-                                    startAdornment: <SearchIcon color="action" />,
-                                }}
-                                sx={{ flex: 3, mx: 2 }}
                             />
                         </>
                     )}
