@@ -12,7 +12,7 @@ import {
     Select,
     Skeleton,
     styled,
-    Typography
+    Typography, useMediaQuery, useTheme
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import {updateOrderStatus} from '../../actions/orderActions';
@@ -69,30 +69,51 @@ const statusMessages: { [key: string]: string } = {
 const StyledDialog = styled(Dialog)(({ theme }) => ({
     '& .MuiPaper-root': {
         backgroundColor: 'white',
+        [theme.breakpoints.down('sm')]: {
+            margin: 0,
+            width: '100%',
+            maxHeight: '100%',
+        },
     },
     '& .MuiDialogContent-root': {
         padding: theme.spacing(3),
+        [theme.breakpoints.down('sm')]: {
+            padding: theme.spacing(2),
+        },
     },
     '& .MuiDialogTitle-root': {
         padding: theme.spacing(2),
     },
 }));
 
-const ContentWrapper = styled(Box)({
+const ContentWrapper = styled(Box)(({ theme }) => ({
     display: 'flex',
     justifyContent: 'space-between',
-});
+    [theme.breakpoints.down('md')]: {
+        flexDirection: 'column',
+    },
+}));
 
-const InfoColumn = styled(Box)({
+const InfoColumn = styled(Box)(({ theme }) => ({
     flex: 1,
     marginRight: '24px',
-});
+    [theme.breakpoints.down('md')]: {
+        marginRight: 0,
+        marginBottom: theme.spacing(3),
+    },
+}));
 
-const HistoryColumn = styled(Box)({
+const HistoryColumn = styled(Box)(({ theme }) => ({
     flex: 1,
     borderLeft: '1px solid #e0e0e0',
     paddingLeft: '24px',
-});
+    [theme.breakpoints.down('md')]: {
+        borderLeft: 'none',
+        paddingLeft: 0,
+        borderTop: '1px solid #e0e0e0',
+        paddingTop: theme.spacing(3),
+    },
+}));
 
 const InfoRow = styled(Box)(({ theme }) => ({
     display: 'flex',
@@ -138,6 +159,8 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order })
     const navigate = useNavigate();
     const { loadingDetails, orderDetails, error } = useSelector((state: RootState) => state.orders);
     const [cancelModalOpen, setCancelModalOpen] = useState(false);
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     const handleStatusChange = (newStatus: string) => {
         if (order.id) {
@@ -247,7 +270,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order })
 
     return (
         <>
-            <StyledDialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+            <StyledDialog open={open} onClose={onClose} maxWidth="md" fullWidth fullScreen={isMobile}>
                 <DialogTitle>
                     #{displayOrder.orderNumber}
                     <IconButton

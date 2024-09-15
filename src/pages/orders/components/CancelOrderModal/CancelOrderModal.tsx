@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
     Button,
     Dialog,
@@ -11,6 +11,8 @@ import {
     Select,
     SelectChangeEvent,
     styled,
+    useMediaQuery,
+    useTheme,
 } from '@mui/material';
 
 interface CancelOrderModalProps {
@@ -22,13 +24,24 @@ interface CancelOrderModalProps {
 const StyledDialog = styled(Dialog)(({ theme }) => ({
     '& .MuiDialog-paper': {
         width: '500px',
-        maxWidth: '90vw',
+        maxWidth: '95vw',
+        backgroundColor: 'white',
     },
 }));
 
 const StyledSelect = styled(Select)(({ theme }) => ({
     width: '100%',
+    backgroundColor: 'white',
+    '& .MuiMenuItem-root': {
+        whiteSpace: 'normal',
+        wordBreak: 'break-word',
+    },
 }));
+
+const StyledMenuItem = styled(MenuItem)({
+    whiteSpace: 'normal',
+    wordBreak: 'break-word',
+});
 
 const cancelReasons = [
     { value: 'Out of stock', label: 'Out of stock: Item unavailable, canceling order.' },
@@ -45,6 +58,8 @@ const cancelReasons = [
 
 const CancelOrderModal: React.FC<CancelOrderModalProps> = ({ open, onClose, onConfirm }) => {
     const [reason, setReason] = useState<string>('');
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     const handleReasonChange = (event: SelectChangeEvent<unknown>) => {
         setReason(event.target.value as string);
@@ -56,7 +71,12 @@ const CancelOrderModal: React.FC<CancelOrderModalProps> = ({ open, onClose, onCo
     };
 
     return (
-        <StyledDialog open={open} onClose={onClose}>
+        <StyledDialog
+            open={open}
+            onClose={onClose}
+            fullWidth
+            maxWidth="sm"
+        >
             <DialogTitle>Cancel Order</DialogTitle>
             <DialogContent>
                 <FormControl fullWidth margin="normal">
@@ -66,18 +86,27 @@ const CancelOrderModal: React.FC<CancelOrderModalProps> = ({ open, onClose, onCo
                         value={reason}
                         onChange={handleReasonChange}
                         label="Cancellation Reason"
+                        MenuProps={{
+                            PaperProps: {
+                                style: {
+                                    maxHeight: isMobile ? '50vh' : '70vh',
+                                    width: '95%',
+                                    backgroundColor: 'white',
+                                },
+                            },
+                        }}
                     >
                         {cancelReasons.map((option) => (
-                            <MenuItem key={option.value} value={option.value}>
+                            <StyledMenuItem key={option.value} value={option.value}>
                                 {option.label}
-                            </MenuItem>
+                            </StyledMenuItem>
                         ))}
                     </StyledSelect>
                 </FormControl>
             </DialogContent>
             <DialogActions>
-                <Button onClick={onClose}>Cancel</Button>
-                <Button onClick={handleConfirm} color="primary" disabled={!reason}>
+                <Button onClick={onClose} sx={{color: 'customRed.main'}}>Cancel</Button>
+                <Button onClick={handleConfirm} sx={{color: 'success.main'}} disabled={!reason}>
                     Confirm Cancellation
                 </Button>
             </DialogActions>

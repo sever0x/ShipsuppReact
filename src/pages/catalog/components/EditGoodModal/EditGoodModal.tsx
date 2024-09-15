@@ -128,18 +128,19 @@ const EditGoodModal: React.FC<EditGoodModalProps> = ({ open, onClose, good, onSa
                 top: '50%',
                 left: '50%',
                 transform: 'translate(-50%, -50%)',
-                width: 800,
+                width: { xs: '95%', sm: '80%', md: 800 },
+                maxWidth: '100%',
                 bgcolor: 'white',
                 boxShadow: 24,
-                p: 4,
+                p: { xs: 2, sm: 3, md: 4 },
                 maxHeight: '90vh',
                 overflowY: 'auto',
             }}>
                 <Typography variant="h6" component="h2" gutterBottom>
                     Edit Good
                 </Typography>
-                <Grid container spacing={3}>
-                    <Grid item xs={6}>
+                <Grid container spacing={2}>
+                    <Grid item xs={12} md={6}>
                         <Box
                             onClick={handleCategoryClick}
                             sx={{
@@ -230,7 +231,7 @@ const EditGoodModal: React.FC<EditGoodModalProps> = ({ open, onClose, good, onSa
                             helperText={errors.description || `${editedGood.description.length}/400`}
                         />
                     </Grid>
-                    <Grid item xs={6}>
+                    <Grid item xs={12} md={6}>
                         <Typography variant="subtitle1" gutterBottom>
                             Manage images
                         </Typography>
@@ -243,7 +244,7 @@ const EditGoodModal: React.FC<EditGoodModalProps> = ({ open, onClose, good, onSa
                                 border: errors.images ? '2px dashed red' : '2px dashed #ccc',
                                 borderRadius: 2,
                                 p: 2,
-                                minHeight: 200,
+                                minHeight: { xs: 100, sm: 150, md: 200 },
                                 display: 'flex',
                                 flexDirection: 'column',
                                 alignItems: 'center',

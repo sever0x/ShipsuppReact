@@ -5,7 +5,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import {Good} from '../../types/Good';
 import CategorySelector from "pages/catalog/components/CategorySelector";
 import {useDropzone} from "react-dropzone";
-import {ExpandMore} from '@mui/icons-material';
+import {Close, ExpandMore} from '@mui/icons-material';
 
 interface Category {
     id: string;
@@ -122,18 +122,31 @@ const AddGoodModal: React.FC<AddGoodModalProps> = ({ open, onClose, onAdd, categ
                 top: '50%',
                 left: '50%',
                 transform: 'translate(-50%, -50%)',
-                width: 800,
+                width: { xs: '95%', sm: '80%', md: 800 },
+                maxWidth: '100%',
                 bgcolor: 'white',
                 boxShadow: 24,
-                p: 4,
+                p: { xs: 2, sm: 3, md: 4 },
                 maxHeight: '90vh',
                 overflowY: 'auto',
             }}>
+                <IconButton
+                    aria-label="close"
+                    onClick={onClose}
+                    sx={{
+                        position: 'absolute',
+                        right: 8,
+                        top: 8,
+                        color: (theme) => theme.palette.grey[500],
+                    }}
+                >
+                    <Close />
+                </IconButton>
                 <Typography variant="h6" component="h2" gutterBottom>
-                    Add to
+                    Add New Item
                 </Typography>
-                <Grid container spacing={3}>
-                    <Grid item xs={6}>
+                <Grid container spacing={2}>
+                    <Grid item xs={12} md={6}>
                         <Box
                             onClick={handleCategoryClick}
                             sx={{
@@ -210,6 +223,8 @@ const AddGoodModal: React.FC<AddGoodModalProps> = ({ open, onClose, onAdd, categ
                             value={newGood.color}
                             onChange={handleChange}
                         />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
                         <TextField
                             fullWidth
                             margin="normal"
@@ -223,8 +238,6 @@ const AddGoodModal: React.FC<AddGoodModalProps> = ({ open, onClose, onAdd, categ
                             error={!!errors.description}
                             helperText={errors.description || `${newGood.description.length}/400`}
                         />
-                    </Grid>
-                    <Grid item xs={6}>
                         <Typography variant="subtitle1" gutterBottom>
                             Manage images
                         </Typography>
@@ -237,7 +250,7 @@ const AddGoodModal: React.FC<AddGoodModalProps> = ({ open, onClose, onAdd, categ
                                 border: errors.images ? '2px dashed red' : '2px dashed #ccc',
                                 borderRadius: 2,
                                 p: 2,
-                                minHeight: 200,
+                                minHeight: { xs: 100, sm: 150, md: 200 },
                                 display: 'flex',
                                 flexDirection: 'column',
                                 alignItems: 'center',
@@ -260,7 +273,7 @@ const AddGoodModal: React.FC<AddGoodModalProps> = ({ open, onClose, onAdd, categ
                         {errors.images && <Typography color="error">{errors.images}</Typography>}
                         <Grid container spacing={2} sx={{ mt: 2 }}>
                             {newImages.map((file, index) => (
-                                <Grid item key={index} xs={4}>
+                                <Grid item key={index} xs={4} sm={3} md={4}>
                                     <Box position="relative">
                                         <img src={URL.createObjectURL(file)} alt="New product" style={{ width: '100%', height: 'auto' }} />
                                         <IconButton
@@ -276,9 +289,14 @@ const AddGoodModal: React.FC<AddGoodModalProps> = ({ open, onClose, onAdd, categ
                         </Grid>
                     </Grid>
                 </Grid>
-                <Button onClick={handleAdd} variant="contained" sx={{ mt: 2 }}>
-                    Save
-                </Button>
+                <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
+                    <Button onClick={onClose} sx={{ mr: 1 }}>
+                        Cancel
+                    </Button>
+                    <Button onClick={handleAdd} variant="contained" color="primary">
+                        Save
+                    </Button>
+                </Box>
             </Box>
         </Modal>
     );
