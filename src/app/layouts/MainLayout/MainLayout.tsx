@@ -60,7 +60,7 @@ const MainLayout: React.FC = () => {
                                 aria-label="open drawer"
                                 edge="start"
                                 onClick={handleDrawerToggle}
-                                sx={{ mr: 2 }}
+                                sx={{ mr: 2, ml: 2 }}
                             >
                                 <MenuIcon />
                             </IconButton>
@@ -103,7 +103,7 @@ const MainLayout: React.FC = () => {
                         )}
                     </Box>
 
-                    <Box sx={{ display: 'flex', alignItems: 'center', minWidth: isSmallScreen ? 'auto' : '200px', justifyContent: 'flex-end' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', minWidth: isSmallScreen ? 'auto' : '200px', justifyContent: 'flex-end', mr: isMobile ? 2 : 4 }}>
                         {(!isMobile || !searchExpanded) && <ProfileMenu />}
                     </Box>
                 </Toolbar>
