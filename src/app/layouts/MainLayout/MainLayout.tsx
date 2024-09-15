@@ -53,56 +53,59 @@ const MainLayout: React.FC = () => {
                         backgroundPosition: 'center',
                     }}
                 >
-                    {isSmallScreen ? (
-                        isMobile && isSearchVisible && searchExpanded ? (
-                            <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                                <IconButton onClick={toggleSearch}>
-                                    <ArrowBackIcon />
-                                </IconButton>
-                                <GlobalSearch expanded={true} />
-                            </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', minWidth: isSmallScreen ? 'auto' : '200px' }}>
+                        {isSmallScreen ? (
+                            <IconButton
+                                color="inherit"
+                                aria-label="open drawer"
+                                edge="start"
+                                onClick={handleDrawerToggle}
+                                sx={{ mr: 2 }}
+                            >
+                                <MenuIcon />
+                            </IconButton>
                         ) : (
                             <>
-                                <IconButton
-                                    color="inherit"
-                                    aria-label="open drawer"
-                                    edge="start"
-                                    onClick={handleDrawerToggle}
-                                    sx={{ mr: 2 }}
-                                >
-                                    <MenuIcon />
-                                </IconButton>
-                                {isSearchVisible && isMobile && (
-                                    <IconButton onClick={toggleSearch}>
-                                        <SearchIcon />
-                                    </IconButton>
-                                )}
-                                {(isTablet || isMediumDevice) && isSearchVisible && (
-                                    <GlobalSearch />
-                                )}
-                            </>
-                        )
-                    ) : (
-                        <>
-                            <Box sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                transition: 'opacity 0.2s, transform 0.2s',
-                                opacity: 1,
-                                transform: 'translateX(0)',
-                                pl: 2,
-                            }}>
                                 <img src={'static/images/logo/minilogo.svg'} alt="Logo"
                                      style={{width: '48px', height: '48px'}}/>
                                 <Typography bold={true} noWrap component="div"
                                             sx={{color: '#231F20', fontSize: 24, ml: 1}}>
                                     ShipSupp
                                 </Typography>
-                            </Box>
-                            {isSearchVisible && <GlobalSearch />}
-                        </>
-                    )}
-                    {(!isMobile || !searchExpanded) && <ProfileMenu />}
+                            </>
+                        )}
+                    </Box>
+
+                    <Box sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: isMobile ? 'flex-end' : 'center',
+                        flexGrow: 1,
+                        mx: 2
+                    }}>
+                        {isSearchVisible && (
+                            isMobile ? (
+                                searchExpanded ? (
+                                    <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                                        <IconButton onClick={toggleSearch}>
+                                            <ArrowBackIcon />
+                                        </IconButton>
+                                        <GlobalSearch expanded={true} />
+                                    </Box>
+                                ) : (
+                                    <IconButton onClick={toggleSearch}>
+                                        <SearchIcon />
+                                    </IconButton>
+                                )
+                            ) : (
+                                <GlobalSearch />
+                            )
+                        )}
+                    </Box>
+
+                    <Box sx={{ display: 'flex', alignItems: 'center', minWidth: isSmallScreen ? 'auto' : '200px', justifyContent: 'flex-end' }}>
+                        {(!isMobile || !searchExpanded) && <ProfileMenu />}
+                    </Box>
                 </Toolbar>
             </AppBar>
             <Box
