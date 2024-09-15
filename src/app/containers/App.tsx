@@ -1,5 +1,5 @@
 import React from 'react';
-import {BrowserRouter as Router, Route, Routes} from 'react-router-dom';
+import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
 import AuthProvider from "misc/providers/AuthProvider";
 import ThemeProvider from 'misc/providers/ThemeProvider';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -17,6 +17,8 @@ import NotFound from "pages/notFound";
 import Chats from "pages/chats";
 import SearchProvider from 'misc/providers/SearchProvider';
 
+const RedirectToCatalog = () => <Navigate to={pageURLs[pages.catalog]} replace />;
+
 function App() {
     return (
         <AuthProvider>
@@ -26,6 +28,7 @@ function App() {
                     <Router>
                         <Routes>
                             <Route element={<MainLayout/>}>
+                                <Route path="/" element={<RedirectToCatalog />} />
                                 <Route path={`${pageURLs[pages.home]}`} element={
                                     <ProtectedRoute>
                                         <Catalog/>
