@@ -1,21 +1,18 @@
-import React, { useContext, useEffect } from 'react';
-import { TextField, InputAdornment } from '@mui/material';
+import React, { useContext } from 'react';
+import { TextField, InputAdornment, Theme, useMediaQuery } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { useLocation } from 'react-router-dom';
 import pageURLs from 'constants/pagesURLs';
-import {SearchContext} from "../../misc/providers/SearchProvider";
+import { SearchContext } from "../../misc/providers/SearchProvider";
 
-const GlobalSearch: React.FC = () => {
+interface GlobalSearchProps {
+    expanded?: boolean;
+}
+
+const GlobalSearch: React.FC<GlobalSearchProps> = ({ expanded = false }) => {
     const location = useLocation();
     const { searchTerm, setSearchTerm } = useContext(SearchContext);
-
-    const isSearchVisible = [pageURLs.catalog, pageURLs.orders].includes(location.pathname);
-
-    useEffect(() => {
-        setSearchTerm('');
-    }, [location, setSearchTerm]);
-
-    if (!isSearchVisible) return null;
+    const isMobile = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'));
 
     const placeholder = location.pathname === pageURLs.catalog
         ? "Search for goods..."
@@ -41,7 +38,18 @@ const GlobalSearch: React.FC = () => {
                     </InputAdornment>
                 ),
             }}
-            sx={{ width: 300, mr: 2 }}
+            sx={{
+                width: isMobile ? (expanded ? '100%' : '40px') : 300,
+                mr: 2,
+                transition: 'width 0.3s ease-in-out',
+                '& .MuiOutlinedInput-root': {
+                    pr: isMobile && !expanded ? 0 : 'inherit',
+                },
+                '& .MuiOutlinedInput-input': {
+                    p: isMobile && !expanded ? 0 : 'inherit',
+                    width: isMobile && !expanded ? 0 : 'inherit',
+                },
+            }}
         />
     );
 };
