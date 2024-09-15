@@ -1,5 +1,5 @@
 import React, {useCallback, useState} from 'react';
-import {Box, Button, Grid, IconButton, InputAdornment, Modal, TextField, Typography} from '@mui/material';
+import {Box, Button, Grid, IconButton, InputAdornment, Modal, TextField, Typography, useMediaQuery, useTheme} from '@mui/material';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import DeleteIcon from '@mui/icons-material/Delete';
 import {Good} from '../../types/Good';
@@ -44,6 +44,10 @@ const AddGoodModal: React.FC<AddGoodModalProps> = ({ open, onClose, onAdd, categ
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [selectedCategory, setSelectedCategory] = useState<string>('Select category');
     const [errors, setErrors] = useState<Errors>({});
+
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;

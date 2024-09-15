@@ -3,7 +3,6 @@ import {useDispatch, useSelector} from 'react-redux';
 import {addGood, deleteGood, fetchCategories, fetchGoods, updateGood} from '../actions/catalogActions';
 import CategoryDropdown from '../components/CategoryDropdown';
 import EditGoodModal from '../components/EditGoodModal';
-import AddGoodModal from '../components/AddGoodModal';
 import {RootState} from "app/reducers";
 import {
     Checkbox,
@@ -21,12 +20,11 @@ import {
     TableContainer,
     TableHead,
     TableRow,
-    TextField,
+    useMediaQuery,
+    useTheme,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import AddIcon from '@mui/icons-material/Add';
-import SearchIcon from '@mui/icons-material/Search';
 import {Good} from '../types/Good';
 import Typography from 'components/Typography';
 import Box from 'components/Box';
@@ -39,8 +37,8 @@ import {Clear} from "@mui/icons-material";
 
 const Catalog: React.FC = () => {
     const dispatch = useDispatch();
-    const {searchTerm} = useSearch();
-    const {categories, goods, loading, error} = useSelector((state: RootState) => state.catalog);
+    const { searchTerm } = useSearch();
+    const { categories, goods, loading, error } = useSelector((state: RootState) => state.catalog);
     const [isInitialLoad, setIsInitialLoad] = useState(true);
     const [editingGood, setEditingGood] = useState<Good | null>(null);
     const [deletingGood, setDeletingGood] = useState<Good | null>(null);
@@ -49,6 +47,10 @@ const Catalog: React.FC = () => {
     const [selectedGoods, setSelectedGoods] = useState<Good[]>([]);
     const [userPorts, setUserPorts] = useState<{ [key: string]: any }>({});
     const [isLoadingPort, setIsLoadingPort] = useState(true);
+
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
 
     useEffect(() => {
         const loadData = async () => {
@@ -308,37 +310,40 @@ const Catalog: React.FC = () => {
     }
 
     return (
-        <Container maxWidth="xl">
+        <Container maxWidth="xl" sx={{ overflowX: 'hidden' }}>
             <Box
                 sx={{
                     display: 'flex',
-                    alignItems: 'center',
+                    flexDirection: { xs: 'column', md: 'row' },
+                    alignItems: { xs: 'stretch', md: 'center' },
                     justifyContent: 'space-between',
                     mb: 3,
+                    gap: 2,
                 }}
             >
-                <Typography variant="h4" sx={{flex: 1}}>
+                <Typography variant="h4" sx={{ mb: { xs: 2, md: 0 } }}>
                     Catalog
                 </Typography>
                 <Box
                     sx={{
                         display: 'flex',
-                        alignItems: 'center',
-                        flex: 1,
-                        gap: '24px',
+                        flexDirection: { xs: 'column', sm: 'row' },
+                        alignItems: 'stretch',
+                        gap: 1,
+                        width: { xs: '100%', md: 'auto' },
                     }}
                 >
                     {selectedGoods.length > 0 ? (
                         <>
-                            <Typography variant="body1" sx={{mr: 2}}>
+                            <Typography variant="body1" sx={{ mb: { xs: 1, sm: 0 } }}>
                                 {selectedGoods.length} item{selectedGoods.length !== 1 ? 's' : ''} selected
                             </Typography>
                             <Button
                                 variant="outlined"
                                 color="error"
-                                startIcon={<DeleteIcon/>}
+                                startIcon={<DeleteIcon />}
                                 onClick={handleBulkDelete}
-                                sx={{mr: 2}}
+                                fullWidth={isMobile}
                             >
                                 Delete Selected
                             </Button>
@@ -347,7 +352,7 @@ const Catalog: React.FC = () => {
                                 onCategorySelect={(categoryId, categoryTitle) => handleBulkMoveToCategory(categoryId, categoryTitle)}
                                 selectedCategory={null}
                                 label="Move to Category"
-                                containerSx={{width: '100%'}}
+                                containerSx={{ width: '100%' }}
                             />
                         </>
                     ) : (
@@ -358,15 +363,15 @@ const Catalog: React.FC = () => {
                                 onPortSelect={handlePortSelect}
                                 multiSelect={false}
                                 label="Select port"
-                                containerSx={{width: '100%', flex: 2}}
+                                containerSx={{ width: '100%' }}
                             />
-                            <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', flex: 3 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                 <CategoryDropdown
                                     categories={categories}
                                     onCategorySelect={handleCategorySelect}
                                     selectedCategory={selectedCategory}
                                     label="Select category"
-                                    containerSx={{width: '100%'}}
+                                    containerSx={{ width: '100%' }}
                                 />
                                 {selectedCategory && (
                                     <IconButton

@@ -3,6 +3,7 @@ import {ExpandMore} from '@mui/icons-material';
 import Box from 'components/Box';
 import Typography from 'components/Typography';
 import CategorySelector from '../CategorySelector';
+import {useMediaQuery, useTheme} from '@mui/material';
 
 interface Category {
     id: string;
@@ -32,6 +33,10 @@ const CategoryDropdown: React.FC<CategoryDropdownProps> = ({
 }) => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [displayedCategory, setDisplayedCategory] = useState<string>(label ?? 'Select category');
+
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
 
     useEffect(() => {
         if (selectedCategory) {
@@ -65,11 +70,22 @@ const CategoryDropdown: React.FC<CategoryDropdownProps> = ({
                     border: '1px solid #ccc',
                     borderRadius: '4px',
                     padding: '8px 12px',
+                    minHeight: '40px',
                     ...dropdownSx
                 }}
                 justifyContent='space-between'
             >
-                <Typography sx={typographySx}>{displayedCategory}</Typography>
+                <Typography
+                    sx={{
+                        fontSize: { xs: '14px', sm: '16px' },
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        ...typographySx
+                    }}
+                >
+                    {displayedCategory}
+                </Typography>
                 <ExpandMore sx={{ ml: 1 }} />
             </Box>
             <CategorySelector

@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Checkbox, Collapse, ListItemIcon, ListItemText} from '@mui/material';
+import {Checkbox, Collapse, ListItemIcon, ListItemText, useMediaQuery, useTheme} from '@mui/material';
 import {ChevronRight, ExpandMore, Public} from '@mui/icons-material';
 import MenuItem from 'components/MenuItem';
 import Menu from 'components/Menu';
@@ -31,6 +31,10 @@ const PortSelector: React.FC<PortSelectorProps> = ({
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [openCountries, setOpenCountries] = useState<{ [key: string]: boolean }>({});
     const [displayedLabel, setDisplayedLabel] = useState(label);
+
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
 
     useEffect(() => {
         if (selectedPorts.length > 0) {
@@ -158,11 +162,21 @@ const PortSelector: React.FC<PortSelectorProps> = ({
                     border: '1px solid #ccc',
                     borderRadius: '4px',
                     padding: '8px 12px',
+                    minHeight: '40px',
                     ...containerSx
                 }}
                 justifyContent='space-between'
             >
-                <Typography>{displayedLabel}</Typography>
+                <Typography
+                    sx={{
+                        fontSize: { xs: '14px', sm: '16px' },
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                    }}
+                >
+                    {displayedLabel}
+                </Typography>
                 <ExpandMore sx={{ ml: 1 }} />
             </Box>
             <Menu
@@ -172,8 +186,9 @@ const PortSelector: React.FC<PortSelectorProps> = ({
                 slotProps={{
                     paper: {
                         sx: {
-                            width: '24%',
-                            maxHeight: '400px',
+                            width: { xs: '90vw', sm: '70vw', md: '50vw', lg: '24%' },
+                            maxWidth: '400px',
+                            maxHeight: '80vh',
                             ...menuSx
                         },
                     }

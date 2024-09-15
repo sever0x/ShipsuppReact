@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useState} from 'react';
-import {Box, Button, Grid, IconButton, InputAdornment, Modal, TextField, Typography} from '@mui/material';
+import {Box, Button, Grid, IconButton, InputAdornment, Modal, TextField, Typography, useMediaQuery, useTheme} from '@mui/material';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import DeleteIcon from '@mui/icons-material/Delete';
 import {ExpandMore} from '@mui/icons-material';
@@ -33,6 +33,10 @@ const EditGoodModal: React.FC<EditGoodModalProps> = ({ open, onClose, good, onSa
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [selectedCategory, setSelectedCategory] = useState<string>(good.categoryId || 'Select category');
     const [errors, setErrors] = useState<Errors>({});
+
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
 
     const totalImageCount = Object.keys(editedGood.images || {}).length - deletedImageKeys.length + newImages.length;
 

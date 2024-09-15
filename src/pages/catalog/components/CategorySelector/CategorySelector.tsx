@@ -1,6 +1,6 @@
-import React, {useState} from 'react';
-import {Collapse, ListItemIcon, ListItemText} from '@mui/material';
-import {ChevronRight, ExpandMore} from '@mui/icons-material';
+import React, { useState } from 'react';
+import { Collapse, ListItemIcon, ListItemText, useMediaQuery, useTheme } from '@mui/material';
+import { ChevronRight, ExpandMore } from '@mui/icons-material';
 import MenuItem from 'components/MenuItem';
 import Menu from 'components/Menu';
 
@@ -18,8 +18,16 @@ interface CategorySelectorProps {
     onClose: () => void;
 }
 
-const CategorySelector: React.FC<CategorySelectorProps> = ({ categories, onCategorySelect, anchorEl, onClose }) => {
+const CategorySelector: React.FC<CategorySelectorProps> = ({
+    categories,
+    onCategorySelect,
+    anchorEl,
+    onClose,
+}) => {
     const [openCategories, setOpenCategories] = useState<{ [key: string]: boolean }>({});
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
 
     const handleCategoryClick = (categoryId: string) => {
         setOpenCategories(prev => ({ ...prev, [categoryId]: !prev[categoryId] }));
@@ -57,9 +65,19 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({ categories, onCateg
                     onClick={() => hasSubcategories ? handleCategoryClick(category.id) : handleCategorySelect(category)}
                     sx={{
                         paddingLeft: `${depth * 16}px`,
+                        fontSize: isMobile ? '14px' : '16px',
                     }}
                 >
-                    <ListItemText primary={category.title} />
+                    <ListItemText
+                        primary={category.title}
+                        primaryTypographyProps={{
+                            style: {
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                            }
+                        }}
+                    />
                     {hasSubcategories && (
                         <ListItemIcon>
                             {openCategories[category.id] ? <ExpandMore /> : <ChevronRight />}
@@ -88,7 +106,9 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({ categories, onCateg
             slotProps={{
                 paper: {
                     sx: {
-                        width: '24%',
+                        width: { xs: '90vw', sm: '70vw', md: '50vw', lg: '24%' },
+                        maxWidth: '400px',
+                        maxHeight: '50vh',
                     },
                 }
             }}
