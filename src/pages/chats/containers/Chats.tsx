@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useRef} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {RootState} from 'app/reducers';
 import {
@@ -14,6 +14,8 @@ import ChatList from '../components/ChatList';
 import ChatContent from '../components/ChatContent';
 import Box from 'components/Box';
 import {createSelector} from 'reselect';
+import {IconButton, useMediaQuery, useTheme} from "@mui/material";
+import {ArrowBack} from "@mui/icons-material";
 
 const selectChat = (state: RootState) => state.chat;
 const selectSelectedChatId = (state: RootState) => state.chat.selectedChatId;
@@ -36,6 +38,9 @@ const Chats: React.FC = () => {
     const user = useSelector((state: RootState) => state.userAuth.user);
     const { chats, loading, selectedChatId } = useSelector((state: RootState) => state.chat);
     const prevSelectedChatIdRef = useRef<string | null>(null);
+    const theme = useTheme();
+    const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'));
+    const [showChatList, setShowChatList] = useState(true);
 
     const currentChatMessages = useSelector((state: RootState) =>
         selectCurrentChatMessages(state)
@@ -69,8 +74,16 @@ const Chats: React.FC = () => {
         if (chatId !== selectedChatId) {
             dispatch(setSelectedChatId(chatId));
             dispatch(fetchMessages(chatId) as any);
+            if (isSmallScreen) {
+                setShowChatList(false);
+            }
         }
-    }, [dispatch, selectedChatId]);
+    }, [dispatch, selectedChatId, isSmallScreen]);
+
+    const handleBackToList = () => {
+        setShowChatList(true);
+        dispatch(setSelectedChatId(null));
+    };
 
     const handleSendMessage = useCallback((text: string) => {
         if (selectedChatId && user?.uid) {
@@ -86,37 +99,42 @@ const Chats: React.FC = () => {
             overflow: 'hidden',
             width: '100%',
         }}>
-            <Box sx={{
-                width: '340px',
-                flexShrink: 0,
-                borderRight: '1px solid #e0e0e0',
-                overflowY: 'auto',
-                height: '100%'
-            }}>
-                <ChatList
-                    chats={chats}
-                    onSelectChat={handleChatSelect}
-                    selectedChatId={selectedChatId}
-                    loading={loading}
-                    currentUserId={user?.uid ?? ''}
-                />
-            </Box>
-            <Box sx={{
-                flexGrow: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                height: '100%',
-                overflow: 'hidden',
-                width: 'calc(100% - 340px)',
-            }}>
-                <ChatContent
-                    messages={currentChatMessages}
-                    membersData={currentChatMembersData}
-                    currentUserId={user?.uid || ''}
-                    onSendMessage={handleSendMessage}
-                    loading={loading && currentChatMessages.length === 0}
-                />
-            </Box>
+            {(!isSmallScreen || (isSmallScreen && showChatList)) && (
+                <Box sx={{
+                    width: isSmallScreen ? '100%' : '340px',
+                    flexShrink: 0,
+                    borderRight: '1px solid #e0e0e0',
+                    overflowY: 'auto',
+                    height: '100%'
+                }}>
+                    <ChatList
+                        chats={chats}
+                        onSelectChat={handleChatSelect}
+                        selectedChatId={selectedChatId}
+                        loading={loading}
+                        currentUserId={user?.uid ?? ''}
+                    />
+                </Box>
+            )}
+            {(!isSmallScreen || (isSmallScreen && !showChatList)) && (
+                <Box sx={{
+                    flexGrow: 1,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    height: '100%',
+                    overflow: 'hidden',
+                    width: isSmallScreen ? '100%' : 'calc(100% - 340px)',
+                }}>
+                    <ChatContent
+                        messages={currentChatMessages}
+                        membersData={currentChatMembersData}
+                        currentUserId={user?.uid || ''}
+                        onSendMessage={handleSendMessage}
+                        loading={loading && currentChatMessages.length === 0}
+                        onBackClick={isSmallScreen ? handleBackToList : undefined}
+                    />
+                </Box>
+            )}
         </Box>
     );
 };

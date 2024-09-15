@@ -5,7 +5,7 @@ import {User} from "pages/chats/types/User";
 import TextField from 'components/TextField';
 import Box from 'components/Box';
 import IconButton from 'components/IconButton';
-import {Send} from '@mui/icons-material';
+import {ArrowBack, Send} from '@mui/icons-material';
 import {useDispatch, useSelector} from "react-redux";
 import {RootState} from "../../../../app/reducers";
 import {markMessagesAsRead, resetUnreadCount, watchAndResetUnreadCount} from "pages/chats/actions/chatActions";
@@ -17,15 +17,17 @@ interface ChatContentProps {
     currentUserId: string;
     onSendMessage: (text: string) => void;
     loading: boolean;
+    onBackClick?: () => void;
 }
 
 const ChatContent: React.FC<ChatContentProps> = React.memo(({
-                                                                messages,
-                                                                membersData,
-                                                                currentUserId,
-                                                                onSendMessage,
-                                                                loading,
-                                                            }) => {
+    messages,
+    membersData,
+    currentUserId,
+    onSendMessage,
+    loading,
+    onBackClick,
+}) => {
     const dispatch = useDispatch();
     const selectedChatId = useSelector((state: RootState) => state.chat.selectedChatId);
     const [newMessage, setNewMessage] = useState('');
@@ -140,6 +142,11 @@ const ChatContent: React.FC<ChatContentProps> = React.memo(({
                 display: 'flex',
                 alignItems: 'center'
             }}>
+                {onBackClick && (
+                    <IconButton onClick={onBackClick} sx={{ mr: 1 }}>
+                        <ArrowBack />
+                    </IconButton>
+                )}
                 <Avatar src={otherUser?.photoUrl} alt={`${otherUser?.firstName} ${otherUser?.lastName}`} sx={{ mr: 2 }} />
                 <Typography variant="h6">{`${otherUser?.firstName} ${otherUser?.lastName}`}</Typography>
             </Box>
