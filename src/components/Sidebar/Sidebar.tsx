@@ -76,10 +76,6 @@ const Sidebar: React.FC = () => {
         navigate(pageURLs[pages.login]);
     };
 
-    const handleAddGood = (newGood: Omit<Good, 'id'>, newImages: File[]) => {
-        dispatch(addGood(newGood, newImages) as any);
-    };
-
     const renderMenuItem = (item: MenuItem, isSubmenu: boolean = false) => {
         const isActive = location.pathname.startsWith(item.path);
         const showActive = isActive && (isSubmenu ? settingsOpen : true);
@@ -333,7 +329,6 @@ const Sidebar: React.FC = () => {
             <AddGoodModal
                 open={isAddModalOpen}
                 onClose={() => setIsAddModalOpen(false)}
-                onAdd={handleAddGood}
                 categories={categories}
             />
         </>

@@ -49,7 +49,9 @@ const catalogReducer = (state = initialState, action: any): CatalogState => {
             return {
                 ...state,
                 loading: false,
-                goods: state.goods.filter(good => good.id !== action.payload),
+                goods: state.goods.map(good =>
+                    good.id === action.payload.id ? action.payload : good
+                ),
                 error: null
             };
         case actionTypes.DELETE_GOOD_FAILURE:

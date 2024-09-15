@@ -130,10 +130,6 @@ const Catalog: React.FC = () => {
         dispatch(updateGood(updatedGood, newImages, deletedImageKeys) as any);
     };
 
-    const handleAddGood = (newGood: Omit<Good, 'id'>, newImages: File[]) => {
-        dispatch(addGood(newGood, newImages) as any);
-    };
-
     const handleBulkDelete = () => {
         selectedGoods.forEach(good => dispatch(deleteGood(good) as any));
         setSelectedGoods([]);
@@ -256,14 +252,17 @@ const Catalog: React.FC = () => {
                                     <TableCell>{good.color}</TableCell>
                                     <TableCell>{good.price}</TableCell>
                                     <TableCell>
-                                        <span style={{
-                                            padding: '4px 8px',
-                                            borderRadius: '4px',
-                                            backgroundColor: good.available ? '#e6f4ea' : '#fce8e6',
-                                            color: good.available ? '#34a853' : '#ea4335'
-                                        }}>
+                                        <Box
+                                            sx={{
+                                                display: 'inline-block',
+                                                padding: '4px 8px',
+                                                borderRadius: '4px',
+                                                backgroundColor: good.available ? '#e6f4ea' : '#fce8e6',
+                                                color: good.available ? '#34a853' : '#ea4335'
+                                            }}
+                                        >
                                             {good.available ? 'Available' : 'Unavailable'}
-                                        </span>
+                                        </Box>
                                     </TableCell>
                                     <TableCell>
                                         <div>
@@ -328,7 +327,7 @@ const Catalog: React.FC = () => {
                     sx={{
                         display: 'flex',
                         flexDirection: { xs: 'column', sm: 'row' },
-                        alignItems: 'stretch',
+                        alignItems: isMobile ? 'stretch' : 'center',
                         gap: 1,
                         width: { xs: '100%', md: 'auto' },
                     }}

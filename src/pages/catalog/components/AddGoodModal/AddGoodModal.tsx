@@ -1,11 +1,17 @@
-import React, {useCallback, useState} from 'react';
-import {Box, Button, Grid, IconButton, InputAdornment, Modal, TextField, Typography, useMediaQuery, useTheme} from '@mui/material';
+import React, { useCallback, useState, useEffect } from 'react';
+import { Box, Button, Grid, IconButton, InputAdornment, Modal, TextField, Typography, useMediaQuery, useTheme } from '@mui/material';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import DeleteIcon from '@mui/icons-material/Delete';
-import {Good} from '../../types/Good';
+import { Good } from '../../types/Good';
 import CategorySelector from "pages/catalog/components/CategorySelector";
-import {useDropzone} from "react-dropzone";
-import {Close, ExpandMore} from '@mui/icons-material';
+import { useDropzone } from "react-dropzone";
+import { Close, ExpandMore } from '@mui/icons-material';
+import { useSelector } from "react-redux";
+import { RootState } from "app/reducers";
+import { useAppDispatch } from "misc/hooks/useAppDispatch";
+import { addGood } from "pages/catalog/actions/catalogActions";
+import storage from "misc/storage";
+import PortSelector from 'components/PortSelector';
 
 interface Category {
     id: string;
@@ -17,7 +23,6 @@ interface Category {
 interface AddGoodModalProps {
     open: boolean;
     onClose: () => void;
-    onAdd: (newGood: Omit<Good, 'id'>, newImages: File[]) => void;
     categories: Category[];
 }
 
@@ -25,7 +30,8 @@ interface Errors {
     [key: string]: string;
 }
 
-const AddGoodModal: React.FC<AddGoodModalProps> = ({ open, onClose, onAdd, categories }) => {
+const AddGoodModal: React.FC<AddGoodModalProps> = ({ open, onClose, categories }) => {
+    const dispatch = useAppDispatch();
     const [newGood, setNewGood] = useState<Omit<Good, 'id'>>({
         article: '',
         title: '',
@@ -44,21 +50,33 @@ const AddGoodModal: React.FC<AddGoodModalProps> = ({ open, onClose, onAdd, categ
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [selectedCategory, setSelectedCategory] = useState<string>('Select category');
     const [errors, setErrors] = useState<Errors>({});
+    const [userPorts, setUserPorts] = useState<{ [key: string]: any }>({});
 
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
 
+    useEffect(() => {
+        const userData = JSON.parse(storage.getItem(storage.keys.USER_DATA) ?? '{}');
+        if (userData.portsArray) {
+            const portsObject = userData.portsArray.reduce((acc: any, port: any) => {
+                acc[port.id] = port;
+                return acc;
+            }, {});
+            setUserPorts(portsObject);
+        }
+    }, []);
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setNewGood(prev => ({ ...prev, [name]: name === 'price' ? parseFloat(value) : value }));
-        // Clear error when field is edited
         setErrors(prev => ({ ...prev, [name]: '' }));
     };
 
     const validateForm = (): boolean => {
         const newErrors: Errors = {};
         if (!newGood.categoryId) newErrors.category = 'Category is required';
+        if (!newGood.portId) newErrors.port = 'Port is required';
         if (!newGood.article.trim()) newErrors.article = 'Article is required';
         if (!newGood.title.trim()) newErrors.title = 'Title is required';
         if (newGood.price <= 0) newErrors.price = 'Price must be greater than 0';
@@ -72,7 +90,13 @@ const AddGoodModal: React.FC<AddGoodModalProps> = ({ open, onClose, onAdd, categ
 
     const handleAdd = () => {
         if (validateForm()) {
-            onAdd(newGood, newImages);
+            const userData = JSON.parse(storage.getItem(storage.keys.USER_DATA) ?? '{}');
+            const goodWithOwnerId = {
+                ...newGood,
+                ownerId: userData.id,
+                createTimestampGMT: new Date().toISOString(),
+            };
+            dispatch(addGood(goodWithOwnerId, newImages) as any);
             onClose();
         }
     };
@@ -81,7 +105,6 @@ const AddGoodModal: React.FC<AddGoodModalProps> = ({ open, onClose, onAdd, categ
         const remainingSlots = 5 - newImages.length;
         const filesToUpload = files.slice(0, remainingSlots);
         setNewImages(prev => [...prev, ...filesToUpload]);
-        // Clear image error if images are added
         setErrors(prev => ({ ...prev, images: '' }));
     };
 
@@ -111,8 +134,12 @@ const AddGoodModal: React.FC<AddGoodModalProps> = ({ open, onClose, onAdd, categ
         setNewGood(prev => ({ ...prev, categoryId: categoryId }));
         setSelectedCategory(categoryTitle);
         handleCategoryClose();
-        // Clear category error when a category is selected
         setErrors(prev => ({ ...prev, category: '' }));
+    };
+
+    const handlePortSelect = (portId: string) => {
+        setNewGood(prev => ({ ...prev, portId: portId }));
+        setErrors(prev => ({ ...prev, port: '' }));
     };
 
     return (
@@ -170,6 +197,19 @@ const AddGoodModal: React.FC<AddGoodModalProps> = ({ open, onClose, onAdd, categ
                             anchorEl={anchorEl}
                             onClose={handleCategoryClose}
                         />
+                        <Box sx={{ mb: 2 }}>
+                            <PortSelector
+                                ports={userPorts}
+                                selectedPorts={newGood.portId ? [newGood.portId] : []}
+                                onPortSelect={handlePortSelect}
+                                multiSelect={false}
+                                label="Select port"
+                                containerSx={{
+                                    border: errors.port ? '1px solid red' : '1px solid #ccc',
+                                }}
+                            />
+                            {errors.port && <Typography color="error">{errors.port}</Typography>}
+                        </Box>
                         <TextField
                             fullWidth
                             margin="normal"
@@ -227,7 +267,6 @@ const AddGoodModal: React.FC<AddGoodModalProps> = ({ open, onClose, onAdd, categ
                     <Grid item xs={12} md={6}>
                         <TextField
                             fullWidth
-                            margin="normal"
                             name="description"
                             label="Description"
                             multiline
