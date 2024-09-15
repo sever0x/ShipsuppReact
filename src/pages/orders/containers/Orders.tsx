@@ -12,7 +12,7 @@ import {
     TableHead,
     TableRow,
     TextField,
-    Typography
+    Typography, useMediaQuery, useTheme
 } from '@mui/material';
 import {fetchOrderDetails, fetchSellerOrders} from '../actions/orderActions';
 import {RootState} from 'app/reducers';
@@ -35,6 +35,9 @@ const Orders: React.FC = () => {
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [selectedPort, setSelectedPort] = useState<string | null>(null);
     const [userPorts, setUserPorts] = useState<{ [key: string]: Port }>({});
+
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     useEffect(() => {
         const userData = JSON.parse(storage.getItem(storage.keys.USER_DATA) ?? '{}');
@@ -211,9 +214,21 @@ const Orders: React.FC = () => {
 
     return (
         <Container maxWidth="xl">
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                <Typography variant="h4" sx={{ flex: 1 }}>Your Orders</Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center', flex: 2, justifyContent: 'flex-end' }}>
+            <Box sx={{
+                display: 'flex',
+                flexDirection: isMobile ? 'column' : 'row',
+                justifyContent: 'space-between',
+                alignItems: isMobile ? 'flex-start' : 'center',
+                mb: 3
+            }}>
+                <Typography variant="h4" sx={{ flex: 1, mb: isMobile ? 2 : 0 }}>Your Orders</Typography>
+                <Box sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    flex: isMobile ? 1 : 2,
+                    justifyContent: isMobile ? 'flex-start' : 'flex-end',
+                    width: isMobile ? '100%' : 'auto'
+                }}>
                     <PortSelector
                         ports={{
                             all: {
@@ -233,6 +248,7 @@ const Orders: React.FC = () => {
                         onPortSelect={handlePortSelect}
                         multiSelect={false}
                         label="Select port"
+                        containerSx={{ width: isMobile ? '100%' : 'auto' }}
                     />
                 </Box>
             </Box>
