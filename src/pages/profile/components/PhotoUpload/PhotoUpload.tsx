@@ -15,7 +15,7 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ profilePhoto, firstName, last
     const theme = useTheme();
 
     return (
-        <Box display="flex" flexDirection="column" alignItems="center" mb={3}>
+        <Box display="flex" flexDirection="column" alignItems="center">
             <Box position="relative">
                 <Avatar
                     src={profilePhoto}

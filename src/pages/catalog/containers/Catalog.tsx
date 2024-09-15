@@ -34,12 +34,13 @@ import Button from 'components/Button';
 import IconButton from 'components/IconButton';
 import storage from 'misc/storage';
 import PortSelector from 'components/PortSelector';
-import { useSearch } from 'misc/providers/SearchProvider';
+import {useSearch} from 'misc/providers/SearchProvider';
+import {Clear} from "@mui/icons-material";
 
 const Catalog: React.FC = () => {
     const dispatch = useDispatch();
-    const { searchTerm } = useSearch();
-    const { categories, goods, loading, error } = useSelector((state: RootState) => state.catalog);
+    const {searchTerm} = useSearch();
+    const {categories, goods, loading, error} = useSelector((state: RootState) => state.catalog);
     const [isInitialLoad, setIsInitialLoad] = useState(true);
     const [editingGood, setEditingGood] = useState<Good | null>(null);
     const [deletingGood, setDeletingGood] = useState<Good | null>(null);
@@ -77,6 +78,11 @@ const Catalog: React.FC = () => {
         }
     }, [loading, isInitialLoad]);
 
+    const handleCategoryReset = () => {
+        setSelectedCategory(null);
+        dispatch(fetchGoods(undefined, selectedPort) as any);
+    };
+
     const handleSelectGood = (good: Good) => {
         setSelectedGoods(prev => [...prev, good]);
     };
@@ -86,7 +92,7 @@ const Catalog: React.FC = () => {
     };
 
     const handleCategorySelect = (categoryId: string, categoryTitle: string) => {
-        setSelectedCategory({ id: categoryId, title: categoryTitle });
+        setSelectedCategory({id: categoryId, title: categoryTitle});
         dispatch(fetchGoods(categoryId, selectedPort) as any);
     };
 
@@ -133,7 +139,7 @@ const Catalog: React.FC = () => {
 
     const handleBulkMoveToCategory = (categoryId: string, categoryTitle: string) => {
         selectedGoods.forEach(good => {
-            const updatedGood = { ...good, categoryId };
+            const updatedGood = {...good, categoryId};
             dispatch(updateGood(updatedGood, [], []) as any);
         });
         setSelectedGoods([]);
@@ -147,22 +153,23 @@ const Catalog: React.FC = () => {
 
     const renderSkeleton = () => (
         <TableRow key={`skeleton-${Math.random()}`}>
-            <TableCell><Skeleton variant="rectangular" width={16} height={16} /></TableCell>
-            <TableCell><Skeleton variant="rectangular" width={50} height={50} /></TableCell>
-            <TableCell><Skeleton variant="text" /></TableCell>
-            <TableCell><Skeleton variant="text" /></TableCell>
-            <TableCell><Skeleton variant="text" /></TableCell>
-            <TableCell><Skeleton variant="text" /></TableCell>
-            <TableCell><Skeleton variant="text" /></TableCell>
-            <TableCell><Skeleton variant="text" /></TableCell>
-            <TableCell><Skeleton variant="text" /></TableCell>
+            <TableCell><Skeleton variant="rectangular" width={16} height={16}/></TableCell>
+            <TableCell><Skeleton variant="rectangular" width={50} height={50}/></TableCell>
+            <TableCell><Skeleton variant="text"/></TableCell>
+            <TableCell><Skeleton variant="text"/></TableCell>
+            <TableCell><Skeleton variant="text"/></TableCell>
+            <TableCell><Skeleton variant="text"/></TableCell>
+            <TableCell><Skeleton variant="text"/></TableCell>
+            <TableCell><Skeleton variant="text"/></TableCell>
+            <TableCell><Skeleton variant="text"/></TableCell>
         </TableRow>
     );
 
     const renderTable = () => {
         if (isInitialLoad || loading || isLoadingPort) {
             return (
-                <TableContainer component={props => <Paper {...props} variant="outlined" sx={{ backgroundColor: 'transparent' }} />}>
+                <TableContainer
+                    component={props => <Paper {...props} variant="outlined" sx={{backgroundColor: 'transparent'}}/>}>
                     <Table>
                         <TableHead>
                             <TableRow>
@@ -191,7 +198,8 @@ const Catalog: React.FC = () => {
 
         if (filteredGoods.length > 0) {
             return (
-                <TableContainer component={props => <Paper {...props} variant="outlined" sx={{ backgroundColor: 'transparent' }} />}>
+                <TableContainer
+                    component={props => <Paper {...props} variant="outlined" sx={{backgroundColor: 'transparent'}}/>}>
                     <Table>
                         <TableHead>
                             <TableRow>
@@ -236,7 +244,7 @@ const Catalog: React.FC = () => {
                                             <img
                                                 src={Object.values(good.images)[0]}
                                                 alt={good.title}
-                                                style={{ width: '50px', height: '50px', objectFit: 'cover' }}
+                                                style={{width: '50px', height: '50px', objectFit: 'cover'}}
                                             />
                                         )}
                                     </TableCell>
@@ -258,10 +266,10 @@ const Catalog: React.FC = () => {
                                     <TableCell>
                                         <div>
                                             <IconButton onClick={() => handleEditClick(good)}>
-                                                <EditIcon />
+                                                <EditIcon/>
                                             </IconButton>
                                             <IconButton onClick={() => handleDeleteClick(good)}>
-                                                <DeleteIcon />
+                                                <DeleteIcon/>
                                             </IconButton>
                                         </div>
                                     </TableCell>
@@ -309,27 +317,28 @@ const Catalog: React.FC = () => {
                     mb: 3,
                 }}
             >
-                <Typography variant="h4" sx={{ flex: 1 }}>
+                <Typography variant="h4" sx={{flex: 1}}>
                     Catalog
                 </Typography>
                 <Box
                     sx={{
                         display: 'flex',
                         alignItems: 'center',
-                        flex: 4,
+                        flex: 1,
+                        gap: '24px',
                     }}
                 >
                     {selectedGoods.length > 0 ? (
                         <>
-                            <Typography variant="body1" sx={{ mr: 2 }}>
+                            <Typography variant="body1" sx={{mr: 2}}>
                                 {selectedGoods.length} item{selectedGoods.length !== 1 ? 's' : ''} selected
                             </Typography>
                             <Button
                                 variant="outlined"
                                 color="error"
-                                startIcon={<DeleteIcon />}
+                                startIcon={<DeleteIcon/>}
                                 onClick={handleBulkDelete}
-                                sx={{ mr: 2 }}
+                                sx={{mr: 2}}
                             >
                                 Delete Selected
                             </Button>
@@ -338,6 +347,7 @@ const Catalog: React.FC = () => {
                                 onCategorySelect={(categoryId, categoryTitle) => handleBulkMoveToCategory(categoryId, categoryTitle)}
                                 selectedCategory={null}
                                 label="Move to Category"
+                                containerSx={{width: '100%'}}
                             />
                         </>
                     ) : (
@@ -348,13 +358,30 @@ const Catalog: React.FC = () => {
                                 onPortSelect={handlePortSelect}
                                 multiSelect={false}
                                 label="Select port"
+                                containerSx={{width: '100%', flex: 2}}
                             />
-                            <CategoryDropdown
-                                categories={categories}
-                                onCategorySelect={handleCategorySelect}
-                                selectedCategory={selectedCategory}
-                                label="Select category"
-                            />
+                            <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', flex: 3 }}>
+                                <CategoryDropdown
+                                    categories={categories}
+                                    onCategorySelect={handleCategorySelect}
+                                    selectedCategory={selectedCategory}
+                                    label="Select category"
+                                    containerSx={{width: '100%'}}
+                                />
+                                {selectedCategory && (
+                                    <IconButton
+                                        onClick={handleCategoryReset}
+                                        sx={{
+                                            marginLeft: '8px',
+                                            backgroundColor: 'background.paper',
+                                            '&:hover': { backgroundColor: 'action.hover' },
+                                        }}
+                                        aria-label="Clear category filter"
+                                    >
+                                        <Clear />
+                                    </IconButton>
+                                )}
+                            </Box>
                         </>
                     )}
                 </Box>

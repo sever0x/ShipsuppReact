@@ -96,6 +96,31 @@ const EditProfile: React.FC<EditProfileProps> = ({ onCancel }) => {
                                 isUploading={isUploading}
                                 handlePhotoUpload={handlePhotoUpload}
                             />
+                        </OutlinedBox>
+                    </Grid>
+                    <Grid item xs={12} md={8}>
+                        <OutlinedBox>
+                            <Typography variant="h6" gutterBottom>Personal Information</Typography>
+                            <PersonalInformationForm formData={formData} handleChange={handleChange} />
+                            {/*<Box mt={2}>*/}
+                            {/*    <PortSelector*/}
+                            {/*        ports={ports}*/}
+                            {/*        selectedPorts={selectedPorts}*/}
+                            {/*        onPortSelect={handlePortSelect}*/}
+                            {/*    />*/}
+                            {/*    {selectedPorts.length > 0 && (*/}
+                            {/*        <Button*/}
+                            {/*            startIcon={<Visibility />}*/}
+                            {/*            onClick={() => setIsModalOpen(true)}*/}
+                            {/*            variant="text"*/}
+                            {/*            size="small"*/}
+                            {/*            color="info"*/}
+                            {/*            sx={{ mt: 1 }}*/}
+                            {/*        >*/}
+                            {/*            View Selected Ports ({selectedPorts.length})*/}
+                            {/*        </Button>*/}
+                            {/*    )}*/}
+                            {/*</Box>*/}
                             <Box mt={2}>
                                 <Button
                                     fullWidth
@@ -116,31 +141,6 @@ const EditProfile: React.FC<EditProfileProps> = ({ onCancel }) => {
                                 >
                                     Cancel
                                 </Button>
-                            </Box>
-                        </OutlinedBox>
-                    </Grid>
-                    <Grid item xs={12} md={8}>
-                        <OutlinedBox>
-                            <Typography variant="h6" gutterBottom>Personal Information</Typography>
-                            <PersonalInformationForm formData={formData} handleChange={handleChange} />
-                            <Box mt={2}>
-                                <PortSelector
-                                    ports={ports}
-                                    selectedPorts={selectedPorts}
-                                    onPortSelect={handlePortSelect}
-                                />
-                                {selectedPorts.length > 0 && (
-                                    <Button
-                                        startIcon={<Visibility />}
-                                        onClick={() => setIsModalOpen(true)}
-                                        variant="text"
-                                        size="small"
-                                        color="info"
-                                        sx={{ mt: 1 }}
-                                    >
-                                        View Selected Ports ({selectedPorts.length})
-                                    </Button>
-                                )}
                             </Box>
                         </OutlinedBox>
                     </Grid>

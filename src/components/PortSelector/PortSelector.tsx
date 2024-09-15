@@ -13,14 +13,20 @@ interface PortSelectorProps {
     onPortSelect: (portId: string) => void;
     multiSelect?: boolean;
     label?: string;
+    containerSx?: React.CSSProperties;
+    menuSx?: React.CSSProperties;
+    menuItemSx?: React.CSSProperties;
 }
 
 const PortSelector: React.FC<PortSelectorProps> = ({
-   ports,
-   selectedPorts,
-   onPortSelect,
-   multiSelect = true,
-   label = 'Select ports'
+    ports,
+    selectedPorts,
+    onPortSelect,
+    multiSelect = true,
+    label = 'Select ports',
+    containerSx,
+    menuSx,
+    menuItemSx
 }) => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [openCountries, setOpenCountries] = useState<{ [key: string]: boolean }>({});
@@ -79,6 +85,7 @@ const PortSelector: React.FC<PortSelectorProps> = ({
                 <MenuItem
                     key={country.id}
                     onClick={() => handleCountryClick(country.id)}
+                    sx={menuItemSx}
                 >
                     <ListItemIcon>
                         {country.id.toLowerCase() === 'all' ? (
@@ -111,6 +118,7 @@ const PortSelector: React.FC<PortSelectorProps> = ({
                                     paddingLeft: '32px',
                                     display: 'flex',
                                     alignItems: 'center',
+                                    ...menuItemSx
                                 }}
                             >
                                 {multiSelect && (
@@ -150,6 +158,7 @@ const PortSelector: React.FC<PortSelectorProps> = ({
                     border: '1px solid #ccc',
                     borderRadius: '4px',
                     padding: '8px 12px',
+                    ...containerSx
                 }}
                 justifyContent='space-between'
             >
@@ -165,6 +174,7 @@ const PortSelector: React.FC<PortSelectorProps> = ({
                         sx: {
                             width: '24%',
                             maxHeight: '400px',
+                            ...menuSx
                         },
                     }
                 }}

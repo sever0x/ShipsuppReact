@@ -213,7 +213,7 @@ const Orders: React.FC = () => {
         <Container maxWidth="xl">
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
                 <Typography variant="h4" sx={{ flex: 1 }}>Your Orders</Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center', flex: 2 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', flex: 2, justifyContent: 'flex-end' }}>
                     <PortSelector
                         ports={{
                             all: {

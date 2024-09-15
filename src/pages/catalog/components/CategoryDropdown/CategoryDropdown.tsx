@@ -16,17 +16,28 @@ interface CategoryDropdownProps {
     onCategorySelect: (categoryId: string, categoryTitle: string) => void;
     selectedCategory: { id: string; title: string } | null;
     label?: string;
+    containerSx?: React.CSSProperties;
+    dropdownSx?: React.CSSProperties;
+    typographySx?: React.CSSProperties;
 }
 
-const CategoryDropdown: React.FC<CategoryDropdownProps> = ({ categories, onCategorySelect, selectedCategory, label }) => {
+const CategoryDropdown: React.FC<CategoryDropdownProps> = ({
+    categories,
+    onCategorySelect,
+    selectedCategory,
+    label,
+    containerSx,
+    dropdownSx,
+    typographySx
+}) => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-    const [displayedCategory, setDisplayedCategory] = useState<string>(label || 'Select category');
+    const [displayedCategory, setDisplayedCategory] = useState<string>(label ?? 'Select category');
 
     useEffect(() => {
         if (selectedCategory) {
             setDisplayedCategory(selectedCategory.title);
         } else {
-            setDisplayedCategory(label || 'Select category');
+            setDisplayedCategory(label ?? 'Select category');
         }
     }, [selectedCategory, label]);
 
@@ -44,7 +55,7 @@ const CategoryDropdown: React.FC<CategoryDropdownProps> = ({ categories, onCateg
     };
 
     return (
-        <Box sx={{ mr: 2, flex: 3 }}>
+        <Box sx={{ flex: 3, ...containerSx }}>
             <Box
                 onClick={handleClick}
                 sx={{
@@ -54,10 +65,11 @@ const CategoryDropdown: React.FC<CategoryDropdownProps> = ({ categories, onCateg
                     border: '1px solid #ccc',
                     borderRadius: '4px',
                     padding: '8px 12px',
+                    ...dropdownSx
                 }}
                 justifyContent='space-between'
             >
-                <Typography>{displayedCategory}</Typography>
+                <Typography sx={typographySx}>{displayedCategory}</Typography>
                 <ExpandMore sx={{ ml: 1 }} />
             </Box>
             <CategorySelector

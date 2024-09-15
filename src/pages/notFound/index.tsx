@@ -21,6 +21,9 @@ const NotFound: React.FC = () => {
             <Typography variant="h5" gutterBottom>
                 Oops! Page not found.
             </Typography>
+            <Typography variant="subtitle1" gutterBottom>
+                Maybe this page isn't ready yet :)
+            </Typography>
             <Button
                 variant="contained"
                 color="primary"
