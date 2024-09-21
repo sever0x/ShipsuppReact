@@ -9,10 +9,13 @@ import {
     FormControl,
     IconButton,
     InputLabel,
+    Link,
     Select,
     Skeleton,
     styled,
-    Typography, useMediaQuery, useTheme
+    Typography,
+    useMediaQuery,
+    useTheme
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import {updateOrderStatus} from '../../actions/orderActions';
@@ -47,16 +50,7 @@ const statusLabels: { [key: string]: string } = {
     'ARRIVED': 'Delivered',
     'COMPLETED': 'Complete',
 };
-//
-// const statusColors: { [key: string]: "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" } = {
-//     'APPROVE_BY_BUYER': 'info',
-//     'APPROVE_BY_SELLER': 'primary',
-//     'SENT': 'secondary',
-//     'ARRIVED': 'warning',
-//     'COMPLETED': 'success',
-//     'CANCEL_BY_SELLER': 'error'
-// };
-//
+
 const statusMessages: { [key: string]: string } = {
     'APPROVE_BY_BUYER': 'Order created',
     'APPROVE_BY_SELLER': 'Order approved',
@@ -119,11 +113,7 @@ const InfoRow = styled(Box)(({ theme }) => ({
     display: 'flex',
     justifyContent: 'space-between',
     marginBottom: theme.spacing(1),
-}));
-
-const StatusButton = styled(Button)(({ theme }) => ({
-    marginRight: theme.spacing(1),
-    marginBottom: theme.spacing(1),
+    alignItems: 'center',
 }));
 
 const HistoryItem = styled(Box)(({ theme }) => ({
@@ -327,7 +317,31 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order })
                                 <Typography variant="body1">{displayOrder.buyer.id}</Typography>
                             </InfoRow>
                             <InfoRow>
-                                <Typography variant="body1">Ship ID:</Typography>
+                                <Box>
+                                    <Typography variant="body1">MMSI:</Typography>
+                                    <Typography
+                                        variant="caption"
+                                        sx={{
+                                            color: 'grey.600',
+                                            fontSize: '12px',
+                                            mt: 0.5,
+                                            display: 'block'
+                                        }}
+                                    >
+                                        <Link
+                                            href="https://www.marinetraffic.com/"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            underline="hover"
+                                            sx={{
+                                                color: 'inherit',
+                                                fontSize: 'inherit'
+                                            }}
+                                        >
+                                            Check on MarineTraffic
+                                        </Link>
+                                    </Typography>
+                                </Box>
                                 <Typography variant="body1">{displayOrder.buyer.vesselMMSI || 'N/A'}</Typography>
                             </InfoRow>
                             <InfoRow>
@@ -359,7 +373,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order })
                                             >
                                                 {statusOrder.slice(currentStatusIndex + 1).map((status) => (
                                                     <MenuItem key={status} value={status}>
-                                                        <OrderStatus status={status} showIcon={false} />
+                                                        {statusLabels[status]}
                                                     </MenuItem>
                                                 ))}
                                             </StyledSelect>
