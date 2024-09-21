@@ -1,7 +1,7 @@
-import React, {useMemo} from 'react';
-import {Avatar, Badge, List, ListItem, ListItemAvatar, ListItemText, Skeleton, Typography} from '@mui/material';
-import {Chat} from "pages/chats/types/Chat";
-import {format} from 'date-fns';
+import React, { useMemo } from 'react';
+import { Avatar, Badge, List, ListItem, ListItemAvatar, ListItemText, Skeleton, Typography } from '@mui/material';
+import { Chat } from "pages/chats/types/Chat";
+import { format } from 'date-fns';
 
 interface ChatListProps {
     chats: Chat[];
@@ -11,29 +11,32 @@ interface ChatListProps {
     currentUserId: string;
 }
 
+const formatLastMessageDate = (date: string | null | undefined) => {
+    if (!date) return '';
+
+    const messageDate = new Date(date);
+    const now = new Date();
+
+    if (messageDate.toDateString() === now.toDateString()) {
+        return format(messageDate, 'HH:mm');
+    } else if (messageDate.getFullYear() === now.getFullYear()) {
+        return format(messageDate, 'd MMM');
+    } else {
+        return format(messageDate, 'd MMM yyyy');
+    }
+};
+
+const sortChatsByLastMessageDate = (chats: Chat[]): Chat[] => {
+    return [...chats].sort((a, b) => {
+        const dateA = a.lastMessage?.date ? new Date(a.lastMessage.date).getTime() : 0;
+        const dateB = b.lastMessage?.date ? new Date(b.lastMessage.date).getTime() : 0;
+        return dateB - dateA;
+    });
+};
+
 const ChatList: React.FC<ChatListProps> = React.memo(({ chats, onSelectChat, selectedChatId, loading, currentUserId }) => {
-
-    const formatLastMessageDate = (date: string | null | undefined) => {
-        if (!date) return '';
-
-        const messageDate = new Date(date);
-        const now = new Date();
-
-        if (messageDate.toDateString() === now.toDateString()) {
-            return format(messageDate, 'HH:mm');
-        } else if (messageDate.getFullYear() === now.getFullYear()) {
-            return format(messageDate, 'd MMM');
-        } else {
-            return format(messageDate, 'd MMM yyyy');
-        }
-    };
-
     const renderedChats = useMemo(() => {
-        const sortedChats = [...chats].sort((a, b) => {
-            const dateA = a.lastMessage?.date ? new Date(a.lastMessage.date).getTime() : 0;
-            const dateB = b.lastMessage?.date ? new Date(b.lastMessage.date).getTime() : 0;
-            return dateB - dateA;
-        });
+        const sortedChats = sortChatsByLastMessageDate(chats);
 
         return sortedChats.map((chat) => {
             const otherUser = Object.values(chat.membersData).find(user => user.id !== currentUserId);
