@@ -130,29 +130,16 @@ export const sendMessage = (groupId: string, senderId: string, text: string) => 
         await set(newMessageRef, newMessage);
 
         const groupRef = ref(database, `chat/groups/${groupId}`);
-        const groupSnapshot = await get(groupRef);
-        if (groupSnapshot.exists()) {
-            const groupData = groupSnapshot.val();
-            for (const userId of Object.keys(groupData.membersData)) {
-                if (userId !== senderId) {
-                    const userUnreadRef = ref(database, `chat/groups/${groupId}/unreadCount/${userId}`);
-                    const unreadSnapshot = await get(userUnreadRef);
-                    const currentUnread = unreadSnapshot.exists() ? unreadSnapshot.val() : 0;
-                    await set(userUnreadRef, currentUnread + 1);
-                }
-            }
-        }
-
-        dispatch({
-            type: SEND_MESSAGE_SUCCESS,
-            payload: { groupId, message: newMessage }
-        });
-
         await update(groupRef, {
             lastMessage: {
                 text,
                 date: serverTimestamp()
             }
+        });
+
+        dispatch({
+            type: SEND_MESSAGE_SUCCESS,
+            payload: { groupId, message: newMessage }
         });
 
     } catch (error) {

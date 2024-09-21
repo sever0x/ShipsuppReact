@@ -29,7 +29,13 @@ const ChatList: React.FC<ChatListProps> = React.memo(({ chats, onSelectChat, sel
     };
 
     const renderedChats = useMemo(() => {
-        return chats.map((chat) => {
+        const sortedChats = [...chats].sort((a, b) => {
+            const dateA = a.lastMessage?.date ? new Date(a.lastMessage.date).getTime() : 0;
+            const dateB = b.lastMessage?.date ? new Date(b.lastMessage.date).getTime() : 0;
+            return dateB - dateA;
+        });
+
+        return sortedChats.map((chat) => {
             const otherUser = Object.values(chat.membersData).find(user => user.id !== currentUserId);
             const unreadCount = chat.unreadCount?.[currentUserId] || 0;
             return (

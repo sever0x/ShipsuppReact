@@ -70,6 +70,25 @@ const chatReducer = (state = initialState, action: any): ChatState => {
             const isMessageExists = existingMessages.some(msg => msg.id === newMessage.id);
 
             if (!isMessageExists) {
+                const updatedChats = state.chats.map(chat => {
+                    if (chat.id === action.payload.groupId) {
+                        return {
+                            ...chat,
+                            lastMessage: {
+                                text: newMessage.text,
+                                date: newMessage.createTimestampGMT
+                            }
+                        };
+                    }
+                    return chat;
+                });
+
+                const sortedChats = updatedChats.sort((a, b) => {
+                    const dateA = a.lastMessage?.date ? new Date(a.lastMessage.date).getTime() : 0;
+                    const dateB = b.lastMessage?.date ? new Date(b.lastMessage.date).getTime() : 0;
+                    return dateB - dateA;
+                });
+
                 return {
                     ...state,
                     loading: false,
@@ -77,27 +96,25 @@ const chatReducer = (state = initialState, action: any): ChatState => {
                         ...state.messages,
                         [action.payload.groupId]: [...existingMessages, newMessage]
                     },
-                    chats: state.chats.map(chat => {
-                        return chat.id === action.payload.groupId
-                            ? {
-                                ...chat,
-                                lastMessage: {
-                                    text: newMessage.text,
-                                    date: newMessage.createTimestampGMT
-                                }
-                            }
-                            : chat;
-                    })
+                    chats: sortedChats
                 };
             }
             return state;
         case UPDATE_CHAT_REALTIME:
+            const updatedChats = action.payload.map((chat: Chat) => ({
+                ...chat,
+                unreadCount: chat.unreadCount || {}
+            }));
+
+            const sortedChats = updatedChats.sort((a: any, b: any) => {
+                const dateA = a.lastMessage?.date ? new Date(a.lastMessage.date).getTime() : 0;
+                const dateB = b.lastMessage?.date ? new Date(b.lastMessage.date).getTime() : 0;
+                return dateB - dateA;
+            });
+
             return {
                 ...state,
-                chats: action.payload.map((chat: Chat) => ({
-                    ...chat,
-                    unreadCount: chat.unreadCount || {}
-                }))
+                chats: sortedChats
             };
         case UPDATE_MESSAGES_REALTIME:
             return {
