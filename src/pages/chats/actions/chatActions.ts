@@ -132,8 +132,7 @@ export const sendMessage = (groupId: string, senderId: string, text: string) => 
         const groupRef = ref(database, `chat/groups/${groupId}`);
         await update(groupRef, {
             lastMessage: {
-                text,
-                date: serverTimestamp()
+                text
             }
         });
 

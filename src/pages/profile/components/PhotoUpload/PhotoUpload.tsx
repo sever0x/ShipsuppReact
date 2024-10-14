@@ -14,6 +14,19 @@ interface PhotoUploadProps {
 const PhotoUpload: React.FC<PhotoUploadProps> = ({ profilePhoto, firstName, lastName, isUploading, handlePhotoUpload }) => {
     const theme = useTheme();
 
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const fileType = file.type.toLowerCase();
+            if (fileType === 'image/png' || fileType === 'image/jpeg' || fileType === 'video/webm') {
+                handlePhotoUpload(e);
+            } else {
+                alert('Please select a file in .png, .jpg or .webm format');
+                e.target.value = '';
+            }
+        }
+    };
+
     return (
         <Box display="flex" flexDirection="column" alignItems="center">
             <Box position="relative">
@@ -41,8 +54,8 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ profilePhoto, firstName, last
                     <input
                         type="file"
                         hidden
-                        onChange={handlePhotoUpload}
-                        accept="image/*"
+                        onChange={handleFileChange}
+                        accept=".png,.jpg,.jpeg,.webm"
                     />
                 </IconButton>
             </Box>
