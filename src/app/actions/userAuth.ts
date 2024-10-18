@@ -36,6 +36,16 @@ const serializeUser = (user: User | null) => {
     };
 };
 
+const checkUserAccess = async (uid: string) => {
+    const userRef = ref(database, `users/${uid}`);
+    const snapshot = await get(userRef);
+    if (snapshot.exists()) {
+        const userData = snapshot.val();
+        return userData.role === 'SELLER' && userData.accessType === 'GRANTED';
+    }
+    return false;
+};
+
 const requestSignIn = () => ({
     type: REQUEST_SIGN_IN,
 });
@@ -107,54 +117,66 @@ const fetchGoogleSignIn = (): ThunkAction<Promise<{ isNewUser: boolean, email: s
         const userRef = ref(database, `users/${user.uid}`);
         const snapshot = await get(userRef);
 
-        let isNewUser = false;
-        let firstName: string;
-        let lastName: string;
+            let isNewUser = false;
+            let firstName: string;
+            let lastName: string;
 
-        if (!snapshot.exists()) {
-            isNewUser = true;
-            firstName = user.displayName ? user.displayName.split(' ')[0] : '';
-            lastName = user.displayName ? user.displayName.split(' ').slice(1).join(' ') : '';
+            if (!snapshot.exists()) {
+                isNewUser = true;
+                firstName = user.displayName ? user.displayName.split(' ')[0] : '';
+                lastName = user.displayName ? user.displayName.split(' ').slice(1).join(' ') : '';
 
-            const userProfile = {
-                id: user.uid,
-                email: user.email,
-                firstName,
-                lastName,
-                accessType: 'GRANTED',
-                date: new Date().toLocaleString(),
-                role: 'SELLER',
-                fcmTokens: [],
-                notifications: {},
-                phone: user.phoneNumber ?? '',
-                profilePhoto: user.photoURL ?? '',
-                portsArray: [],
-                vesselIMO: "",
-                vesselMMSI: ""
-            };
+                const userProfile = {
+                    id: user.uid,
+                    email: user.email,
+                    firstName,
+                    lastName,
+                    accessType: 'GRANTED',
+                    date: new Date().toLocaleString(),
+                    role: 'SELLER',
+                    fcmTokens: [],
+                    notifications: {},
+                    phone: user.phoneNumber ?? '',
+                    profilePhoto: user.photoURL ?? '',
+                    portsArray: [],
+                    vesselIMO: "",
+                    vesselMMSI: ""
+                };
 
-            await set(userRef, userProfile);
-        } else {
-            const userData = snapshot.val();
-            firstName = userData.firstName;
-            lastName = userData.lastName;
-        }
+                await set(userRef, userProfile);
+            } else {
+                const hasAccess = await checkUserAccess(user.uid);
+                if (hasAccess) {
+                    const userData = snapshot.val();
+                    firstName = userData.firstName;
+                    lastName = userData.lastName;
+                } else {
+                    await signOut(auth);
+                    throw new Error('Access denied. Please contact the administrator for details if you think an error has occurred.');
+                }
+            }
 
         dispatch(successSignIn(user));
         return { isNewUser, email: user.email || '', firstName, lastName };
     } catch (error) {
         dispatch(errorSignIn(error));
-        throw error;
+        return Promise.reject(new Error('Failed to sign in'));
     }
 };
 
-const fetchLogin = (email: string, password: string) => async (dispatch: any) => {
+const fetchLogin = (email: string, password: string): ThunkAction<Promise<void>, RootState, unknown, UnknownAction> => async (dispatch: any) => {
     dispatch(requestSignIn());
     try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        dispatch(successSignIn(user));
+        const hasAccess = await checkUserAccess(user.uid);
+        if (hasAccess) {
+            dispatch(successSignIn(user));
+        } else {
+            await signOut(auth);
+            throw new Error('Access denied. Please contact the administrator for details if you think an error has occurred.');
+        }
     } catch (error) {
         dispatch(errorSignIn(error));
     }

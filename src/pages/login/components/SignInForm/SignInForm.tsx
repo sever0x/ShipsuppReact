@@ -33,7 +33,7 @@ const getClasses = createUseStyles(() => ({
 
 const SignInForm: React.FC = () => {
     const classes = getClasses();
-    const { login, error } = useAuth();
+    const {login, error} = useAuth();
     const navigate = useNavigate();
 
     const [email, setEmail] = useState('');
@@ -46,30 +46,32 @@ const SignInForm: React.FC = () => {
     };
 
     return (
-        <form onSubmit={handleSubmit}>
-            <div className={classes.textContainer}>
-                <Typography sx={{fontSize: '2.25rem', fontWeight: 'bold'}}>
-                    Sign In
-                </Typography>
-                <Typography sx={{paddingTop: '16px'}}>
-                    Don't have an account? <Link href={`${pageURLs[pages.register]}`} sx={{
-                    color: 'inherit',
-                    textDecorationColor: 'inherit'
-                }}>
-                    Register
-                </Link>
-                </Typography>
-            </div>
-            <div className={classes.fieldsContainer}>
-                <EmailField email={email} setEmail={setEmail}/>
-                <PasswordField password={password} setPassword={setPassword}/>
-            </div>
-            {error && <Typography color="error">{error.message}</Typography>}
-            <div className={classes.buttonsContainer}>
-                <SubmitButton text="Sign In"/>
-                <GoogleSignIn />
-            </div>
-        </form>
+        <>
+            <form onSubmit={handleSubmit}>
+                <div className={classes.textContainer}>
+                    <Typography sx={{fontSize: '2.25rem', fontWeight: 'bold'}}>
+                        Sign In
+                    </Typography>
+                    <Typography sx={{paddingTop: '16px'}}>
+                        Don't have an account? <Link href={`${pageURLs[pages.register]}`} sx={{
+                        color: 'inherit',
+                        textDecorationColor: 'inherit'
+                    }}>
+                        Register
+                    </Link>
+                    </Typography>
+                </div>
+                <div className={classes.fieldsContainer}>
+                    <EmailField email={email} setEmail={setEmail}/>
+                    <PasswordField password={password} setPassword={setPassword}/>
+                </div>
+                {error && <Typography color="error" pt={2}>{error.message}</Typography>}
+                <div className={classes.buttonsContainer}>
+                    <SubmitButton text="Sign In"/>
+                    <GoogleSignIn/>
+                </div>
+            </form>
+        </>
     );
 };
 
