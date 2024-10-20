@@ -11,12 +11,10 @@ import EmailField from 'components/EmailField';
 import PasswordField from 'components/PasswordField';
 import TextField from 'components/TextField';
 import SubmitButton from 'components/SubmitButton';
-import GoogleSignInButton from 'components/GoogleSignInButton';
 import {useSelector} from "react-redux";
 import {RootState} from 'app/reducers';
 import {useAppDispatch} from 'misc/hooks/useAppDispatch';
 import PortSelector from 'components/PortSelector';
-import Button from 'components/Button';
 
 const getClasses = createUseStyles(() => ({
     textContainer: {
@@ -58,8 +56,8 @@ const RegisterForm: React.FC = () => {
     const location = useLocation();
     const state = location.state as LocationState;
 
-    const [step, setStep] = useState(state?.step || 1);
-    const [email, setEmail] = useState(state?.email || '');
+    const [step, setStep] = useState(state?.step ?? 1);
+    const [email, setEmail] = useState(state?.email ?? '');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [firstName, setFirstName] = useState(state?.firstName || '');
@@ -116,26 +114,41 @@ const RegisterForm: React.FC = () => {
                     portsArray: selectedPortObject ? [selectedPortObject] : []
                 });
             }
-            navigate('/catalog');
         } catch (error) {
-            console.error("Registration error:", error);
+            if (error instanceof Error) {
+                if (error.message.includes('successfully submitted')) {
+                    alert(error.message);
+                    navigate('/login');
+                } else {
+                    console.error("Registration error:", error);
+                }
+            } else {
+                console.error("Unknown error:", error);
+            }
         }
+
     };
 
     const handleGoogleSignUp = async () => {
         try {
             const result = await googleSignIn();
             if (result.isNewUser) {
-                setStep(3);
-                setEmail(result.email);
-                setFirstName(result.firstName);
-                setLastName(result.lastName);
-                setIsGoogleSignIn(true);
+                alert('Thank you! Your request has been successfully submitted. We will contact you shortly.');
+                navigate('/login');
             } else {
                 navigate('/catalog');
             }
         } catch (error) {
-            console.error("Google sign up error:", error);
+            if (error instanceof Error) {
+                if (error.message.includes('successfully submitted') || error.message.includes('please wait for confirmation')) {
+                    alert(error.message);
+                    navigate('/login');
+                } else {
+                    console.error("Google sign up error:", error);
+                }
+            } else {
+                console.error("Unknown error:", error);
+            }
         }
     };
 
@@ -229,9 +242,9 @@ const RegisterForm: React.FC = () => {
                 {error && <Typography color="error">{error.message}</Typography>}
                 <div className={classes.buttonsContainer}>
                     <SubmitButton text={step === 3 ? "Sign Up" : "Next"} />
-                    {step === 1 && !isGoogleSignIn && (
-                        <GoogleSignInButton onClick={handleGoogleSignUp} text="Sign Up with Google" />
-                    )}
+                    {/*{step === 1 && !isGoogleSignIn && (*/}
+                    {/*    <GoogleSignInButton onClick={handleGoogleSignUp} text="Sign Up with Google" />*/}
+                    {/*)}*/}
                 </div>
             </form>
         </>

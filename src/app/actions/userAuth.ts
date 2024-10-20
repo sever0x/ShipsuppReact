@@ -1,5 +1,4 @@
 import {
-    createUserWithEmailAndPassword,
     getIdToken,
     GoogleAuthProvider,
     signInWithEmailAndPassword,
@@ -7,15 +6,16 @@ import {
     signOut,
     User
 } from 'firebase/auth';
-import { get, ref, set } from 'firebase/database';
-import { ThunkAction } from 'redux-thunk';
-import { UnknownAction } from 'redux';
+import {get, ref} from 'firebase/database';
+import {ThunkAction} from 'redux-thunk';
+import {UnknownAction} from 'redux';
 
-import { auth, database } from 'app/config/firebaseConfig';
+import {auth, database} from 'app/config/firebaseConfig';
 import storage from 'misc/storage';
 import logger from 'app/utility/logger';
-import { RootState } from '../reducers';
+import {RootState} from '../reducers';
 import * as ActionTypes from '../constants/actionTypes';
+import {BACKEND_SERVICE} from "../../constants/api";
 
 // Type definitions
 type SafeUser = {
@@ -75,6 +75,28 @@ const checkUserAccess = async (uid: string): Promise<boolean> => {
     return false;
 };
 
+const submitPartnerApplication = async (userData: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    country: string;
+    phone?: string;
+    portId?: string;
+    referralCode?: string;
+}) => {
+    const response = await fetch(`${BACKEND_SERVICE}/postPartnerApplication`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams(userData).toString()
+    });
+
+    if (!response.ok) {
+        throw new Error('Failed to submit partner application');
+    }
+};
+
 // Action creators
 const createAction = <T extends string, P>(type: T, payload?: P) => ({ type, payload });
 
@@ -96,7 +118,6 @@ const successSignIn = (user: User) => {
 };
 const errorSignIn = (error: any) => createAction(ActionTypes.ERROR_SIGN_IN, error);
 const requestSignUp = () => createAction(ActionTypes.REQUEST_SIGN_UP);
-const successSignUp = () => createAction(ActionTypes.SUCCESS_SIGN_UP);
 const errorSignUp = (error: any) => createAction(ActionTypes.ERROR_SIGN_UP, error);
 const requestSignOut = () => createAction(ActionTypes.REQUEST_SIGN_OUT);
 const successSignOut = () => createAction(ActionTypes.SUCCESS_SIGN_OUT);
@@ -105,57 +126,33 @@ const authStateChange = (user: User | null) => createAction(ActionTypes.AUTH_STA
 // Thunk actions
 const googleProvider = new GoogleAuthProvider();
 
-const fetchGoogleSignIn = (): ThunkAction<Promise<{ isNewUser: boolean, email: string, firstName: string, lastName: string }>, RootState, unknown, UnknownAction> =>
+const fetchGoogleSignIn = (): ThunkAction<Promise<{ email: string, firstName: string, lastName: string }>, RootState, unknown, UnknownAction> =>
     async (dispatch) => {
         dispatch(requestSignIn());
         try {
+            // Use signInWithPopup, but don't create a new user if they don't exist
             const result = await signInWithPopup(auth, googleProvider);
             const user = result.user;
 
             const userRef = ref(database, `users/${user.uid}`);
             const snapshot = await get(userRef);
 
-            let isNewUser = false;
-            let firstName: string;
-            let lastName: string;
+            // Check if the user exists in your database
+            if (snapshot.exists()) {
+                const userData = snapshot.val();
+                const firstName = userData.firstName;
+                const lastName = userData.lastName;
 
-            if (!snapshot.exists()) {
-                isNewUser = true;
-                firstName = user.displayName ? user.displayName.split(' ')[0] : '';
-                lastName = user.displayName ? user.displayName.split(' ').slice(1).join(' ') : '';
-
-                const userProfile: UserProfile = {
-                    id: user.uid,
-                    email: user.email,
-                    firstName,
-                    lastName,
-                    accessType: 'GRANTED',
-                    date: new Date().toLocaleString(),
-                    role: 'SELLER',
-                    fcmTokens: [],
-                    notifications: {},
-                    phone: user.phoneNumber ?? '',
-                    profilePhoto: user.photoURL ?? '',
-                    portsArray: [],
-                    vesselIMO: "",
-                    vesselMMSI: ""
-                };
-
-                await set(userRef, userProfile);
+                // Dispatch success if user exists
+                // dispatch(successSignIn(user));
+                return { email: user.email || '', firstName, lastName };
             } else {
-                const hasAccess = await checkUserAccess(user.uid);
-                if (hasAccess) {
-                    const userData = snapshot.val();
-                    firstName = userData.firstName;
-                    lastName = userData.lastName;
-                } else {
-                    await signOut(auth);
-                    throw new Error('Access denied. Please contact the administrator for details if you think an error has occurred.');
-                }
+                // User does not exist in your database; sign them out
+                await signOut(auth);
+                // Delete the user from Firebase Authentication
+                await user.delete();
+                throw new Error('User does not exist. Please contact support.');
             }
-
-            dispatch(successSignIn(user));
-            return { isNewUser, email: user.email || '', firstName, lastName };
         } catch (error) {
             dispatch(errorSignIn(error));
             return Promise.reject(new Error('Failed to sign in'));
@@ -185,26 +182,15 @@ const fetchRegister = (email: string, password: string, additionalInfo: Omit<Use
     async (dispatch: any) => {
         dispatch(requestSignUp());
         try {
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
-
-            const userProfile: UserProfile = {
-                id: user.uid,
-                email: user.email,
-                accessType: 'GRANTED',
-                date: new Date().toLocaleString(),
-                role: 'SELLER',
-                fcmTokens: [],
-                notifications: {},
-                profilePhoto: '',
-                ...additionalInfo
-            };
-
-            const userRef = ref(database, `users/${user.uid}`);
-            await set(userRef, userProfile);
-
-            dispatch(successSignUp());
-            dispatch(successSignIn(user));
+            await submitPartnerApplication({
+                firstName: additionalInfo.firstName,
+                lastName: additionalInfo.lastName,
+                email: email ?? '',
+                country: additionalInfo.portsArray[0].city.country.title || '',
+                phone: additionalInfo.phone,
+                portId: additionalInfo.portsArray?.[0]?.id,
+                referralCode: ''
+            });
         } catch (error) {
             dispatch(errorSignUp(error));
         }
