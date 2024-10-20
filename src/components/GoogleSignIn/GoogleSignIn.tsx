@@ -1,13 +1,14 @@
 import React from 'react';
-import {useNavigate} from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import useAuth from 'misc/hooks/useAuth';
 import GoogleSignInButton from 'components/GoogleSignInButton';
 
 interface GoogleSignInProps {
     onSuccess?: () => void;
+    onError: (error: string) => void;
 }
 
-const GoogleSignIn: React.FC<GoogleSignInProps> = ({ onSuccess }) => {
+const GoogleSignIn: React.FC<GoogleSignInProps> = ({ onSuccess, onError }) => {
     const { googleSignIn } = useAuth();
     const navigate = useNavigate();
 
@@ -29,8 +30,9 @@ const GoogleSignIn: React.FC<GoogleSignInProps> = ({ onSuccess }) => {
             if (onSuccess) {
                 onSuccess();
             }
-        } catch (error) {
-            console.error('Google Sign In error:', error);
+        } catch (error: any) {
+            const errorMessage = error.message || 'Google Sign In failed';
+            onError(errorMessage);
         }
     };
 

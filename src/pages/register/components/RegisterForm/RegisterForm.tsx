@@ -129,29 +129,6 @@ const RegisterForm: React.FC = () => {
 
     };
 
-    const handleGoogleSignUp = async () => {
-        try {
-            const result = await googleSignIn();
-            if (result.isNewUser) {
-                alert('Thank you! Your request has been successfully submitted. We will contact you shortly.');
-                navigate('/login');
-            } else {
-                navigate('/catalog');
-            }
-        } catch (error) {
-            if (error instanceof Error) {
-                if (error.message.includes('successfully submitted') || error.message.includes('please wait for confirmation')) {
-                    alert(error.message);
-                    navigate('/login');
-                } else {
-                    console.error("Google sign up error:", error);
-                }
-            } else {
-                console.error("Unknown error:", error);
-            }
-        }
-    };
-
     const handlePortSelect = (portId: string) => {
         setSelectedPort(portId);
     };
@@ -196,16 +173,6 @@ const RegisterForm: React.FC = () => {
             case 3:
                 return (
                     <>
-                        {/*<TextField*/}
-                        {/*    label="Vessel IMO"*/}
-                        {/*    value={vesselIMO}*/}
-                        {/*    onChange={(e) => setVesselIMO(e.target.value)}*/}
-                        {/*/>*/}
-                        {/*<TextField*/}
-                        {/*    label="Vessel MMSI"*/}
-                        {/*    value={vesselMMSI}*/}
-                        {/*    onChange={(e) => setVesselMMSI(e.target.value)}*/}
-                        {/*/>*/}
                         <div className={classes.portSelectorContainer}>
                             <PortSelector
                                 ports={ports}
@@ -242,9 +209,6 @@ const RegisterForm: React.FC = () => {
                 {error && <Typography color="error">{error.message}</Typography>}
                 <div className={classes.buttonsContainer}>
                     <SubmitButton text={step === 3 ? "Sign Up" : "Next"} />
-                    {/*{step === 1 && !isGoogleSignIn && (*/}
-                    {/*    <GoogleSignInButton onClick={handleGoogleSignUp} text="Sign Up with Google" />*/}
-                    {/*)}*/}
                 </div>
             </form>
         </>

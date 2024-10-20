@@ -1,9 +1,10 @@
-import React from 'react';
-import {createUseStyles} from "react-jss";
+import React, { useState } from 'react';
+import { createUseStyles } from "react-jss";
 import useTheme from "misc/hooks/useTheme";
 import Stack from "components/Stack";
 import Logo from '../../../components/Logo';
 import SignInForm from '../components/SignInForm';
+import { Snackbar, Alert } from "@mui/material";
 
 const getClasses = createUseStyles(() => ({
     container: {
@@ -20,12 +21,29 @@ const getClasses = createUseStyles(() => ({
     }
 }));
 
-const SignInPage: React.FC = () => {
+const SignInPage = () => {
     const { theme } = useTheme();
     const classes = getClasses({ theme });
+    const [error, setError] = useState<string | null>(null);
+
+    const handleError = (errorMessage: string) => {
+        console.log("Error set:", errorMessage);
+        setError(errorMessage);
+    };
+
+    const handleCloseSnackbar = (_event: React.SyntheticEvent | Event, reason?: string) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setError(null);
+    };
+
+    const handleCloseAlert = (_event: React.SyntheticEvent) => {
+        setError(null);
+    };
 
     return (
-        <div className={classes.container + ' ' + classes.center}>
+        <div className={`${classes.container} ${classes.center}`}>
             <Stack
                 sx={{
                     display: 'flex',
@@ -40,9 +58,19 @@ const SignInPage: React.FC = () => {
                     <Logo />
                 </div>
                 <Stack sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                    <SignInForm />
+                    <SignInForm onError={handleError} />
                 </Stack>
             </Stack>
+            <Snackbar
+                open={!!error}
+                autoHideDuration={6000}
+                onClose={handleCloseSnackbar}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+            >
+                <Alert onClose={handleCloseAlert} severity="error" sx={{ width: '100%' }}>
+                    {error}
+                </Alert>
+            </Snackbar>
         </div>
     );
 };

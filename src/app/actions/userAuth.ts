@@ -130,32 +130,31 @@ const fetchGoogleSignIn = (): ThunkAction<Promise<{ email: string, firstName: st
     async (dispatch) => {
         dispatch(requestSignIn());
         try {
-            // Use signInWithPopup, but don't create a new user if they don't exist
             const result = await signInWithPopup(auth, googleProvider);
             const user = result.user;
 
             const userRef = ref(database, `users/${user.uid}`);
             const snapshot = await get(userRef);
 
-            // Check if the user exists in your database
             if (snapshot.exists()) {
                 const userData = snapshot.val();
-                const firstName = userData.firstName;
-                const lastName = userData.lastName;
-
-                // Dispatch success if user exists
-                // dispatch(successSignIn(user));
-                return { email: user.email || '', firstName, lastName };
+                dispatch(successSignIn(user));
+                return {
+                    email: user.email || '',
+                    firstName: userData.firstName,
+                    lastName: userData.lastName
+                };
             } else {
-                // User does not exist in your database; sign them out
                 await signOut(auth);
-                // Delete the user from Firebase Authentication
                 await user.delete();
-                throw new Error('User does not exist. Please contact support.');
+                const error = new Error('User does not exist. Please contact support.');
+                dispatch(errorSignIn(error));
+                throw error;
             }
-        } catch (error) {
-            dispatch(errorSignIn(error));
-            return Promise.reject(new Error('Failed to sign in'));
+        } catch (error: any) {
+            let errorMessage = error.message || 'Failed to sign in with Google';
+            dispatch(errorSignIn(errorMessage));
+            throw new Error(errorMessage);
         }
     };
 
@@ -167,14 +166,25 @@ const fetchLogin = (email: string, password: string): ThunkAction<Promise<void>,
             const user = userCredential.user;
 
             const hasAccess = await checkUserAccess(user.uid);
-            if (hasAccess) {
-                dispatch(successSignIn(user));
-            } else {
+            if (!hasAccess) {
                 await signOut(auth);
-                throw new Error('Access denied. Please contact the administrator for details if you think an error has occurred.');
+                throw new Error('Access denied. Please contact the administrator.');
             }
-        } catch (error) {
-            dispatch(errorSignIn(error));
+
+            dispatch(successSignIn(user));
+        } catch (error: any) {
+            let errorMessage = 'An error occurred during sign in.';
+
+            if (error.code === 'auth/user-not-found') {
+                errorMessage = 'User does not exist. Please contact support.';
+            } else if (error.code === 'auth/invalid-credential') {
+                errorMessage = 'Invalid email or password. Please try again.';
+            } else if (error.message) {
+                errorMessage = error.message;
+            }
+
+            dispatch(errorSignIn(errorMessage));
+            throw new Error(errorMessage);
         }
     };
 

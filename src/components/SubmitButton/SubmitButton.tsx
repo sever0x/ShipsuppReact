@@ -2,10 +2,11 @@ import React from 'react';
 import Button from "components/Button";
 
 interface SubmitButtonProps {
-    text: string;
+    text: string,
+    disabled?: boolean
 }
 
-const SubmitButton: React.FC<SubmitButtonProps> = ({ text }) => (
+const SubmitButton: React.FC<SubmitButtonProps> = ({text, disabled}) => (
     <Button
         type="submit"
         fullWidth
@@ -20,6 +21,7 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({ text }) => (
                 backgroundColor: '#333',
             },
         }}
+        disabled={disabled ?? false}
     >
         {text}
     </Button>
