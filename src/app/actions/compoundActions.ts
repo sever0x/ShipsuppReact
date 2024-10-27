@@ -32,7 +32,8 @@ export const signUpAndLoadProfile = (
         phone: string,
         vesselIMO: string,
         vesselMMSI: string,
-        portsArray: any[]
+        portsArray: any[],
+        referral: string,
     }
 ): ThunkAction<Promise<void>, RootState, unknown, UnknownAction> =>
     async (dispatch) => {

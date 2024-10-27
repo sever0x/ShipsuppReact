@@ -54,6 +54,7 @@ const RegisterForm: React.FC = () => {
     const [firstName, setFirstName] = useState(state?.firstName || '');
     const [lastName, setLastName] = useState(state?.lastName || '');
     const [phone, setPhone] = useState('');
+    const [referral, setReferral] = useState('');
     const [vesselIMO, setVesselIMO] = useState('');
     const [vesselMMSI, setVesselMMSI] = useState('');
     const [selectedPort, setSelectedPort] = useState<string>('');
@@ -88,7 +89,8 @@ const RegisterForm: React.FC = () => {
                     phone,
                     vesselIMO,
                     vesselMMSI,
-                    portsArray: selectedPortObject ? [selectedPortObject] : []
+                    portsArray: selectedPortObject ? [selectedPortObject] : [],
+                    referral
                 });
             } else {
                 await register(email, password, {
@@ -97,7 +99,8 @@ const RegisterForm: React.FC = () => {
                     phone,
                     vesselIMO,
                     vesselMMSI,
-                    portsArray: selectedPortObject ? [selectedPortObject] : []
+                    portsArray: selectedPortObject ? [selectedPortObject] : [],
+                    referral
                 });
             }
             setSuccessMessage("Thank you! Your request has been successfully submitted. We will contact you shortly.");
@@ -156,6 +159,11 @@ const RegisterForm: React.FC = () => {
                         label="Select a port"
                     />
                 </div>
+                <TextField
+                    label="Referral code"
+                    value={referral}
+                    onChange={(e) => setReferral(e.target.value)}
+                />
             </div>
             {error && <Typography color="error">{error.message}</Typography>}
             {successMessage && <Typography color="success">{successMessage}</Typography>}

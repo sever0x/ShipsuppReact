@@ -52,6 +52,7 @@ type UserProfile = {
         id: string;
         title: string;
     }>;
+    referral: string;
 };
 
 // Helper functions
@@ -231,7 +232,7 @@ const fetchRegister = (email: string, password: string, additionalInfo: Omit<Use
                 country: additionalInfo.portsArray[0].city.country.title || '',
                 phone: additionalInfo.phone,
                 portId: additionalInfo.portsArray?.[0]?.id,
-                referralCode: ''
+                referralCode: additionalInfo.referral
             });
         } catch (error) {
             dispatch(errorSignUp(error));
