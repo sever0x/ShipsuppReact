@@ -4,6 +4,7 @@ const result = {
     [pages.home]: `/${pages.home}`,
     [pages.login]: `/${pages.login}`,
     [pages.register]: `/${pages.register}`,
+    [pages.forgotPassword]: `/${pages.forgotPassword}`,
     [pages.profile]: `/${pages.profile}`,
     [pages.catalog]: `/${pages.catalog}`,
     [pages.orders]: `/${pages.orders}`,

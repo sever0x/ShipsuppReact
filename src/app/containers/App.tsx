@@ -16,6 +16,7 @@ import Orders from "pages/orders";
 import NotFound from "pages/notFound";
 import Chats from "pages/chats";
 import SearchProvider from 'misc/providers/SearchProvider';
+import ForgotPassword from "pages/forgotPassword";
 
 const RedirectToCatalog = () => <Navigate to={pageURLs[pages.catalog]} replace />;
 
@@ -62,6 +63,9 @@ function App() {
                                 }/>
                                 <Route path={`${pageURLs[pages.register]}`} element={
                                     <Register/>
+                                }/>
+                                <Route path={`${pageURLs[pages.forgotPassword]}`} element={
+                                    <ForgotPassword/>
                                 }/>
                             </Route>
                         </Routes>

@@ -88,6 +88,14 @@ const SignInForm: React.FC<SignInFormProps> = ({ onError }) => {
                 <EmailField email={email} setEmail={setEmail} />
                 <PasswordField password={password} setPassword={setPassword} />
             </div>
+            <Typography sx={{ paddingTop: '16px', display: "flex", justifyContent: "flex-end" }}>
+                <Link href={`${pageURLs[pages.forgotPassword]}`} sx={{
+                    color: 'inherit',
+                    textDecorationColor: 'inherit'
+                }}>
+                    Forgot password?
+                </Link>
+            </Typography>
             <div className={classes.buttonsContainer}>
                 <SubmitButton text="Sign In" disabled={isSubmitting} />
                 <GoogleSignIn onError={onError} />

@@ -8,5 +8,6 @@ export const chats: string = "chats";
 export const settings: string = "settings";
 export const permissions: string = "permissions";
 export const support: string = "support";
+export const forgotPassword: string = "reset_password";
 
 export const notFound = '404';

@@ -122,9 +122,41 @@ const errorSignUp = (error: any) => createAction(ActionTypes.ERROR_SIGN_UP, erro
 const requestSignOut = () => createAction(ActionTypes.REQUEST_SIGN_OUT);
 const successSignOut = () => createAction(ActionTypes.SUCCESS_SIGN_OUT);
 const authStateChange = (user: User | null) => createAction(ActionTypes.AUTH_STATE_CHANGED, serializeUser(user));
+const requestPasswordReset = () => createAction(ActionTypes.REQUEST_PASSWORD_RESET);
+const successPasswordReset = () => createAction(ActionTypes.SUCCESS_PASSWORD_RESET);
+const errorPasswordReset = (error: any) => createAction(ActionTypes.ERROR_PASSWORD_RESET, error);
 
 // Thunk actions
 const googleProvider = new GoogleAuthProvider();
+
+const fetchPasswordReset = (email: string): ThunkAction<Promise<void>, RootState, unknown, UnknownAction> =>
+    async (dispatch) => {
+        dispatch(requestPasswordReset());
+        try {
+            const response = await fetch(`${BACKEND_SERVICE}/resetPassword`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({ email }).toString()
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to send password reset email');
+            }
+
+            dispatch(successPasswordReset());
+        } catch (error: any) {
+            let errorMessage = 'Failed to send password reset email. Please try again.';
+
+            if (error.message) {
+                errorMessage = error.message;
+            }
+
+            dispatch(errorPasswordReset(errorMessage));
+            throw new Error(errorMessage);
+        }
+    };
 
 const fetchGoogleSignIn = (): ThunkAction<Promise<{ email: string, firstName: string, lastName: string }>, RootState, unknown, UnknownAction> =>
     async (dispatch) => {
@@ -227,4 +259,5 @@ export default {
     successSignIn,
     requestSignOut,
     authStateChange,
+    fetchPasswordReset,
 };
