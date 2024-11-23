@@ -1,18 +1,18 @@
-import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { createUseStyles } from 'react-jss';
+import React, {useEffect, useState} from 'react';
+import {useLocation, useNavigate} from 'react-router-dom';
+import {createUseStyles} from 'react-jss';
 import useAuth from 'misc/hooks/useAuth';
 import Typography from 'components/Typography';
-import { Link } from "@mui/material";
+import {Link} from "@mui/material";
 import pageURLs from 'constants/pagesURLs';
 import * as pages from 'constants/pages';
 import actions from "../../../../misc/actions/portsActions";
 import EmailField from 'components/EmailField';
 import TextField from 'components/TextField';
 import SubmitButton from 'components/SubmitButton';
-import { useSelector } from "react-redux";
-import { RootState } from 'app/reducers';
-import { useAppDispatch } from 'misc/hooks/useAppDispatch';
+import {useSelector} from "react-redux";
+import {RootState} from 'app/reducers';
+import {useAppDispatch} from 'misc/hooks/useAppDispatch';
 import PortSelector from 'components/PortSelector';
 
 const getClasses = createUseStyles(() => ({

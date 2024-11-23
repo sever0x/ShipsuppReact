@@ -1,8 +1,10 @@
 import {Dispatch} from 'redux';
 import {get, ref, update} from 'firebase/database';
 import {deleteObject, getDownloadURL, getMetadata, ref as storageRef, uploadBytes} from 'firebase/storage';
-import {database, storage as firebaseStorage} from 'app/config/firebaseConfig';
+import {database, storage as firebaseStorage, auth} from 'app/config/firebaseConfig';
 import {
+    CHANGE_PASSWORD_FAILURE,
+    CHANGE_PASSWORD_REQUEST, CHANGE_PASSWORD_SUCCESS,
     FETCH_PROFILE_FAILURE,
     FETCH_PROFILE_REQUEST,
     FETCH_PROFILE_SUCCESS,
@@ -16,8 +18,73 @@ import {
 import storage from 'misc/storage';
 import {v4 as uuidv4} from 'uuid';
 import {calculateRetryDelay, RETRY_CONFIG} from 'app/config/retryConfig';
+import axios from 'axios';
+import { BACKEND_SERVICE } from 'constants/api';
+import {getIdToken} from "firebase/auth";
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+interface ChangePasswordData {
+    userId: string;
+    newPassword: string;
+    confirmPassword: string;
+}
+
+interface ChangePasswordResponse {
+    success: boolean;
+    error?: string;
+}
+
+export const changePassword = (data: ChangePasswordData): any => {
+    return async (dispatch: any): Promise<ChangePasswordResponse> => {
+        dispatch({ type: CHANGE_PASSWORD_REQUEST });
+
+        try {
+            const user = auth.currentUser;
+            if (!user) {
+                dispatch({
+                    type: CHANGE_PASSWORD_FAILURE,
+                    payload: 'No authenticated user found'
+                });
+                return { success: false, error: 'No authenticated user found' };
+            }
+
+            const idToken = await user.getIdToken();
+
+            await axios.post(`${BACKEND_SERVICE}/changePassword`, {
+                userId: data.userId,
+                newPassword: data.newPassword,
+                confirmPassword: data.confirmPassword
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${idToken}`
+                }
+            });
+
+            dispatch({ type: CHANGE_PASSWORD_SUCCESS });
+            return { success: true };
+        } catch (error) {
+            let errorMessage = 'Failed to change password';
+
+            if (axios.isAxiosError(error)) {
+                if (error.response?.status === 401) {
+                    errorMessage = 'Session expired. Please login again.';
+                } else if (error.response?.data?.message) {
+                    errorMessage = error.response.data.message;
+                }
+            } else if (error instanceof Error) {
+                errorMessage = error.message;
+            }
+
+            dispatch({
+                type: CHANGE_PASSWORD_FAILURE,
+                payload: errorMessage
+            });
+
+            return { success: false, error: errorMessage };
+        }
+    };
+};
 
 export const fetchUserProfile = (uid: string) => async (dispatch: Dispatch) => {
     dispatch({ type: FETCH_PROFILE_REQUEST });

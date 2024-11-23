@@ -50,7 +50,7 @@ const muiTheme = createTheme({
             secondary: '#132F2F', // Dark teal
         },
         error: {
-            main: '#463380', // Medium purple
+            main: '#FF4D4F', // Medium purple
         },
         warning: {
             main: '#5F4A9F', // Light purple

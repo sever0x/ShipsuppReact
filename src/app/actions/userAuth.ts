@@ -247,7 +247,6 @@ const fetchLogout = () => async (dispatch: any) => {
         storage.removeItem(storage.keys.USER_DATA);
         dispatch(successSignOut());
     } catch (error) {
-        // Handle error if needed
         logger.error('Error during logout:', error);
     }
 };

@@ -17,6 +17,7 @@ import InfoItem from '../components/InfoItem';
 import OutlinedBox from '../components/OutlinedBox';
 import StyledPortsAccordion from '../components/StyledPortsAccordion';
 import {Port} from 'misc/types/Port';
+import ChangePasswordForm from '../components/ChangePasswordForm';
 
 interface GroupedPorts {
     [countryId: string]: {
@@ -46,7 +47,7 @@ const Profile: React.FC = () => {
         return <Typography variant="body1">No user is logged in</Typography>;
     }
 
-    if (profile.loading) {
+    if (profile.loading && !profile.data) {
         return (
             <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
                 <CircularProgress />
@@ -54,7 +55,7 @@ const Profile: React.FC = () => {
         );
     }
 
-    if (profile.error) {
+    if (profile.error && !profile.data) {
         return (
             <Box display="flex" justifyContent="center" alignItems="center" minHeight="80vh">
                 <Typography color="error">{profile.error}</Typography>
@@ -144,6 +145,15 @@ const Profile: React.FC = () => {
                                     <InfoItem icon={<WorkIcon />} label="Commercial Plan" value={profile.data?.commercialPlan || 'Not available'} isMobile={isMobile} />
                                 </Grid>
                             </Grid>
+                        </OutlinedBox>
+                        <OutlinedBox sx={{ mt: 3 }}>
+                            <Typography variant="h6" gutterBottom>
+                                Security
+                            </Typography>
+                            <Typography variant="body2" color="secondary" sx={{ mb: 2 }}>
+                                Change your password to keep your account secure
+                            </Typography>
+                            <ChangePasswordForm />
                         </OutlinedBox>
                     </Grid>
                 </Grid>

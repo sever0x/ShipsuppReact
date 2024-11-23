@@ -1,0 +1,9 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.main.ShipSupp.dev",
+    "sha256_cert_fingerprints":
+    ["14:F0:B1:99:23:6F:F5:BF:6F:D1:DE:C7:CA:31:6F:20:8B:44:A3:C6:BF:4D:C3:E4:A0:BB:A5:93:07:D6:8D:BF"]
+  }
+}]

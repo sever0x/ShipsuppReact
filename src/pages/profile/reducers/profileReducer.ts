@@ -1,4 +1,7 @@
 import {
+    CHANGE_PASSWORD_FAILURE,
+    CHANGE_PASSWORD_REQUEST,
+    CHANGE_PASSWORD_SUCCESS,
     FETCH_PROFILE_FAILURE,
     FETCH_PROFILE_REQUEST,
     FETCH_PROFILE_SUCCESS,
@@ -16,6 +19,7 @@ interface ProfileState {
     error: string | null;
     uploadingPhoto: boolean;
     updatingProfile: boolean;
+    changingPassword: boolean;
 }
 
 const initialState: ProfileState = {
@@ -23,7 +27,8 @@ const initialState: ProfileState = {
     data: null,
     error: null,
     uploadingPhoto: false,
-    updatingProfile: false
+    updatingProfile: false,
+    changingPassword: false
 };
 
 const profileReducer = (state = initialState, action: any): ProfileState => {
@@ -56,6 +61,12 @@ const profileReducer = (state = initialState, action: any): ProfileState => {
             };
         case UPDATE_PROFILE_FAILURE:
             return { ...state, updatingProfile: false, error: action.payload };
+        case CHANGE_PASSWORD_REQUEST:
+            return { ...state, changingPassword: true, error: null };
+        case CHANGE_PASSWORD_SUCCESS:
+            return { ...state, changingPassword: false, error: null };
+        case CHANGE_PASSWORD_FAILURE:
+            return { ...state, changingPassword: false, error: action.payload };
         default:
             return state;
     }

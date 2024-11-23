@@ -1,14 +1,13 @@
 import React, {useEffect, useState} from 'react';
 import {useSelector} from 'react-redux';
 import {Box, Button, Container, Grid, useMediaQuery, useTheme} from '@mui/material';
-import {Cancel, Save, Visibility} from '@mui/icons-material';
+import {Cancel, Save} from '@mui/icons-material';
 import {RootState} from '../../../../app/reducers';
 import {updateProfile, updateProfilePhoto} from '../../actions/profileActions';
 import Typography from 'components/Typography';
 import OutlinedBox from '../OutlinedBox';
 import PersonalInformationForm from '../PersonalInformationForm';
 import PhotoUpload from '../PhotoUpload';
-import PortSelector from 'components/PortSelector';
 import SelectedPortsModal from 'components/SelectedPorts';
 import actions from "../../../../misc/actions/portsActions";
 import {useAppDispatch} from "../../../../misc/hooks/useAppDispatch";
