@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
-import {Avatar, Skeleton, Typography} from '@mui/material';
+import {Avatar, Link, Skeleton, Typography} from '@mui/material';
 import {Message} from 'pages/chats/types/Message';
 import {User} from "pages/chats/types/User";
 import TextField from 'components/TextField';
@@ -10,6 +10,46 @@ import {useDispatch, useSelector} from "react-redux";
 import {RootState} from "../../../../app/reducers";
 import {markMessagesAsRead} from "pages/chats/actions/chatActions";
 import {DEV_MODE} from "../../../../constants/config";
+
+const linkRegex = /(https?:\/\/\S+)/g;
+
+const MessageText: React.FC<{ text: string }> = React.memo(({ text }) => {
+    const parts = text.split(linkRegex);
+    const matches = Array.from(text.matchAll(linkRegex), m => m[0]);
+
+    return (
+        <Typography variant="body1" sx={{ wordBreak: 'break-word' }}>
+            {parts.map((part, index) => {
+                if (matches.includes(part)) {
+                    return (
+                        <Link
+                            key={index}
+                            href={part}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            sx={{
+                                color: '#2196f3',
+                                textDecoration: 'none',
+                                '&:hover': {
+                                    textDecoration: 'underline'
+                                }
+                            }}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                            }}
+                        >
+                            {part}
+                        </Link>
+                    );
+                }
+                if (part) {
+                    return <React.Fragment key={index}>{part}</React.Fragment>;
+                }
+                return null;
+            })}
+        </Typography>
+    );
+});
 
 interface ChatContentProps {
     messages: Message[];
@@ -221,7 +261,7 @@ const ChatContent: React.FC<ChatContentProps> = React.memo(({
                                     <Typography variant="body2" sx={{ mb: 0.5, color: 'text.secondary' }}>
                                         {isSender ? 'You' : `${user?.firstName} ${user?.lastName}`}
                                     </Typography>
-                                    <Typography variant="body1" sx={{ wordBreak: 'break-word' }}>{message.text}</Typography>
+                                    <MessageText text={message.text} />
                                     <Typography variant="caption" sx={{ display: 'block', mt: 1, color: 'text.secondary' }}>
                                         {new Date(message.createTimestampGMT).toLocaleString()}
                                     </Typography>
