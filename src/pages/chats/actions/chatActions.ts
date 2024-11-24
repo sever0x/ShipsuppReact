@@ -206,42 +206,6 @@ export const markMessagesAsRead = (chatId: string, userId: string) => async (dis
     }
 };
 
-export const watchAndResetUnreadCount = (chatId: string, userId: string) => (dispatch: Dispatch, getState: () => RootState) => {
-    const unreadCountRef = ref(database, `chat/groups/${chatId}/unreadCount/${userId}`);
-
-    const unreadCountListener = onValue(unreadCountRef, (snapshot) => {
-        const unreadCount = snapshot.val();
-        const state = getState();
-        const isActiveChat = state.chat.selectedChatId === chatId;
-
-        if (unreadCount > 0 && isActiveChat) {
-            dispatch(resetUnreadCount(chatId, userId) as any);
-        }
-    });
-
-    return () => {
-        off(unreadCountRef, 'value', unreadCountListener);
-    };
-};
-
-export const updateUnreadCount = (chatId: string, userId: string, count: number) => async (dispatch: Dispatch) => {
-    try {
-        const chatRef = ref(database, `chat/groups/${chatId}/unreadCount/${userId}`);
-        await set(chatRef, count);
-    } catch (error) {
-        console.error("Error updating unread count:", error);
-    }
-};
-
-export const resetUnreadCount = (chatId: string, userId: string) => async (dispatch: Dispatch) => {
-    try {
-        const chatRef = ref(database, `chat/groups/${chatId}/unreadCount/${userId}`);
-        await set(chatRef, 0);
-    } catch (error) {
-        console.error("Error resetting unread count:", error);
-    }
-};
-
 export const switchToChatOrCreateNew = (order: Order, sellerId: string) => async (dispatch: Dispatch) => {
     try {
         const chatsRef = ref(database, 'chat/groups');

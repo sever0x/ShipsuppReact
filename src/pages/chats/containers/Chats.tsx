@@ -3,8 +3,8 @@ import {useDispatch, useSelector} from 'react-redux';
 import {RootState} from 'app/reducers';
 import {
     fetchChats,
-    fetchMessages, resetSelectedChatId,
-    resetUnreadCount,
+    fetchMessages,
+    resetSelectedChatId,
     sendMessage,
     setSelectedChatId,
     setupMessageListener,
@@ -88,7 +88,6 @@ const Chats: React.FC = () => {
     const handleSendMessage = useCallback((text: string) => {
         if (selectedChatId && user?.uid) {
             dispatch(sendMessage(selectedChatId, user.uid, text) as any);
-            dispatch(resetUnreadCount(selectedChatId, user.uid) as any);
         }
     }, [dispatch, selectedChatId, user]);
 

@@ -8,7 +8,7 @@ import IconButton from 'components/IconButton';
 import {ArrowBack, Send} from '@mui/icons-material';
 import {useDispatch, useSelector} from "react-redux";
 import {RootState} from "../../../../app/reducers";
-import {markMessagesAsRead, resetUnreadCount, watchAndResetUnreadCount} from "pages/chats/actions/chatActions";
+import {markMessagesAsRead} from "pages/chats/actions/chatActions";
 import {DEV_MODE} from "../../../../constants/config";
 
 interface ChatContentProps {
@@ -34,6 +34,31 @@ const ChatContent: React.FC<ChatContentProps> = React.memo(({
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const [isInitialLoad, setIsInitialLoad] = useState(true);
     const prevSelectedChatIdRef = useRef<string | null>(null);
+    const markAsReadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    useEffect(() => {
+        if (DEV_MODE) {
+            console.log('ChatContent: selectedChatId changed =', selectedChatId);
+        }
+
+        if (selectedChatId !== prevSelectedChatIdRef.current) {
+            setIsInitialLoad(true);
+            prevSelectedChatIdRef.current = selectedChatId;
+            setNewMessage('');
+        }
+
+        return () => {
+            if (markAsReadTimeoutRef.current) {
+                clearTimeout(markAsReadTimeoutRef.current);
+                markAsReadTimeoutRef.current = null;
+            }
+            if (scrollTimeoutRef.current) {
+                clearTimeout(scrollTimeoutRef.current);
+                scrollTimeoutRef.current = null;
+            }
+        };
+    }, [selectedChatId]);
 
     const scrollToBottom = useCallback((smooth = true) => {
         if (messagesEndRef.current) {
@@ -43,16 +68,6 @@ const ChatContent: React.FC<ChatContentProps> = React.memo(({
             });
         }
     }, []);
-
-    useEffect(() => {
-        if (DEV_MODE) {
-            console.log('ChatContent.tsx: selectedChatId changed = ', selectedChatId);
-        }
-        if (selectedChatId !== prevSelectedChatIdRef.current) {
-            setIsInitialLoad(true);
-            prevSelectedChatIdRef.current = selectedChatId;
-        }
-    }, [selectedChatId]);
 
     useEffect(() => {
         if (messages.length > 0) {
@@ -69,46 +84,45 @@ const ChatContent: React.FC<ChatContentProps> = React.memo(({
         if (newMessage.trim()) {
             onSendMessage(newMessage.trim());
             setNewMessage('');
+            setTimeout(() => scrollToBottom(true), 100);
         }
-    }, [newMessage, onSendMessage]);
-
-    useEffect(() => {
-        setNewMessage('');
-    }, [selectedChatId]);
+    }, [newMessage, onSendMessage, scrollToBottom]);
 
     const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
         const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+
         if (scrollHeight - scrollTop - clientHeight <= 1) {
-            if (selectedChatId) {
-                dispatch(markMessagesAsRead(selectedChatId, currentUserId) as any);
+            if (selectedChatId && !scrollTimeoutRef.current) {
+                if (DEV_MODE) {
+                    console.log('ChatContent: marking messages as read from scroll');
+                }
+
+                scrollTimeoutRef.current = setTimeout(() => {
+                    dispatch(markMessagesAsRead(selectedChatId, currentUserId) as any);
+                    scrollTimeoutRef.current = null;
+                }, 300);
             }
         }
     }, [dispatch, selectedChatId, currentUserId]);
 
     useEffect(() => {
         if (selectedChatId && messages.length > 0) {
-            dispatch(markMessagesAsRead(selectedChatId, currentUserId) as any);
-        }
-    }, [dispatch, selectedChatId, currentUserId, messages]);
+            if (DEV_MODE) {
+                console.log('ChatContent: marking messages as read on chat open');
+            }
 
-    useEffect(() => {
-        let unsubscribe: (() => void) | undefined;
-
-        if (selectedChatId) {
-            unsubscribe = dispatch(watchAndResetUnreadCount(selectedChatId, currentUserId) as any);
+            markAsReadTimeoutRef.current = setTimeout(() => {
+                dispatch(markMessagesAsRead(selectedChatId, currentUserId) as any);
+                markAsReadTimeoutRef.current = null;
+            }, 1000);
         }
 
         return () => {
-            if (unsubscribe) {
-                unsubscribe();
+            if (markAsReadTimeoutRef.current) {
+                clearTimeout(markAsReadTimeoutRef.current);
+                markAsReadTimeoutRef.current = null;
             }
         };
-    }, [dispatch, selectedChatId, currentUserId]);
-
-    useEffect(() => {
-        if (selectedChatId && messages.length > 0) {
-            dispatch(resetUnreadCount(selectedChatId, currentUserId) as any);
-        }
     }, [dispatch, selectedChatId, currentUserId, messages]);
 
     if (!selectedChatId) {
