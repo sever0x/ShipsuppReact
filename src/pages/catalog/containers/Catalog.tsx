@@ -58,9 +58,9 @@ const Catalog: React.FC = () => {
             let portId = null;
             while (portId === null) {
                 const userData = JSON.parse(storage.getItem(storage.keys.USER_DATA) ?? '{}');
-                if (userData.portsArray && userData.portsArray.length > 0) {
-                    setUserPorts(userData.portsArray);
-                    portId = userData.portsArray[0].id;
+                if (userData.ports && Object.keys(userData.ports).length > 0) {
+                    setUserPorts(userData.ports);
+                    portId = Object.keys(userData.ports)[0];
                 } else {
                     await new Promise(resolve => setTimeout(resolve, 1000));
                 }

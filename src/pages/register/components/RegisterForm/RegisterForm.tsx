@@ -76,10 +76,6 @@ const RegisterForm: React.FC = () => {
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
-        if (password !== confirmPassword) {
-            alert("Passwords do not match!");
-            return;
-        }
         try {
             const selectedPortObject = ports[selectedPort];
             if (isGoogleSignIn && user) {
@@ -89,7 +85,9 @@ const RegisterForm: React.FC = () => {
                     phone,
                     vesselIMO,
                     vesselMMSI,
-                    portsArray: selectedPortObject ? [selectedPortObject] : [],
+                    ports: selectedPortObject ? {
+                        [selectedPortObject.id]: selectedPortObject
+                    } : {},
                     referral
                 });
             } else {
@@ -99,17 +97,15 @@ const RegisterForm: React.FC = () => {
                     phone,
                     vesselIMO,
                     vesselMMSI,
-                    portsArray: selectedPortObject ? [selectedPortObject] : [],
+                    ports: selectedPortObject ? {
+                        [selectedPortObject.id]: selectedPortObject
+                    } : {},
                     referral
                 });
             }
             setSuccessMessage("Thank you! Your request has been successfully submitted. We will contact you shortly.");
         } catch (error) {
-            if (error instanceof Error) {
-                console.error("Registration error:", error);
-            } else {
-                console.error("Unknown error:", error);
-            }
+            console.error("Registration error:", error);
         }
     };
 

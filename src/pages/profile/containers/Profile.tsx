@@ -64,7 +64,9 @@ const Profile: React.FC = () => {
     }
 
     const groupPorts = (): GroupedPorts => {
-        return profile.data.portsArray.reduce((acc: GroupedPorts, port: Port) => {
+        const portsArray = Object.values(profile.data.ports || {}) as Port[];
+
+        return portsArray.reduce((acc: GroupedPorts, port: Port) => {
             const countryId = port.city.country.id;
             if (!acc[countryId]) {
                 acc[countryId] = {
@@ -74,7 +76,7 @@ const Profile: React.FC = () => {
             }
             acc[countryId].ports.push(port);
             return acc;
-        }, {});
+        }, {} as GroupedPorts);
     };
 
     return (
@@ -121,7 +123,7 @@ const Profile: React.FC = () => {
                                     <InfoItem
                                         icon={<LocationOnIcon />}
                                         label="Ports"
-                                        value={<StyledPortsAccordion groupedPorts={groupPorts()} />}
+                                        value={profile.data?.ports ? <StyledPortsAccordion groupedPorts={groupPorts()} /> : 'No ports assigned'}
                                         isMobile={isMobile}
                                     />
                                 </Grid>

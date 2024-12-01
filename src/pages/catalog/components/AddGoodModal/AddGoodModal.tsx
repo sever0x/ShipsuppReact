@@ -58,12 +58,8 @@ const AddGoodModal: React.FC<AddGoodModalProps> = ({ open, onClose, categories }
 
     useEffect(() => {
         const userData = JSON.parse(storage.getItem(storage.keys.USER_DATA) ?? '{}');
-        if (userData.portsArray) {
-            const portsObject = userData.portsArray.reduce((acc: any, port: any) => {
-                acc[port.id] = port;
-                return acc;
-            }, {});
-            setUserPorts(portsObject);
+        if (userData.ports) {
+            setUserPorts(userData.ports);
         }
     }, []);
 

@@ -16,6 +16,7 @@ import logger from 'app/utility/logger';
 import {RootState} from '../reducers';
 import * as ActionTypes from '../constants/actionTypes';
 import {BACKEND_SERVICE} from "../../constants/api";
+import {Port} from "../../misc/types/Port";
 
 // Type definitions
 type SafeUser = {
@@ -23,36 +24,6 @@ type SafeUser = {
     email: string | null;
     emailVerified: boolean;
     displayName: string | null;
-};
-
-type UserProfile = {
-    id: string;
-    email: string | null;
-    firstName: string;
-    lastName: string;
-    accessType: string;
-    date: string;
-    role: string;
-    fcmTokens: any[];
-    notifications: Record<string, any>;
-    phone: string;
-    profilePhoto: string;
-    vesselIMO: string;
-    vesselMMSI: string;
-    portsArray: Array<{
-        city: {
-            country: {
-                id: string;
-                phoneCode: string;
-                title: string;
-            };
-            id: string;
-            title: string;
-        };
-        id: string;
-        title: string;
-    }>;
-    referral: string;
 };
 
 // Helper functions
@@ -221,17 +192,26 @@ const fetchLogin = (email: string, password: string): ThunkAction<Promise<void>,
         }
     };
 
-const fetchRegister = (email: string, password: string, additionalInfo: Omit<UserProfile, 'id' | 'email' | 'accessType' | 'date' | 'role' | 'fcmTokens' | 'notifications' | 'profilePhoto'>) =>
+const fetchRegister = (email: string, password: string, additionalInfo: {
+    firstName: string;
+    lastName: string;
+    phone: string;
+    vesselIMO: string;
+    vesselMMSI: string;
+    ports: { [p: string]: Port };
+    referral: string
+}) =>
     async (dispatch: any) => {
         dispatch(requestSignUp());
         try {
+            const firstPort = Object.values(additionalInfo.ports)[0];
             await submitPartnerApplication({
                 firstName: additionalInfo.firstName,
                 lastName: additionalInfo.lastName,
                 email: email ?? '',
-                country: additionalInfo.portsArray[0].city.country.title || '',
+                country: firstPort?.city.country.title || '',
                 phone: additionalInfo.phone,
-                portId: additionalInfo.portsArray?.[0]?.id,
+                portId: firstPort?.id,
                 referralCode: additionalInfo.referral
             });
         } catch (error) {

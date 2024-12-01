@@ -9,6 +9,7 @@ import {
     signUpAndLoadProfile
 } from "../../app/actions/compoundActions";
 import {updateProfile} from "pages/profile/actions/profileActions";
+import {Port} from "../types/Port";
 
 const useAuth = () => {
     const dispatch: ThunkDispatch<RootState, unknown, UnknownAction> = useDispatch();
@@ -19,7 +20,15 @@ const useAuth = () => {
         loading,
         error,
         login: (email: string, password: string) => dispatch(signInAndLoadProfile(email, password)),
-        register: (email: string, password: string, additionalInfo: { firstName: string, lastName: string, phone: string, vesselIMO: string, vesselMMSI: string, portsArray: any[], referral: string }) =>
+        register: (email: string, password: string, additionalInfo: {
+            firstName: string;
+            lastName: string;
+            vesselMMSI: string;
+            referral: string;
+            phone: string;
+            vesselIMO: string;
+            ports: { [key: string]: Port }
+        }) =>
             dispatch(signUpAndLoadProfile(email, password, additionalInfo)),
         logout: () => dispatch(actions.fetchLogout()),
         googleSignIn: () => dispatch(googleSignInAndLoadProfile()),

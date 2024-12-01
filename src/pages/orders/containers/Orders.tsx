@@ -41,8 +41,8 @@ const Orders: React.FC = () => {
 
     useEffect(() => {
         const userData = JSON.parse(storage.getItem(storage.keys.USER_DATA) ?? '{}');
-        if (userData.portsArray) {
-            setUserPorts(userData.portsArray);
+        if (userData.ports) {
+            setUserPorts(userData.ports);
         }
     }, []);
 

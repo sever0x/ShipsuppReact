@@ -11,6 +11,7 @@ import PhotoUpload from '../PhotoUpload';
 import SelectedPortsModal from 'components/SelectedPorts';
 import actions from "../../../../misc/actions/portsActions";
 import {useAppDispatch} from "../../../../misc/hooks/useAppDispatch";
+import {Port} from "../../../../misc/types/Port";
 
 interface EditProfileProps {
     onCancel: () => void;
@@ -23,7 +24,9 @@ const EditProfile: React.FC<EditProfileProps> = ({ onCancel }) => {
     const ports = useSelector((state: RootState) => state.ports.data);
     const [formData, setFormData] = useState(profile);
     const [isUploading, setIsUploading] = useState(false);
-    const [selectedPorts, setSelectedPorts] = useState(profile.portsArray.map((port: any) => port.id));
+    const [selectedPorts, setSelectedPorts] = useState(
+        profile.ports ? Object.keys(profile.ports) : []
+    );
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
@@ -46,9 +49,16 @@ const EditProfile: React.FC<EditProfileProps> = ({ onCancel }) => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        const selectedPortsObject = selectedPorts.reduce((acc, portId) => {
+            if (ports[portId]) {
+                acc[portId] = ports[portId];
+            }
+            return acc;
+        }, {} as { [key: string]: Port });
+
         const updatedFormData = {
             ...formData,
-            portsArray: selectedPorts.map((portId: string | number) => ports[portId]).filter(Boolean)
+            ports: selectedPortsObject
         };
         dispatch(updateProfile(profile.id, updatedFormData) as any);
         onCancel();
