@@ -1,15 +1,24 @@
-import React, { useCallback, useState, useEffect } from 'react';
-import { Box, Button, Grid, IconButton, InputAdornment, Modal, TextField, Typography, useMediaQuery, useTheme } from '@mui/material';
+import React, {useCallback, useEffect, useState} from 'react';
+import {
+    Box,
+    Button,
+    Grid,
+    IconButton,
+    InputAdornment,
+    Modal,
+    TextField,
+    Typography,
+    useMediaQuery,
+    useTheme
+} from '@mui/material';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Good } from '../../types/Good';
+import {Good} from '../../types/Good';
 import CategorySelector from "pages/catalog/components/CategorySelector";
-import { useDropzone } from "react-dropzone";
-import { Close, ExpandMore } from '@mui/icons-material';
-import { useSelector } from "react-redux";
-import { RootState } from "app/reducers";
-import { useAppDispatch } from "misc/hooks/useAppDispatch";
-import { addGood } from "pages/catalog/actions/catalogActions";
+import {useDropzone} from "react-dropzone";
+import {Close, ExpandMore} from '@mui/icons-material';
+import {useAppDispatch} from "misc/hooks/useAppDispatch";
+import {addGood} from "pages/catalog/actions/catalogActions";
 import storage from "misc/storage";
 import PortSelector from 'components/PortSelector';
 

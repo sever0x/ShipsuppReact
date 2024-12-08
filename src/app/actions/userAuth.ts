@@ -142,9 +142,16 @@ const fetchGoogleSignIn = (): ThunkAction<Promise<{ email: string, firstName: st
 
             if (snapshot.exists()) {
                 const userData = snapshot.val();
+
+                const hasAccess = await checkUserAccess(user.uid);
+                if (!hasAccess) {
+                    await signOut(auth);
+                    throw new Error('Access denied. Only sellers can access this area.');
+                }
+
                 dispatch(successSignIn(user));
                 return {
-                    email: user.email || '',
+                    email: user.email ?? '',
                     firstName: userData.firstName,
                     lastName: userData.lastName
                 };
