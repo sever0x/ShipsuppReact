@@ -1,4 +1,6 @@
 import {
+    ADD_PORT_FAILURE,
+    ADD_PORT_REQUEST, ADD_PORT_SUCCESS,
     CHANGE_PASSWORD_FAILURE,
     CHANGE_PASSWORD_REQUEST,
     CHANGE_PASSWORD_SUCCESS,
@@ -20,6 +22,7 @@ interface ProfileState {
     uploadingPhoto: boolean;
     updatingProfile: boolean;
     changingPassword: boolean;
+    addingPort: boolean;
 }
 
 const initialState: ProfileState = {
@@ -28,7 +31,8 @@ const initialState: ProfileState = {
     error: null,
     uploadingPhoto: false,
     updatingProfile: false,
-    changingPassword: false
+    changingPassword: false,
+    addingPort: false,
 };
 
 const profileReducer = (state = initialState, action: any): ProfileState => {
@@ -67,6 +71,16 @@ const profileReducer = (state = initialState, action: any): ProfileState => {
             return { ...state, changingPassword: false, error: null };
         case CHANGE_PASSWORD_FAILURE:
             return { ...state, changingPassword: false, error: action.payload };
+        case ADD_PORT_REQUEST:
+            return { ...state, addingPort: true, error: null };
+        case ADD_PORT_SUCCESS:
+            return {
+                ...state,
+                addingPort: false,
+                error: null
+            };
+        case ADD_PORT_FAILURE:
+            return { ...state, addingPort: false, error: action.payload };
         default:
             return state;
     }

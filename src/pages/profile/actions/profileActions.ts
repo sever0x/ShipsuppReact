@@ -3,6 +3,9 @@ import {get, ref, update} from 'firebase/database';
 import {deleteObject, getDownloadURL, getMetadata, ref as storageRef, uploadBytes} from 'firebase/storage';
 import {database, storage as firebaseStorage, auth} from 'app/config/firebaseConfig';
 import {
+    ADD_PORT_FAILURE,
+    ADD_PORT_REQUEST,
+    ADD_PORT_SUCCESS,
     CHANGE_PASSWORD_FAILURE,
     CHANGE_PASSWORD_REQUEST, CHANGE_PASSWORD_SUCCESS,
     FETCH_PROFILE_FAILURE,
@@ -21,6 +24,7 @@ import {calculateRetryDelay, RETRY_CONFIG} from 'app/config/retryConfig';
 import axios from 'axios';
 import { BACKEND_SERVICE } from 'constants/api';
 import {getIdToken} from "firebase/auth";
+import {AppDispatch} from "../../../misc/hooks/useAppDispatch";
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -195,5 +199,61 @@ export const updateProfile = (uid: string, profileData: any) => async (dispatch:
             type: UPDATE_PROFILE_FAILURE,
             payload: error instanceof Error ? error.message : 'An unknown error occurred'
         });
+    }
+};
+
+export const addNewPort = (userId: string, portId: string, portsToCopy?: string[]) => async (dispatch: AppDispatch) => {
+    dispatch({ type: ADD_PORT_REQUEST });
+
+    try {
+        const user = auth.currentUser;
+        if (!user) {
+            throw new Error('No authenticated user found');
+        }
+
+        const idToken = await getIdToken(user);
+
+        const response = await axios.put(
+            `${BACKEND_SERVICE}/addNewPort`,
+            {
+                userId,
+                portId,
+                portsToCopy: portsToCopy || []
+            },
+            {
+                headers: {
+                    'Authorization': `Bearer ${idToken}`,
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            }
+        );
+
+        dispatch({
+            type: ADD_PORT_SUCCESS,
+            payload: response.data
+        });
+
+        dispatch(fetchUserProfile(userId));
+
+        return response.data;
+    } catch (error) {
+        let errorMessage = 'Failed to add port';
+
+        if (axios.isAxiosError(error)) {
+            if (error.response?.status === 401) {
+                errorMessage = 'Session expired. Please login again.';
+            } else if (error.response?.data?.message) {
+                errorMessage = error.response.data.message;
+            }
+        } else if (error instanceof Error) {
+            errorMessage = error.message;
+        }
+
+        dispatch({
+            type: ADD_PORT_FAILURE,
+            payload: errorMessage
+        });
+
+        throw error;
     }
 };

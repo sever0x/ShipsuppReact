@@ -3,7 +3,7 @@ import {useSelector} from 'react-redux';
 import {Box, Button, Container, Grid, useMediaQuery, useTheme} from '@mui/material';
 import {Cancel, Save} from '@mui/icons-material';
 import {RootState} from '../../../../app/reducers';
-import {updateProfile, updateProfilePhoto} from '../../actions/profileActions';
+import {addNewPort, updateProfile, updateProfilePhoto} from '../../actions/profileActions';
 import Typography from 'components/Typography';
 import OutlinedBox from '../OutlinedBox';
 import PersonalInformationForm from '../PersonalInformationForm';
@@ -12,6 +12,7 @@ import SelectedPortsModal from 'components/SelectedPorts';
 import actions from "../../../../misc/actions/portsActions";
 import {useAppDispatch} from "../../../../misc/hooks/useAppDispatch";
 import {Port} from "../../../../misc/types/Port";
+import PortSelector from 'components/PortSelector';
 
 interface EditProfileProps {
     onCancel: () => void;
@@ -27,6 +28,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ onCancel }) => {
     const [selectedPorts, setSelectedPorts] = useState(
         profile.ports ? Object.keys(profile.ports) : []
     );
+    const [selectedPortId, setSelectedPortId] = useState<string>('');
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
@@ -37,14 +39,14 @@ const EditProfile: React.FC<EditProfileProps> = ({ onCancel }) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handlePortSelect = (portId: string) => {
-        setSelectedPorts((prev: string[]) => {
-            if (prev.includes(portId)) {
-                return prev.filter(id => id !== portId);
-            } else {
-                return [...prev, portId];
-            }
-        });
+    const handleAddPort = async (portId: string) => {
+        try {
+            setSelectedPortId(portId);
+            await dispatch(addNewPort(profile.id, portId));
+        } catch (error) {
+            console.error('Failed to add port:', error);
+            setSelectedPortId('');
+        }
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -111,25 +113,15 @@ const EditProfile: React.FC<EditProfileProps> = ({ onCancel }) => {
                         <OutlinedBox>
                             <Typography variant="h6" gutterBottom>Personal Information</Typography>
                             <PersonalInformationForm formData={formData} handleChange={handleChange} />
-                            {/*<Box mt={2}>*/}
-                            {/*    <PortSelector*/}
-                            {/*        ports={ports}*/}
-                            {/*        selectedPorts={selectedPorts}*/}
-                            {/*        onPortSelect={handlePortSelect}*/}
-                            {/*    />*/}
-                            {/*    {selectedPorts.length > 0 && (*/}
-                            {/*        <Button*/}
-                            {/*            startIcon={<Visibility />}*/}
-                            {/*            onClick={() => setIsModalOpen(true)}*/}
-                            {/*            variant="text"*/}
-                            {/*            size="small"*/}
-                            {/*            color="info"*/}
-                            {/*            sx={{ mt: 1 }}*/}
-                            {/*        >*/}
-                            {/*            View Selected Ports ({selectedPorts.length})*/}
-                            {/*        </Button>*/}
-                            {/*    )}*/}
-                            {/*</Box>*/}
+                            <Box mt={2}>
+                                <PortSelector
+                                    ports={ports}
+                                    selectedPorts={selectedPortId ? [selectedPortId] : []}
+                                    onPortSelect={handleAddPort}
+                                    multiSelect={false}
+                                    label="Add new port"
+                                />
+                            </Box>
                             <Box mt={2}>
                                 <Button
                                     fullWidth
