@@ -11,8 +11,8 @@ import PhotoUpload from '../PhotoUpload';
 import SelectedPortsModal from 'components/SelectedPorts';
 import actions from "../../../../misc/actions/portsActions";
 import {useAppDispatch} from "../../../../misc/hooks/useAppDispatch";
-import {Port} from "../../../../misc/types/Port";
-import PortSelector from 'components/PortSelector';
+import AddPortSection from "pages/profile/components/AddPortSection";
+import {isStatusActive} from "pages/profile/types/PortSubscription";
 
 interface EditProfileProps {
     onCancel: () => void;
@@ -23,11 +23,9 @@ const EditProfile: React.FC<EditProfileProps> = ({ onCancel }) => {
     const theme = useTheme();
     const profile = useSelector((state: RootState) => state.profile.data);
     const ports = useSelector((state: RootState) => state.ports.data);
+    const subscriptions = useSelector((state: RootState) => state.portSubscriptions.data);
     const [formData, setFormData] = useState(profile);
     const [isUploading, setIsUploading] = useState(false);
-    const [selectedPorts, setSelectedPorts] = useState(
-        profile.ports ? Object.keys(profile.ports) : []
-    );
     const [selectedPortId, setSelectedPortId] = useState<string>('');
     const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -39,10 +37,10 @@ const EditProfile: React.FC<EditProfileProps> = ({ onCancel }) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleAddPort = async (portId: string) => {
+    const handleAddPort = async (portId: string, portIdToCopy?: string) => {
         try {
             setSelectedPortId(portId);
-            await dispatch(addNewPort(profile.id, portId));
+            await dispatch(addNewPort(profile.id, portId, portIdToCopy));
         } catch (error) {
             console.error('Failed to add port:', error);
             setSelectedPortId('');
@@ -51,18 +49,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ onCancel }) => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        const selectedPortsObject = selectedPorts.reduce((acc, portId) => {
-            if (ports[portId]) {
-                acc[portId] = ports[portId];
-            }
-            return acc;
-        }, {} as { [key: string]: Port });
-
-        const updatedFormData = {
-            ...formData,
-            ports: selectedPortsObject
-        };
-        dispatch(updateProfile(profile.id, updatedFormData) as any);
+        dispatch(updateProfile(profile.id, formData) as any);
         onCancel();
     };
 
@@ -81,11 +68,13 @@ const EditProfile: React.FC<EditProfileProps> = ({ onCancel }) => {
         }
     };
 
-    const handlePortRemove = (portId: string) => {
-        setSelectedPorts((prev: any[]) => prev.filter(id => id !== portId));
+    const handlePortsManage = () => {
+        setIsModalOpen(true);
     };
 
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+    const subscribedPorts = Object.values(subscriptions).map(subscription => subscription.port);
 
     return (
         <Container maxWidth="xl" sx={{
@@ -113,23 +102,34 @@ const EditProfile: React.FC<EditProfileProps> = ({ onCancel }) => {
                         <OutlinedBox>
                             <Typography variant="h6" gutterBottom>Personal Information</Typography>
                             <PersonalInformationForm formData={formData} handleChange={handleChange} />
-                            <Box mt={2}>
-                                <PortSelector
+
+                            <Box mt={3}>
+                                <Typography variant="h6" gutterBottom>Ports Management</Typography>
+                                <Button
+                                    variant="outlined"
+                                    color="primary"
+                                    onClick={handlePortsManage}
+                                    fullWidth
+                                    sx={{ marginBottom: 2 }}
+                                >
+                                    Manage Existing Ports
+                                </Button>
+
+                                <AddPortSection
                                     ports={ports}
-                                    selectedPorts={selectedPortId ? [selectedPortId] : []}
-                                    onPortSelect={handleAddPort}
-                                    multiSelect={false}
-                                    label="Add new port"
+                                    existingPorts={subscribedPorts.filter(port => isStatusActive(subscriptions[port.id]))}
+                                    onAddPort={handleAddPort}
                                 />
                             </Box>
-                            <Box mt={2}>
+
+                            <Box mt={3}>
                                 <Button
                                     fullWidth
                                     type="submit"
                                     variant="contained"
                                     color="primary"
                                     startIcon={<Save />}
-                                    sx={{ mb: 1 }}
+                                    sx={{ marginBottom: 1 }}
                                 >
                                     Save Changes
                                 </Button>
@@ -147,11 +147,12 @@ const EditProfile: React.FC<EditProfileProps> = ({ onCancel }) => {
                     </Grid>
                 </Grid>
             </form>
+
             <SelectedPortsModal
                 open={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                selectedPorts={selectedPorts.map((id: string | number) => ports[id]).filter(Boolean)}
-                onRemove={handlePortRemove}
+                selectedPorts={subscribedPorts}
+                onRemove={() => {}}
             />
         </Container>
     );
