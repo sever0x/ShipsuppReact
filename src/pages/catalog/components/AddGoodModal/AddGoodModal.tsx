@@ -39,22 +39,24 @@ interface Errors {
     [key: string]: string;
 }
 
+const initialGoodState: Omit<Good, 'id'> = {
+    article: '',
+    title: '',
+    price: 0,
+    brand: '',
+    color: '',
+    description: '',
+    categoryId: '',
+    currency: 'USD',
+    ownerId: '',
+    portId: '',
+    createTimestampGMT: '',
+    available: true,
+};
+
 const AddGoodModal: React.FC<AddGoodModalProps> = ({ open, onClose, categories }) => {
     const dispatch = useAppDispatch();
-    const [newGood, setNewGood] = useState<Omit<Good, 'id'>>({
-        article: '',
-        title: '',
-        price: 0,
-        brand: '',
-        color: '',
-        description: '',
-        categoryId: '',
-        currency: 'USD',
-        ownerId: '',
-        portId: '',
-        createTimestampGMT: '',
-        available: true,
-    });
+    const [newGood, setNewGood] = useState<Omit<Good, 'id'>>(initialGoodState);
     const [newImages, setNewImages] = useState<File[]>([]);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [selectedCategory, setSelectedCategory] = useState<string>('Select category');
@@ -66,11 +68,25 @@ const AddGoodModal: React.FC<AddGoodModalProps> = ({ open, onClose, categories }
     const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
 
     useEffect(() => {
+        if (open) {
+            resetForm();
+        }
+    }, [open]);
+
+    useEffect(() => {
         const userData = JSON.parse(storage.getItem(storage.keys.USER_DATA) ?? '{}');
         if (userData.ports) {
             setUserPorts(userData.ports);
         }
     }, []);
+
+    const resetForm = () => {
+        setNewGood(initialGoodState);
+        setNewImages([]);
+        setSelectedCategory('Select category');
+        setErrors({});
+        setAnchorEl(null);
+    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -93,7 +109,7 @@ const AddGoodModal: React.FC<AddGoodModalProps> = ({ open, onClose, categories }
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleAdd = () => {
+    const handleAdd = async () => {
         if (validateForm()) {
             const userData = JSON.parse(storage.getItem(storage.keys.USER_DATA) ?? '{}');
             const goodWithOwnerId = {
@@ -101,8 +117,13 @@ const AddGoodModal: React.FC<AddGoodModalProps> = ({ open, onClose, categories }
                 ownerId: userData.id,
                 createTimestampGMT: new Date().toISOString(),
             };
-            dispatch(addGood(goodWithOwnerId, newImages) as any);
-            onClose();
+            try {
+                await dispatch(addGood(goodWithOwnerId, newImages) as any);
+                resetForm();
+                onClose();
+            } catch (error) {
+                console.error('Failed to add good:', error);
+            }
         }
     };
 
@@ -147,8 +168,13 @@ const AddGoodModal: React.FC<AddGoodModalProps> = ({ open, onClose, categories }
         setErrors(prev => ({ ...prev, port: '' }));
     };
 
+    const handleClose = () => {
+        resetForm();
+        onClose();
+    };
+
     return (
-        <Modal open={open} onClose={onClose}>
+        <Modal open={open} onClose={handleClose}>
             <Box sx={{
                 position: 'absolute',
                 top: '50%',
@@ -164,7 +190,7 @@ const AddGoodModal: React.FC<AddGoodModalProps> = ({ open, onClose, categories }
             }}>
                 <IconButton
                     aria-label="close"
-                    onClick={onClose}
+                    onClick={handleClose}
                     sx={{
                         position: 'absolute',
                         right: 8,
@@ -334,7 +360,7 @@ const AddGoodModal: React.FC<AddGoodModalProps> = ({ open, onClose, categories }
                     </Grid>
                 </Grid>
                 <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
-                    <Button onClick={onClose} sx={{ mr: 1 }}>
+                    <Button onClick={handleClose} sx={{ mr: 1 }}>
                         Cancel
                     </Button>
                     <Button onClick={handleAdd} variant="contained" color="primary">
