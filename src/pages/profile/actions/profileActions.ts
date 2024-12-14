@@ -11,12 +11,18 @@ import {
     FETCH_PROFILE_FAILURE,
     FETCH_PROFILE_REQUEST,
     FETCH_PROFILE_SUCCESS,
+    FETCH_SUBSCRIPTIONS_FAILURE,
+    FETCH_SUBSCRIPTIONS_REQUEST,
+    FETCH_SUBSCRIPTIONS_SUCCESS,
     UPDATE_PROFILE_FAILURE,
     UPDATE_PROFILE_PHOTO_FAILURE,
     UPDATE_PROFILE_PHOTO_REQUEST,
     UPDATE_PROFILE_PHOTO_SUCCESS,
     UPDATE_PROFILE_REQUEST,
-    UPDATE_PROFILE_SUCCESS
+    UPDATE_PROFILE_SUCCESS,
+    UPDATE_SUBSCRIPTION_STATUS_FAILURE,
+    UPDATE_SUBSCRIPTION_STATUS_REQUEST,
+    UPDATE_SUBSCRIPTION_STATUS_SUCCESS
 } from '../constants/actionTypes';
 import storage from 'misc/storage';
 import {v4 as uuidv4} from 'uuid';
@@ -25,6 +31,8 @@ import axios from 'axios';
 import { BACKEND_SERVICE } from 'constants/api';
 import {getIdToken} from "firebase/auth";
 import {AppDispatch} from "../../../misc/hooks/useAppDispatch";
+import {Action, ThunkAction} from "@reduxjs/toolkit";
+import {RootState} from "../../../app/reducers";
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -37,6 +45,11 @@ interface ChangePasswordData {
 interface ChangePasswordResponse {
     success: boolean;
     error?: string;
+}
+
+export interface SubscriptionAction extends Action {
+    type: string;
+    payload?: any;
 }
 
 export const changePassword = (data: ChangePasswordData): any => {
@@ -202,7 +215,7 @@ export const updateProfile = (uid: string, profileData: any) => async (dispatch:
     }
 };
 
-export const addNewPort = (userId: string, portId: string, portsToCopy?: string[]) => async (dispatch: AppDispatch) => {
+export const addNewPort = (userId: string, portId: string, portIdToCopy?: string) => async (dispatch: AppDispatch) => {
     dispatch({ type: ADD_PORT_REQUEST });
 
     try {
@@ -218,7 +231,7 @@ export const addNewPort = (userId: string, portId: string, portsToCopy?: string[
             {
                 userId,
                 portId,
-                portsToCopy: portsToCopy || []
+                portsToCopy: portIdToCopy ? [portIdToCopy] : []
             },
             {
                 headers: {
@@ -233,7 +246,8 @@ export const addNewPort = (userId: string, portId: string, portsToCopy?: string[
             payload: response.data
         });
 
-        dispatch(fetchUserProfile(userId));
+        await dispatch(fetchUserProfile(userId));
+        await dispatch(fetchPortSubscriptions(userId));
 
         return response.data;
     } catch (error) {
@@ -245,12 +259,114 @@ export const addNewPort = (userId: string, portId: string, portsToCopy?: string[
             } else if (error.response?.data?.message) {
                 errorMessage = error.response.data.message;
             }
-        } else if (error instanceof Error) {
-            errorMessage = error.message;
         }
 
         dispatch({
             type: ADD_PORT_FAILURE,
+            payload: errorMessage
+        });
+
+        throw error;
+    }
+};
+
+export const fetchPortSubscriptions = (userId: string) => async (dispatch: AppDispatch) => {
+    dispatch({ type: FETCH_SUBSCRIPTIONS_REQUEST });
+
+    try {
+        const user = auth.currentUser;
+        if (!user) {
+            throw new Error('No authenticated user found');
+        }
+
+        const idToken = await getIdToken(user);
+
+        const response = await axios.get(
+            `${BACKEND_SERVICE}/getPortSubscriptions`,
+            {
+                params: { userId },
+                headers: {
+                    'Authorization': `Bearer ${idToken}`
+                }
+            }
+        );
+
+        dispatch({
+            type: FETCH_SUBSCRIPTIONS_SUCCESS,
+            payload: response.data // Pass the whole response, reducer will handle the structure
+        });
+
+        return response.data.data; // Return just the subscriptions array
+    } catch (error) {
+        let errorMessage = 'Failed to fetch port subscriptions';
+
+        if (axios.isAxiosError(error)) {
+            if (error.response?.status === 401) {
+                errorMessage = 'Session expired. Please login again.';
+            } else if (error.response?.data?.message) {
+                errorMessage = error.response.data.message;
+            }
+        }
+
+        dispatch({
+            type: FETCH_SUBSCRIPTIONS_FAILURE,
+            payload: errorMessage
+        });
+
+        throw error;
+    }
+};
+
+export const updateSubscriptionStatus = (
+    userId: string,
+    subscriptionId: string,
+    action: 'disable' | 'activate'
+) => async (dispatch: AppDispatch) => {
+    dispatch({ type: UPDATE_SUBSCRIPTION_STATUS_REQUEST });
+
+    try {
+        const user = auth.currentUser;
+        if (!user) {
+            throw new Error('No authenticated user found');
+        }
+
+        const idToken = await getIdToken(user);
+        const endpoint = action === 'disable' ? 'disablePortSubscription' : 'activatePortSubscription';
+
+        const response = await axios.post(
+            `${BACKEND_SERVICE}/${endpoint}`,
+            {
+                userId,
+                subscriptionId
+            },
+            {
+                headers: {
+                    'Authorization': `Bearer ${idToken}`,
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            }
+        );
+
+        dispatch({
+            type: UPDATE_SUBSCRIPTION_STATUS_SUCCESS,
+            payload: response.data
+        });
+
+        // Refresh subscriptions after update
+        return dispatch(fetchPortSubscriptions(userId));
+    } catch (error) {
+        let errorMessage = `Failed to ${action} port subscription`;
+
+        if (axios.isAxiosError(error)) {
+            if (error.response?.status === 401) {
+                errorMessage = 'Session expired. Please login again.';
+            } else if (error.response?.data?.message) {
+                errorMessage = error.response.data.message;
+            }
+        }
+
+        dispatch({
+            type: UPDATE_SUBSCRIPTION_STATUS_FAILURE,
             payload: errorMessage
         });
 

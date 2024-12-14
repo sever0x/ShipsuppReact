@@ -1,11 +1,14 @@
 import React, {useEffect, useState} from 'react';
-import {Checkbox, Collapse, ListItemIcon, ListItemText, useMediaQuery, useTheme} from '@mui/material';
+import {useSelector} from 'react-redux';
+import {Checkbox, Chip, Collapse, ListItemIcon, ListItemText, useMediaQuery, useTheme} from '@mui/material';
 import {ChevronRight, ExpandMore, Public} from '@mui/icons-material';
 import MenuItem from 'components/MenuItem';
 import Menu from 'components/Menu';
 import Box from 'components/Box';
 import Typography from 'components/Typography';
 import {Port} from 'misc/types/Port';
+import {RootState} from 'app/reducers';
+import {getStatusStr, isStatusActive} from 'pages/profile/types/PortSubscription';
 
 interface PortSelectorProps {
     ports: { [key: string]: Port };
@@ -16,18 +19,20 @@ interface PortSelectorProps {
     containerSx?: React.CSSProperties;
     menuSx?: React.CSSProperties;
     menuItemSx?: React.CSSProperties;
+    showSubscriptionStatus?: boolean;
 }
 
 const PortSelector: React.FC<PortSelectorProps> = ({
-    ports,
-    selectedPorts,
-    onPortSelect,
-    multiSelect = true,
-    label = 'Select ports',
-    containerSx,
-    menuSx,
-    menuItemSx
-}) => {
+                                                       ports,
+                                                       selectedPorts,
+                                                       onPortSelect,
+                                                       multiSelect = true,
+                                                       label = 'Select ports',
+                                                       containerSx,
+                                                       menuSx,
+                                                       menuItemSx,
+                                                       showSubscriptionStatus = true
+                                                   }) => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [openCountries, setOpenCountries] = useState<{ [key: string]: boolean }>({});
     const [displayedLabel, setDisplayedLabel] = useState(label);
@@ -35,19 +40,30 @@ const PortSelector: React.FC<PortSelectorProps> = ({
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
+    const subscriptions = useSelector((state: RootState) => state.portSubscriptions.data);
 
     useEffect(() => {
         if (selectedPorts.length > 0) {
             if (multiSelect) {
-                setDisplayedLabel(`${selectedPorts.length} port${selectedPorts.length > 1 ? 's' : ''} selected`);
+                const activePorts = selectedPorts.filter(portId => {
+                    const subscription = subscriptions[portId];
+                    return !showSubscriptionStatus || (subscription && isStatusActive(subscription));
+                });
+                setDisplayedLabel(`${activePorts.length} port${activePorts.length !== 1 ? 's' : ''} selected`);
             } else {
                 const selectedPort = Object.values(ports).find(port => port.id === selectedPorts[0]);
-                setDisplayedLabel(selectedPort ? `${selectedPort.city.title} - ${selectedPort.title}` : label);
+                if (selectedPort) {
+                    const subscription = subscriptions[selectedPort.id];
+                    const isActive = !showSubscriptionStatus || (subscription && isStatusActive(subscription));
+                    setDisplayedLabel(`${selectedPort.city.title} - ${selectedPort.title}${!isActive ? ' (inactive)' : ''}`);
+                } else {
+                    setDisplayedLabel(label);
+                }
             }
         } else {
             setDisplayedLabel(label);
         }
-    }, [selectedPorts, ports, multiSelect, label]);
+    }, [selectedPorts, ports, subscriptions, multiSelect, label, showSubscriptionStatus]);
 
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
@@ -114,35 +130,50 @@ const PortSelector: React.FC<PortSelectorProps> = ({
             if (hasSubports) {
                 items.push(
                     <Collapse key={`collapse-${country.id}`} in={openCountries[country.id]} timeout="auto" unmountOnExit>
-                        {country.ports.map((port) => (
-                            <MenuItem
-                                key={port.id}
-                                onClick={() => handlePortSelect(port.id)}
-                                sx={{
-                                    paddingLeft: '32px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    ...menuItemSx
-                                }}
-                            >
-                                {multiSelect && (
-                                    <Checkbox
-                                        checked={selectedPorts.includes(port.id)}
-                                        sx={{ padding: '4px' }}
-                                    />
-                                )}
-                                <ListItemText
-                                    primary={`${port.city.title} - ${port.title}`}
-                                    primaryTypographyProps={{
-                                        variant: 'body2',
-                                        style: {
-                                            fontWeight: selectedPorts.includes(port.id) ? 'bold' : 'normal',
-                                            color: selectedPorts.includes(port.id) ? 'primary.main' : 'inherit'
-                                        }
+                        {country.ports.map((port) => {
+                            const subscription = subscriptions[port.id];
+                            const isActive = !showSubscriptionStatus || (subscription && isStatusActive(subscription));
+
+                            return (
+                                <MenuItem
+                                    key={port.id}
+                                    onClick={() => handlePortSelect(port.id)}
+                                    sx={{
+                                        paddingLeft: '32px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        opacity: isActive ? 1 : 0.6,
+                                        ...menuItemSx
                                     }}
-                                />
-                            </MenuItem>
-                        ))}
+                                >
+                                    {multiSelect && (
+                                        <Checkbox
+                                            checked={selectedPorts.includes(port.id)}
+                                            sx={{ padding: '4px' }}
+                                        />
+                                    )}
+                                    <ListItemText
+                                        primary={`${port.city.title} - ${port.title}`}
+                                        secondary={showSubscriptionStatus && subscription ? getStatusStr(subscription) : undefined}
+                                        primaryTypographyProps={{
+                                            variant: 'body2',
+                                            style: {
+                                                fontWeight: selectedPorts.includes(port.id) ? 'bold' : 'normal',
+                                                color: selectedPorts.includes(port.id) ? 'primary.main' : 'inherit'
+                                            }
+                                        }}
+                                    />
+                                    {showSubscriptionStatus && !isActive && (
+                                        <Chip
+                                            label="Inactive"
+                                            size="small"
+                                            color="default"
+                                            sx={{ ml: 1 }}
+                                        />
+                                    )}
+                                </MenuItem>
+                            );
+                        })}
                     </Collapse>
                 );
             }

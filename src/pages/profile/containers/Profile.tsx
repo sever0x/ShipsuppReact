@@ -1,9 +1,18 @@
-import React, {useEffect, useState} from 'react';
-import {useDispatch, useSelector} from 'react-redux';
-import {Avatar, Box, Button, CircularProgress, Container, Grid, useMediaQuery, useTheme,} from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+    Avatar,
+    Box,
+    Button,
+    CircularProgress,
+    Container,
+    Grid,
+    useMediaQuery,
+    useTheme,
+} from '@mui/material';
 import useAuth from 'misc/hooks/useAuth';
-import {fetchUserProfile} from '../actions/profileActions';
-import {RootState} from 'app/reducers';
+import {fetchPortSubscriptions, fetchUserProfile} from '../actions/profileActions';
+import { RootState } from 'app/reducers';
 import EditProfile from '../components/EditProfile';
 import EditIcon from '@mui/icons-material/Edit';
 import EmailIcon from '@mui/icons-material/Email';
@@ -16,7 +25,7 @@ import Typography from 'components/Typography';
 import InfoItem from '../components/InfoItem';
 import OutlinedBox from '../components/OutlinedBox';
 import StyledPortsAccordion from '../components/StyledPortsAccordion';
-import {Port} from 'misc/types/Port';
+import { Port } from 'misc/types/Port';
 import ChangePasswordForm from '../components/ChangePasswordForm';
 
 interface GroupedPorts {
@@ -35,11 +44,13 @@ const Profile: React.FC = () => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const profile = useSelector((state: RootState) => state.profile);
+    const subscriptions = useSelector((state: RootState) => state.portSubscriptions.data);
     const [isEditing, setIsEditing] = useState(false);
 
     useEffect(() => {
         if (user?.uid) {
             dispatch(fetchUserProfile(user.uid) as any);
+            dispatch(fetchPortSubscriptions(user.uid) as any);
         }
     }, [user, dispatch]);
 
@@ -63,10 +74,16 @@ const Profile: React.FC = () => {
         );
     }
 
-    const groupPorts = (): GroupedPorts => {
-        const portsArray = Object.values(profile.data.ports || {}) as Port[];
+    const getActivePorts = (): Port[] => {
+        return Object.values(subscriptions)
+            .filter(subscription => subscription.status === 'ACTIVE')
+            .map(subscription => subscription.port);
+    };
 
-        return portsArray.reduce((acc: GroupedPorts, port: Port) => {
+    const groupPorts = (): GroupedPorts => {
+        const activePorts = getActivePorts();
+
+        return activePorts.reduce((acc: GroupedPorts, port: Port) => {
             const countryId = port.city.country.id;
             if (!acc[countryId]) {
                 acc[countryId] = {
@@ -93,7 +110,9 @@ const Profile: React.FC = () => {
                                     alt={`${profile.data?.firstName} ${profile.data?.lastName}`}
                                     sx={{ width: { xs: 80, sm: 120 }, height: { xs: 80, sm: 120 }, mb: 2 }}
                                 />
-                                <Typography variant="h5" align="center">{`${profile.data?.firstName} ${profile.data?.lastName}`}</Typography>
+                                <Typography variant="h5" align="center">
+                                    {`${profile.data?.firstName} ${profile.data?.lastName}`}
+                                </Typography>
                             </Box>
                             <Button
                                 fullWidth
@@ -114,21 +133,43 @@ const Profile: React.FC = () => {
                             </Typography>
                             <Grid container spacing={2} pt={2}>
                                 <Grid item xs={12} sm={6}>
-                                    <InfoItem icon={<EmailIcon />} label="Email" value={user.email || 'Not provided'} isMobile={isMobile} />
+                                    <InfoItem
+                                        icon={<EmailIcon />}
+                                        label="Email"
+                                        value={user.email || 'Not provided'}
+                                        isMobile={isMobile}
+                                    />
                                 </Grid>
                                 <Grid item xs={12} sm={6}>
-                                    <InfoItem icon={<PhoneIcon />} label="Phone" value={profile.data?.phone || 'Not provided'} isMobile={isMobile} />
+                                    <InfoItem
+                                        icon={<PhoneIcon />}
+                                        label="Phone"
+                                        value={profile.data?.phone || 'Not provided'}
+                                        isMobile={isMobile}
+                                    />
                                 </Grid>
                                 <Grid item xs={12}>
                                     <InfoItem
                                         icon={<LocationOnIcon />}
                                         label="Ports"
-                                        value={profile.data?.ports ? <StyledPortsAccordion groupedPorts={groupPorts()} /> : 'No ports assigned'}
+                                        value={
+                                            Object.keys(subscriptions).length > 0 ? (
+                                                <StyledPortsAccordion
+                                                    groupedPorts={groupPorts()}
+                                                    subscriptions={subscriptions}
+                                                />
+                                            ) : 'No ports assigned'
+                                        }
                                         isMobile={isMobile}
                                     />
                                 </Grid>
                                 <Grid item xs={12} sm={6}>
-                                    <InfoItem icon={<FingerprintIcon />} label="UID" value={user.uid} isMobile={isMobile} />
+                                    <InfoItem
+                                        icon={<FingerprintIcon />}
+                                        label="UID"
+                                        value={user.uid}
+                                        isMobile={isMobile}
+                                    />
                                 </Grid>
                             </Grid>
                         </OutlinedBox>
@@ -138,13 +179,28 @@ const Profile: React.FC = () => {
                             </Typography>
                             <Grid container spacing={2} pt={2}>
                                 <Grid item xs={12} sm={6}>
-                                    <InfoItem icon={<WorkIcon />} label="Current ShipSupp Plan" value={profile.data?.currentPlan || 'Not available'} isMobile={isMobile} />
+                                    <InfoItem
+                                        icon={<WorkIcon />}
+                                        label="Current ShipSupp Plan"
+                                        value={profile.data?.currentPlan || 'Not available'}
+                                        isMobile={isMobile}
+                                    />
                                 </Grid>
                                 <Grid item xs={12} sm={6}>
-                                    <InfoItem icon={<DateRangeIcon />} label="Joined ShipSupp" value={profile.data?.registrationDate || 'Not available'} isMobile={isMobile} />
+                                    <InfoItem
+                                        icon={<DateRangeIcon />}
+                                        label="Joined ShipSupp"
+                                        value={profile.data?.registrationDate || 'Not available'}
+                                        isMobile={isMobile}
+                                    />
                                 </Grid>
                                 <Grid item xs={12}>
-                                    <InfoItem icon={<WorkIcon />} label="Commercial Plan" value={profile.data?.commercialPlan || 'Not available'} isMobile={isMobile} />
+                                    <InfoItem
+                                        icon={<WorkIcon />}
+                                        label="Commercial Plan"
+                                        value={profile.data?.commercialPlan || 'Not available'}
+                                        isMobile={isMobile}
+                                    />
                                 </Grid>
                             </Grid>
                         </OutlinedBox>
