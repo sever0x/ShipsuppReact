@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import {useNavigate, useSearchParams} from 'react-router-dom';
 import axios from 'axios';
 import { Box, Container, Typography, Skeleton } from '@mui/material';
 import { BACKEND_SERVICE } from "../../../constants/api";
@@ -9,6 +9,7 @@ import {Order} from "pages/orders/types/Order";
 import EditOrderModal from 'pages/orders/components/EditOrderModal';
 
 const SharedOrderView: React.FC = () => {
+    const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const [order, setOrder] = useState<Order | null>(null);
     const [loading, setLoading] = useState(true);
@@ -59,6 +60,14 @@ const SharedOrderView: React.FC = () => {
         fetchOrder();
     }, [searchParams]);
 
+    const handleClose = () => {
+        if (window.history.length > 1) {
+            navigate(-1);
+        } else {
+            navigate('/orders');
+        }
+    };
+
     if (loading) {
         return (
             <Container maxWidth="xl">
@@ -102,7 +111,7 @@ const SharedOrderView: React.FC = () => {
         <Container maxWidth="xl">
             <EditOrderModal
                 open={true}
-                onClose={() => {}}
+                onClose={handleClose}
                 order={order}
                 readOnly={true}
             />

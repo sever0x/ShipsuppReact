@@ -37,6 +37,7 @@ interface EditOrderModalProps {
     onClose: () => void;
     order: Order;
     readOnly?: boolean;
+    isSharedView?: boolean;
 }
 
 const statusOrder = [
@@ -147,7 +148,7 @@ const StyledSelect = styled(Select)(({ theme }) => ({
     },
 }));
 
-const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order, readOnly = false }) => {
+const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order, readOnly = false, isSharedView=false }) => {
     const dispatch = useDispatch();
     const { user } = useAuth();
     const navigate = useNavigate();
@@ -178,6 +179,18 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order, r
             navigate("/chats");
         }
     }
+
+    const handleClose = () => {
+        if (isSharedView) {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.href = '/orders';
+            }
+        } else {
+            onClose();
+        }
+    };
 
     const formatDate = (dateString: unknown): string => {
         if (typeof dateString === 'string' || typeof dateString === 'number') {
@@ -247,7 +260,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order, r
 
     if (error) {
         return (
-            <Dialog open={open} onClose={onClose}>
+            <Dialog open={open} onClose={handleClose}>
                 <DialogContent>
                     <Typography color="error">Error: {error}</Typography>
                 </DialogContent>
@@ -257,7 +270,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order, r
 
     return (
         <>
-            <StyledDialog open={open} onClose={onClose} maxWidth="md" fullWidth fullScreen={isMobile}>
+            <StyledDialog open={open} onClose={handleClose} maxWidth="md" fullWidth fullScreen={isMobile}>
                 <DialogTitle>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         #{displayOrder.orderNumber}

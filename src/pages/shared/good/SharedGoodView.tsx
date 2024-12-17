@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import {useNavigate, useSearchParams} from 'react-router-dom';
 import axios from 'axios';
 import { Box, Container, Typography, Skeleton } from '@mui/material';
 import { BACKEND_SERVICE } from "../../../constants/api";
@@ -7,6 +7,7 @@ import {Good} from "pages/catalog/types/Good";
 import EditGoodModal from 'pages/catalog/components/EditGoodModal';
 
 const SharedGoodView: React.FC = () => {
+    const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const [product, setProduct] = useState<Good | null>(null);
     const [loading, setLoading] = useState(true);
@@ -40,6 +41,14 @@ const SharedGoodView: React.FC = () => {
 
         fetchProduct();
     }, [searchParams]);
+
+    const handleClose = () => {
+        if (window.history.length > 1) {
+            navigate(-1);
+        } else {
+            navigate('/catalog');
+        }
+    };
 
     if (loading) {
         return (
@@ -80,7 +89,7 @@ const SharedGoodView: React.FC = () => {
         <Container maxWidth="xl">
             <EditGoodModal
                 open={true}
-                onClose={() => {}}
+                onClose={handleClose}
                 good={product}
                 onSave={() => {}}
                 categories={[]}

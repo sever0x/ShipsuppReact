@@ -34,13 +34,14 @@ interface EditGoodModalProps {
     onSave: (updatedGood: Good, newImages: File[], deletedImageKeys: string[]) => void;
     categories: Category[];
     readOnly?: boolean;
+    isSharedView?: boolean;
 }
 
 interface Errors {
     [key: string]: string;
 }
 
-const EditGoodModal: React.FC<EditGoodModalProps> = ({ open, onClose, good, onSave, categories, readOnly = false }) => {
+const EditGoodModal: React.FC<EditGoodModalProps> = ({ open, onClose, good, onSave, categories, readOnly = false, isSharedView=false }) => {
     const [editedGood, setEditedGood] = useState<Good>(good);
     const [newImages, setNewImages] = useState<File[]>([]);
     const [deletedImageKeys, setDeletedImageKeys] = useState<string[]>([]);
@@ -75,6 +76,18 @@ const EditGoodModal: React.FC<EditGoodModalProps> = ({ open, onClose, good, onSa
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
+    };
+
+    const handleClose = () => {
+        if (isSharedView) {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.href = '/catalog';
+            }
+        } else {
+            onClose();
+        }
     };
 
     const handleSave = () => {
@@ -147,7 +160,7 @@ const EditGoodModal: React.FC<EditGoodModalProps> = ({ open, onClose, good, onSa
     }, [totalImageCount]);
 
     return (
-        <Modal open={open} onClose={onClose}>
+        <Modal open={open} onClose={handleClose}>
             <Box sx={{
                 position: 'absolute',
                 top: '50%',
@@ -410,7 +423,7 @@ const EditGoodModal: React.FC<EditGoodModalProps> = ({ open, onClose, good, onSa
                             Save
                         </Button>
                     )}
-                    <Button onClick={onClose}>
+                    <Button onClick={handleClose}>
                         {readOnly ? 'Close' : 'Cancel'}
                     </Button>
                 </Box>

@@ -26,6 +26,7 @@ import storage from 'misc/storage';
 import PortSelector from 'components/PortSelector';
 import {Port} from 'misc/types/Port';
 import { useSearch } from 'misc/providers/SearchProvider';
+import {Visibility} from "@mui/icons-material";
 
 const OrdersList: React.FC = () => {
     const dispatch = useDispatch();
@@ -35,6 +36,7 @@ const OrdersList: React.FC = () => {
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [selectedPort, setSelectedPort] = useState<string | null>(null);
     const [userPorts, setUserPorts] = useState<{ [key: string]: Port }>({});
+    const [viewingOrder, setViewingOrder] = useState<Order | null>(null);
 
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -51,6 +53,10 @@ const OrdersList: React.FC = () => {
             dispatch(fetchSellerOrders(user.uid) as any);
         }
     }, [dispatch, user]);
+
+    const handleViewOrder = (order: Order) => {
+        setViewingOrder(order);
+    };
 
     const handlePortSelect = (portId: string) => {
         setSelectedPort(portId === 'all' ? null : portId);
@@ -135,6 +141,7 @@ const OrdersList: React.FC = () => {
         }
 
         if (filteredOrders.length > 0) {
+            // @ts-ignore
             return (
                 <TableContainer component={props => <Paper {...props} variant="outlined" sx={{ backgroundColor: 'transparent' }} />}>
                     <Table>
@@ -179,6 +186,9 @@ const OrdersList: React.FC = () => {
                                     <TableCell>
                                         <IconButton onClick={() => handleEditOrder(order)}>
                                             <EditIcon />
+                                        </IconButton>
+                                        <IconButton onClick={() => handleViewOrder(order)}>
+                                            <Visibility />
                                         </IconButton>
                                     </TableCell>
                                 </TableRow>
@@ -258,6 +268,14 @@ const OrdersList: React.FC = () => {
                     open={!!selectedOrder}
                     onClose={handleCloseModal}
                     order={selectedOrder}
+                />
+            )}
+            {viewingOrder && (
+                <EditOrderModal
+                    open={!!viewingOrder}
+                    onClose={() => setViewingOrder(null)}
+                    order={viewingOrder}
+                    readOnly={true}
                 />
             )}
         </Container>

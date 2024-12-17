@@ -33,7 +33,7 @@ import IconButton from 'components/IconButton';
 import storage from 'misc/storage';
 import PortSelector from 'components/PortSelector';
 import {useSearch} from 'misc/providers/SearchProvider';
-import {Clear} from "@mui/icons-material";
+import {Clear, Visibility} from "@mui/icons-material";
 
 const Catalog: React.FC = () => {
     const dispatch = useDispatch();
@@ -47,6 +47,7 @@ const Catalog: React.FC = () => {
     const [selectedGoods, setSelectedGoods] = useState<Good[]>([]);
     const [userPorts, setUserPorts] = useState<{ [key: string]: any }>({});
     const [isLoadingPort, setIsLoadingPort] = useState(true);
+    const [viewingGood, setViewingGood] = useState<Good | null>(null);
 
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -79,6 +80,10 @@ const Catalog: React.FC = () => {
             setIsInitialLoad(false);
         }
     }, [loading, isInitialLoad]);
+
+    const handleViewClick = (good: Good) => {
+        setViewingGood(good);
+    };
 
     const handleCategoryReset = () => {
         setSelectedCategory(null);
@@ -265,9 +270,12 @@ const Catalog: React.FC = () => {
                                         </Box>
                                     </TableCell>
                                     <TableCell>
-                                        <div>
+                                        <div style={{display: 'flex'}}>
                                             <IconButton onClick={() => handleEditClick(good)}>
                                                 <EditIcon/>
+                                            </IconButton>
+                                            <IconButton onClick={() => handleViewClick(good)}>
+                                                <Visibility/>
                                             </IconButton>
                                             <IconButton onClick={() => handleDeleteClick(good)}>
                                                 <DeleteIcon/>
@@ -424,6 +432,16 @@ const Catalog: React.FC = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
+            {viewingGood && (
+                <EditGoodModal
+                    open={!!viewingGood}
+                    onClose={() => setViewingGood(null)}
+                    good={viewingGood}
+                    onSave={() => {}}
+                    categories={categories}
+                    readOnly={true}
+                />
+            )}
         </Container>
     );
 };
