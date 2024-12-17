@@ -27,7 +27,7 @@ import PortSelector from 'components/PortSelector';
 import {Port} from 'misc/types/Port';
 import { useSearch } from 'misc/providers/SearchProvider';
 
-const Orders: React.FC = () => {
+const OrdersList: React.FC = () => {
     const dispatch = useDispatch();
     const { searchTerm } = useSearch();
     const { loadingOrders, data: orders, error } = useSelector((state: RootState) => state.orders);
@@ -264,4 +264,4 @@ const Orders: React.FC = () => {
     );
 };
 
-export default Orders;
+export default OrdersList;

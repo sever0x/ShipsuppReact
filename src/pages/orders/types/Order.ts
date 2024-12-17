@@ -1,5 +1,6 @@
-export interface Order {
-    id: string;
+import {ShareableItem} from "../../../misc/types/ShareableItem";
+
+export interface Order extends ShareableItem{
     orderNumber: string;
     status: string;
     createTimestampGMT: string;
@@ -77,4 +78,5 @@ export interface Order {
     buyerId: string;
     sellerId: string;
     portId: string;
+    cancellationReason?: string;
 }

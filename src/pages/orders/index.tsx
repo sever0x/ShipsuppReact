@@ -1,8 +1,8 @@
 import React from 'react';
-import Orders from './containers/Orders';
+import OrdersPage from "pages/orders/containers/OrdersPage";
 
 function Index() {
-    return <Orders />;
+    return <OrdersPage />;
 }
 
 export default Index;

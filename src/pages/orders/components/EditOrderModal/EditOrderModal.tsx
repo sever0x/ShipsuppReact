@@ -1,11 +1,12 @@
-import React, {useState} from 'react';
-import {useDispatch, useSelector} from 'react-redux';
+import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import {
     Box,
     Button,
     Dialog,
     DialogContent,
     DialogTitle,
+    Divider,
     FormControl,
     IconButton,
     InputLabel,
@@ -18,21 +19,24 @@ import {
     useTheme
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import {updateOrderStatus} from '../../actions/orderActions';
-import {RootState} from 'app/reducers';
-import {switchToChatOrCreateNew} from "pages/chats/actions/chatActions";
-import {Order} from "pages/orders/types/Order";
+import { updateOrderStatus } from '../../actions/orderActions';
+import { RootState } from 'app/reducers';
+import { switchToChatOrCreateNew } from "pages/chats/actions/chatActions";
+import { Order } from "pages/orders/types/Order";
 import useAuth from "../../../../misc/hooks/useAuth";
-import {useNavigate} from "react-router-dom";
-import {Chat} from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
+import { Chat } from "@mui/icons-material";
 import MenuItem from 'components/MenuItem';
 import OrderStatus from '../OrderStatus';
 import CancelOrderModal from '../CancelOrderModal';
+import ShareButton from 'components/ShareButton/ShareButton';
+import TextDisplay from 'components/TextDisplay/TextDisplay';
 
 interface EditOrderModalProps {
     open: boolean;
     onClose: () => void;
-    order: any;
+    order: Order;
+    readOnly?: boolean;
 }
 
 const statusOrder = [
@@ -143,7 +147,7 @@ const StyledSelect = styled(Select)(({ theme }) => ({
     },
 }));
 
-const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order }) => {
+const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order, readOnly = false }) => {
     const dispatch = useDispatch();
     const { user } = useAuth();
     const navigate = useNavigate();
@@ -153,6 +157,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order })
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     const handleStatusChange = (newStatus: string) => {
+        if (readOnly) return;
         if (order.id) {
             dispatch(updateOrderStatus(order.id, newStatus) as any);
             onClose();
@@ -160,6 +165,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order })
     };
 
     const handleCancelOrder = (reason: string) => {
+        if (readOnly) return;
         if (order.id) {
             dispatch(updateOrderStatus(order.id, 'CANCEL_BY_SELLER', reason) as any);
             onClose();
@@ -184,7 +190,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order })
 
     const isOrderCancelled = order.status === 'CANCEL_BY_SELLER';
     const isOrderCompleted = order.status === 'COMPLETED';
-    const canChangeStatus = !isOrderCancelled && !isOrderCompleted;
+    const canChangeStatus = !isOrderCancelled && !isOrderCompleted && !readOnly;
 
     const getBuyerInfo = () => {
         if (orderDetails?.buyer) {
@@ -204,23 +210,10 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order })
 
     const sortedStatusHistory = Object.entries(displayOrder.datesOfStatusChange)
         .sort(([, dateA], [, dateB]) => {
-            const timeA = new Date(dateA as string).getTime();
-            const timeB = new Date(dateB as string).getTime();
+            const timeA = new Date(dateA).getTime();
+            const timeB = new Date(dateB).getTime();
             return timeA - timeB;
         });
-
-    const renderSkeleton = () => (
-        <Box>
-            <Skeleton variant="text" height={30} width="80%" />
-            <Skeleton variant="text" height={24} width="60%" />
-            <Skeleton variant="rectangular" height={40} width="100%" />
-            <Skeleton variant="text" height={24} width="70%" />
-            <Skeleton variant="text" height={24} width="50%" />
-            <Skeleton variant="text" height={24} width="60%" />
-            <Skeleton variant="text" height={24} width="40%" />
-            <Skeleton variant="rectangular" height={60} width="100%" />
-        </Box>
-    );
 
     if (loadingDetails) {
         return (
@@ -231,7 +224,11 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order })
                 <DialogContent>
                     <ContentWrapper>
                         <InfoColumn>
-                            {renderSkeleton()}
+                            <Skeleton variant="text" height={30} width="80%" />
+                            <Skeleton variant="text" height={24} width="60%" />
+                            <Skeleton variant="rectangular" height={40} width="100%" />
+                            <Skeleton variant="text" height={24} width="70%" />
+                            <Skeleton variant="text" height={24} width="50%" />
                         </InfoColumn>
                         <HistoryColumn>
                             <Skeleton variant="text" height={30} width="80%" />
@@ -262,7 +259,14 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order })
         <>
             <StyledDialog open={open} onClose={onClose} maxWidth="md" fullWidth fullScreen={isMobile}>
                 <DialogTitle>
-                    #{displayOrder.orderNumber}
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        #{displayOrder.orderNumber}
+                        <ShareButton
+                            type="order"
+                            id={displayOrder.id}
+                            orderNumber={displayOrder.orderNumber}
+                        />
+                    </Box>
                     <IconButton
                         aria-label="close"
                         onClick={onClose}
@@ -279,116 +283,201 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order })
                 <DialogContent>
                     <ContentWrapper>
                         <InfoColumn>
-                            <InfoRow>
-                                <Typography variant="body1">Current status:</Typography>
-                                <OrderStatus status={displayOrder.status} />
-                            </InfoRow>
-                            <InfoRow>
-                                <Typography variant="body1">Article:</Typography>
-                                <Typography variant="body1">{displayOrder.good.article || '-'}</Typography>
-                            </InfoRow>
-                            <InfoRow>
-                                <Typography variant="body1">Title:</Typography>
-                                <Typography variant="body1">{displayOrder.good.title || '-'}</Typography>
-                            </InfoRow>
-                            <InfoRow>
-                                <Typography variant="body1">Quantity:</Typography>
-                                <Typography variant="body1">{displayOrder.quantity}</Typography>
-                            </InfoRow>
-                            <InfoRow>
-                                <Typography variant="body1">Price per one:</Typography>
-                                <Typography variant="body1">{displayOrder.priceInOrder}</Typography>
-                            </InfoRow>
-                            <InfoRow>
-                                <Typography variant="body1">Total price:</Typography>
-                                <Typography variant="body1">{displayOrder.quantity * displayOrder.priceInOrder}</Typography>
-                            </InfoRow>
-                            <InfoRow>
-                                <Typography variant="body1">Buyer:</Typography>
-                                <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                                    <Typography variant="body1">{getBuyerInfo()}</Typography>
-                                    <IconButton onClick={() => handleOpenChatWithBuyer(orderDetails)}>
-                                        <Chat fontSize='small' />
-                                    </IconButton>
-                                </div>
-                            </InfoRow>
-                            <InfoRow>
-                                <Typography variant="body1">Buyer ID:</Typography>
-                                <Typography variant="body1">{displayOrder.buyer.id}</Typography>
-                            </InfoRow>
-                            <InfoRow>
-                                <Box>
-                                    <Typography variant="body1">MMSI:</Typography>
-                                    <Typography
-                                        variant="caption"
-                                        sx={{
-                                            color: 'grey.600',
-                                            fontSize: '12px',
-                                            mt: 0.5,
-                                            display: 'block'
-                                        }}
-                                    >
-                                        <Link
-                                            href="https://www.marinetraffic.com/"
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            underline="hover"
-                                            sx={{
-                                                color: 'inherit',
-                                                fontSize: 'inherit'
-                                            }}
-                                        >
-                                            Check on MarineTraffic
-                                        </Link>
-                                    </Typography>
-                                </Box>
-                                <Typography variant="body1">{displayOrder.buyer.vesselMMSI || 'N/A'}</Typography>
-                            </InfoRow>
-                            <InfoRow>
-                                <Typography variant="body1">Port:</Typography>
-                                <Typography variant="body1">{getPortInfo()}</Typography>
-                            </InfoRow>
+                            {readOnly ? (
+                                <Box sx={{mb: 4}}>
+                                    <TextDisplay
+                                        label="Current status"
+                                        value={<OrderStatus status={displayOrder.status}/>}
+                                    />
+                                    <Divider sx={{my: 2}}/>
 
-                            {isOrderCancelled && (
-                                <InfoRow>
-                                    <Typography variant="body1">Cancellation Reason:</Typography>
-                                    <Typography variant="body1">{displayOrder.cancellationReason}</Typography>
-                                </InfoRow>
-                            )}
-
-                            {canChangeStatus && (
-                                <Box mt={2}>
-                                    <Typography variant="subtitle1">Set new order status:</Typography>
-                                    <Typography variant="caption" color="error.main">
-                                        *be careful, you cannot change the status back
-                                    </Typography>
-                                    <Box mt={1}>
-                                        <FormControl fullWidth>
-                                            <InputLabel id="status-select-label">New Status</InputLabel>
-                                            <StyledSelect
-                                                labelId="status-select-label"
-                                                value=""
-                                                onChange={(e) => handleStatusChange(e.target.value as string)}
-                                                label="New Status"
-                                            >
-                                                {statusOrder.slice(currentStatusIndex + 1).map((status) => (
-                                                    <MenuItem key={status} value={status}>
-                                                        {statusLabels[status]}
-                                                    </MenuItem>
-                                                ))}
-                                            </StyledSelect>
-                                        </FormControl>
-                                        <Button
-                                            onClick={() => setCancelModalOpen(true)}
-                                            variant="contained"
-                                            color="customRed"
-                                            sx={{ mt: 1 }}
-                                            fullWidth
-                                        >
-                                            Cancel order
-                                        </Button>
+                                    <Typography variant="subtitle1" sx={{mb: 2}}>Product Information</Typography>
+                                    <TextDisplay label="Article" value={displayOrder.good.article}/>
+                                    <TextDisplay label="Title" value={displayOrder.good.title}/>
+                                    <Box sx={{display: 'flex', gap: 2, mb: 2}}>
+                                        {displayOrder.good.images && Object.values(displayOrder.good.images)[0] && (
+                                            <img
+                                                src={Object.values(displayOrder.good.images)[0]}
+                                                alt={displayOrder.good.title}
+                                                style={{
+                                                    width: '100px',
+                                                    height: '100px',
+                                                    objectFit: 'cover',
+                                                    borderRadius: '4px',
+                                                }}
+                                            />
+                                        )}
                                     </Box>
+
+                                    <Divider sx={{my: 2}}/>
+
+                                    <Typography variant="subtitle1" sx={{mb: 2}}>Order Details</Typography>
+                                    <TextDisplay label="Quantity" value={displayOrder.quantity}/>
+                                    <TextDisplay
+                                        label="Price per unit"
+                                        value={`${displayOrder.priceInOrder} ${displayOrder.currencyInOrder}`}
+                                    />
+                                    <TextDisplay
+                                        label="Total price"
+                                        value={`${displayOrder.quantity * displayOrder.priceInOrder} ${displayOrder.currencyInOrder}`}
+                                    />
+
+                                    <Divider sx={{my: 2}}/>
+
+                                    <Typography variant="subtitle1" sx={{mb: 2}}>Buyer Information</Typography>
+                                    <TextDisplay
+                                        label="Buyer"
+                                        value={
+                                            <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                                                {getBuyerInfo()}
+                                                {!readOnly && (
+                                                    <IconButton
+                                                        onClick={() => handleOpenChatWithBuyer(orderDetails)}
+                                                        size="small"
+                                                    >
+                                                        <Chat fontSize="small"/>
+                                                    </IconButton>
+                                                )}
+                                            </Box>
+                                        }
+                                    />
+                                    <TextDisplay label="Buyer ID" value={displayOrder.buyer.id}/>
+                                    <TextDisplay label="MMSI" value={displayOrder.buyer.vesselMMSI || 'N/A'}/>
+                                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                                        <TextDisplay label="Port" value={getPortInfo()}/>
+                                    </Box>
+
+                                    {isOrderCancelled && (
+                                        <>
+                                            <Divider sx={{my: 2}}/>
+                                            <Typography variant="subtitle1" color="error" sx={{mb: 2}}>
+                                                Cancellation Information
+                                            </Typography>
+                                            <TextDisplay
+                                                label="Cancellation Reason"
+                                                value={displayOrder.cancellationReason}
+                                            />
+                                        </>
+                                    )}
                                 </Box>
+                            ) : (
+                                <>
+                                    <InfoRow>
+                                        <Typography variant="body1">Current status:</Typography>
+                                        <OrderStatus status={displayOrder.status} />
+                                    </InfoRow>
+                                    <InfoRow>
+                                        <Typography variant="body1">Article:</Typography>
+                                        <Typography variant="body1">{displayOrder.good.article || '-'}</Typography>
+                                    </InfoRow>
+                                    <InfoRow>
+                                        <Typography variant="body1">Title:</Typography>
+                                        <Typography variant="body1">{displayOrder.good.title || '-'}</Typography>
+                                    </InfoRow>
+                                    <InfoRow>
+                                        <Typography variant="body1">Quantity:</Typography>
+                                        <Typography variant="body1">{displayOrder.quantity}</Typography>
+                                    </InfoRow>
+                                    <InfoRow>
+                                        <Typography variant="body1">Price per one:</Typography>
+                                        <Typography variant="body1">{displayOrder.priceInOrder}</Typography>
+                                    </InfoRow>
+                                    <InfoRow>
+                                        <Typography variant="body1">Total price:</Typography>
+                                        <Typography variant="body1">
+                                            {displayOrder.quantity * displayOrder.priceInOrder}
+                                        </Typography>
+                                    </InfoRow>
+                                    <InfoRow>
+                                        <Typography variant="body1">Buyer:</Typography>
+                                        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                                            <Typography variant="body1">{getBuyerInfo()}</Typography>
+                                            {!readOnly && (
+                                                <IconButton onClick={() => handleOpenChatWithBuyer(orderDetails)}>
+                                                    <Chat fontSize="small" />
+                                                </IconButton>
+                                            )}
+                                        </div>
+                                    </InfoRow>
+                                    <InfoRow>
+                                        <Typography variant="body1">Buyer ID:</Typography>
+                                        <Typography variant="body1">{displayOrder.buyer.id}</Typography>
+                                    </InfoRow>
+                                    <InfoRow>
+                                        <Box>
+                                            <Typography variant="body1">MMSI:</Typography>
+                                            <Typography
+                                                variant="caption"
+                                                sx={{
+                                                    color: 'grey.600',
+                                                    fontSize: '12px',
+                                                    mt: 0.5,
+                                                    display: 'block',
+                                                }}
+                                            >
+                                                <Link
+                                                    href="https://www.marinetraffic.com/"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    underline="hover"
+                                                    sx={{
+                                                        color: 'inherit',
+                                                        fontSize: 'inherit',
+                                                    }}
+                                                >
+                                                    Check on MarineTraffic
+                                                </Link>
+                                            </Typography>
+                                        </Box>
+                                        <Typography variant="body1">{displayOrder.buyer.vesselMMSI || 'N/A'}</Typography>
+                                    </InfoRow>
+                                    <InfoRow>
+                                        <Typography variant="body1">Port:</Typography>
+                                        <Typography variant="body1">{getPortInfo()}</Typography>
+                                    </InfoRow>
+
+                                    {isOrderCancelled && (
+                                        <InfoRow>
+                                            <Typography variant="body1">Cancellation Reason:</Typography>
+                                            <Typography variant="body1">{displayOrder.cancellationReason}</Typography>
+                                        </InfoRow>
+                                    )}
+
+                                    {canChangeStatus && (
+                                        <Box mt={2}>
+                                            <Typography variant="subtitle1">Set new order status:</Typography>
+                                            <Typography variant="caption" color="error.main">
+                                                *be careful, you cannot change the status back
+                                            </Typography>
+                                            <Box mt={1}>
+                                                <FormControl fullWidth>
+                                                    <InputLabel id="status-select-label">New Status</InputLabel>
+                                                    <StyledSelect
+                                                        labelId="status-select-label"
+                                                        value=""
+                                                        onChange={(e) => handleStatusChange(e.target.value as string)}
+                                                        label="New Status"
+                                                    >
+                                                        {statusOrder.slice(currentStatusIndex + 1).map((status) => (
+                                                            <MenuItem key={status} value={status}>
+                                                                {statusLabels[status]}
+                                                            </MenuItem>
+                                                        ))}
+                                                    </StyledSelect>
+                                                </FormControl>
+                                                <Button
+                                                    onClick={() => setCancelModalOpen(true)}
+                                                    variant="contained"
+                                                    color="error"
+                                                    sx={{ mt: 1 }}
+                                                    fullWidth
+                                                >
+                                                    Cancel order
+                                                </Button>
+                                            </Box>
+                                        </Box>
+                                    )}
+                                </>
                             )}
                         </InfoColumn>
                         <HistoryColumn>
@@ -409,11 +498,13 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ open, onClose, order })
                     </ContentWrapper>
                 </DialogContent>
             </StyledDialog>
-            <CancelOrderModal
-                open={cancelModalOpen}
-                onClose={() => setCancelModalOpen(false)}
-                onConfirm={handleCancelOrder}
-            />
+            {!readOnly && (
+                <CancelOrderModal
+                    open={cancelModalOpen}
+                    onClose={() => setCancelModalOpen(false)}
+                    onConfirm={handleCancelOrder}
+                />
+            )}
         </>
     );
 };

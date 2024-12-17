@@ -1,5 +1,6 @@
-export interface Good {
-    id: string;
+import { ShareableItem } from "misc/types/ShareableItem";
+
+export interface Good extends ShareableItem {
     article: string;
     title: string;
     price: number;
