@@ -20,6 +20,7 @@ interface PortSelectorProps {
     menuSx?: React.CSSProperties;
     menuItemSx?: React.CSSProperties;
     showSubscriptionStatus?: boolean;
+    hideInactiveStatus?: boolean;
 }
 
 const PortSelector: React.FC<PortSelectorProps> = ({
@@ -31,7 +32,8 @@ const PortSelector: React.FC<PortSelectorProps> = ({
                                                        containerSx,
                                                        menuSx,
                                                        menuItemSx,
-                                                       showSubscriptionStatus = true
+                                                       showSubscriptionStatus = true,
+                                                       hideInactiveStatus = false
                                                    }) => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [openCountries, setOpenCountries] = useState<{ [key: string]: boolean }>({});
@@ -55,7 +57,7 @@ const PortSelector: React.FC<PortSelectorProps> = ({
                 if (selectedPort) {
                     const subscription = subscriptions[selectedPort.id];
                     const isActive = !showSubscriptionStatus || (subscription && isStatusActive(subscription));
-                    setDisplayedLabel(`${selectedPort.city.title} - ${selectedPort.title}${!isActive ? ' (inactive)' : ''}`);
+                    setDisplayedLabel(`${selectedPort.city.title} - ${selectedPort.title}${!isActive && !hideInactiveStatus ? ' (inactive)' : ''}`);
                 } else {
                     setDisplayedLabel(label);
                 }
@@ -63,7 +65,7 @@ const PortSelector: React.FC<PortSelectorProps> = ({
         } else {
             setDisplayedLabel(label);
         }
-    }, [selectedPorts, ports, subscriptions, multiSelect, label, showSubscriptionStatus]);
+    }, [selectedPorts, ports, subscriptions, multiSelect, label, showSubscriptionStatus, hideInactiveStatus]);
 
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
@@ -142,7 +144,7 @@ const PortSelector: React.FC<PortSelectorProps> = ({
                                         paddingLeft: '32px',
                                         display: 'flex',
                                         alignItems: 'center',
-                                        opacity: isActive ? 1 : 0.6,
+                                        opacity: hideInactiveStatus || isActive ? 1 : 0.6,
                                         ...menuItemSx
                                     }}
                                 >
@@ -163,7 +165,7 @@ const PortSelector: React.FC<PortSelectorProps> = ({
                                             }
                                         }}
                                     />
-                                    {showSubscriptionStatus && !isActive && (
+                                    {showSubscriptionStatus && !isActive && !hideInactiveStatus && (
                                         <Chip
                                             label="Inactive"
                                             size="small"

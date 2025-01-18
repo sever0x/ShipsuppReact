@@ -153,6 +153,7 @@ const RegisterForm: React.FC = () => {
                         onPortSelect={handlePortSelect}
                         multiSelect={false}
                         label="Select a port"
+                        hideInactiveStatus={true}
                     />
                 </div>
                 <TextField
